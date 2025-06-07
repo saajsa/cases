@@ -1,9 +1,6 @@
 <?php
-defined('BASEPATH') or exit('No direct script access allowed');
 
-/**
- * Step 3: Create this file as modules/cases/models/Appointments_model.php
- */
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Appointments_model extends App_Model
 {
