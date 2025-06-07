@@ -260,6 +260,9 @@ private function get_invoice_status_text($status)
         // Load the model
         $this->load->model('Appointments_model');
         
+        // Count total appointments before any filters are applied
+        $recordsTotal = $this->db->count_all(db_prefix() . 'appointments');
+
         // Get DataTable parameters
         $draw = intval($this->input->get('draw'));
         $start = intval($this->input->get('start'));
@@ -345,12 +348,7 @@ private function get_invoice_status_text($status)
             $this->db->group_end();
         }
 
-        // Get total records before filtering (for recordsTotal)
-        $total_query = clone $this->db;
-        $total_query->select('COUNT(*) as total', false);
-        $recordsTotal = $this->db->count_all(db_prefix() . 'appointments');
-
-        // Get filtered count
+        // Clone builder for counting filtered rows without affecting main query
         $filtered_query = clone $this->db;
         $recordsFiltered = $filtered_query->count_all_results();
 
