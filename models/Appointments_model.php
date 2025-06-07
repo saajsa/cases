@@ -455,10 +455,12 @@ class Appointments_model extends App_Model
      */
     public function mark_reminder_sent($appointment_id)
     {
-        return $this->update_appointment($appointment_id, [
-            'reminder_sent' => 1,
-            'reminder_count' => 'reminder_count + 1'
-        ]);
+        $this->db->set('reminder_sent', 1);
+        $this->db->set('reminder_count', 'reminder_count+1', false);
+        $this->db->where('id', $appointment_id);
+        $this->db->update(db_prefix() . 'appointments');
+
+        return $this->db->affected_rows() > 0;
     }
 
     /**
