@@ -1,12 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head(); ?>
 
-<?php
-/**
- * Step 5A: Create this file as modules/cases/views/appointments/manage.php
- */
-?>
-
 <style>
 /* Consistent with your existing Cases module styling */
 * {
