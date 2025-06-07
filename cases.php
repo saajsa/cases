@@ -96,21 +96,21 @@ function cases_module_init_menu_items() {
         $CI->app_menu->add_sidebar_children_item('cases', [
             'slug'     => 'appointment_settings',
             'name'     => 'Appointment Settings',
-            'href'     => admin_url('cases/appointments/settings'),
+            'href'     => admin_url('cases/settings'),
             'position' => 7,
         ]);
 
         $CI->app_menu->add_sidebar_children_item('cases', [
             'slug'     => 'appointment_services',
             'name'     => 'Services Management',
-            'href'     => admin_url('cases/appointments/services'),
+            'href'     => admin_url('cases/services'),
             'position' => 8,
         ]);
 
         $CI->app_menu->add_sidebar_children_item('cases', [
             'slug'     => 'staff_availability',
             'name'     => 'Staff Availability',
-            'href'     => admin_url('cases/appointments/availability'),
+            'href'     => admin_url('cases/availability'),
             'position' => 9,
         ]);
     }

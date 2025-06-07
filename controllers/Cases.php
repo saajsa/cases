@@ -1087,7 +1087,7 @@ private function get_invoice_status_text($status)
                 }
                 
                 set_alert('success', 'Settings updated successfully');
-                redirect(admin_url('cases/appointments/settings'));
+                redirect(admin_url('cases/settings'));
             }
             
             $data['title'] = 'Appointment Settings';
