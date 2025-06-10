@@ -276,14 +276,112 @@ echo cases_page_wrapper_start(
     </div>
 </div>
 
+// Replace the entire <script> section in your views/manage.php with this:
+
 <script>
-// Clean, minimal JavaScript
+// Clean, minimal JavaScript with all required functions
 document.addEventListener('DOMContentLoaded', function() {
     // Variables
     let consultationsData = [];
     let casesData = [];
     let csrfTokenName = '<?php echo $this->security->get_csrf_token_name(); ?>';
     let csrfTokenHash = '<?php echo $this->security->get_csrf_hash(); ?>';
+    
+    // Essential utility functions first
+    function showLoading(containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div class="cases-loading-state">
+                    <div class="cases-loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>Loading...</p>
+                </div>
+            `;
+        }
+    }
+    
+    function showError(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div class="cases-empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h5>Error</h5>
+                    <p>${htmlEscape(message)}</p>
+                    <button class="cases-btn cases-btn-primary" onclick="location.reload()">
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+    }
+    
+    function htmlEscape(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+    
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return 'N/A';
+        }
+    }
+    
+    // Enhanced fetch wrapper with comprehensive error handling
+    function safeFetch(url, options = {}) {
+        const defaultOptions = {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+        };
+        
+        const finalOptions = { ...defaultOptions, ...options };
+        
+        return fetch(url, finalOptions)
+            .then(response => {
+                console.log('Response status:', response.status, 'for URL:', url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // Check if response is actually JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.warn('Non-JSON response received:', contentType);
+                    return response.text().then(text => {
+                        console.error('Non-JSON response body:', text.substring(0, 500));
+                        throw new Error('Server returned non-JSON response');
+                    });
+                }
+                
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Fetch error for', url, ':', error);
+                throw error;
+            });
+    }
     
     // Tab functionality
     const tabButtons = document.querySelectorAll('[data-tab]');
@@ -310,26 +408,20 @@ document.addEventListener('DOMContentLoaded', function() {
             tabContents.forEach(content => {
                 content.style.display = 'none';
             });
-            document.getElementById(targetTab + '-tab').style.display = 'block';
+            const targetContent = document.getElementById(targetTab + '-tab');
+            if (targetContent) {
+                targetContent.style.display = 'block';
+            }
         });
-    });
-    
-    // Load initial data
-    loadConsultations();
-    loadCases();
-    
-    // Debug: Check if modal elements exist
-    console.log('Modal elements check:', {
-        consultationModal: document.getElementById('consultationModal'),
-        modalTitle: document.getElementById('modal-title-text'),
-        submitBtn: document.getElementById('submit-btn-text'),
-        submitBtnParent: document.getElementById('submit-btn-text')?.parentElement,
-        consultationForm: document.getElementById('consultationForm')
     });
     
     // Render consultations with cases framework
     function renderConsultations(data) {
         const container = document.getElementById('consultations-container');
+        if (!container) {
+            console.error('Consultations container not found');
+            return;
+        }
         
         if (!data || data.length === 0) {
             container.innerHTML = `
@@ -408,6 +500,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Render cases with cases framework
     function renderCases(data) {
         const container = document.getElementById('cases-container');
+        if (!container) {
+            console.error('Cases container not found');
+            return;
+        }
         
         if (!data || data.length === 0) {
             container.innerHTML = `
@@ -465,36 +561,50 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = html;
     }
     
-    // Load data functions
+    // Load data functions with better error handling
     function loadConsultations() {
+        console.log('Loading consultations...');
         showLoading('consultations-container');
         
-        fetch(admin_url + 'cases/consultations_list')
-            .then(response => response.json())
+        safeFetch(admin_url + 'cases/consultations_list')
             .then(data => {
-                consultationsData = data.data || [];
-                renderConsultations(consultationsData);
-                updateStats();
+                console.log('Consultations response:', data);
+                
+                if (data && data.success) {
+                    consultationsData = Array.isArray(data.data) ? data.data : [];
+                    renderConsultations(consultationsData);
+                    updateStats();
+                } else {
+                    console.error('Invalid consultations response:', data);
+                    showError('consultations-container', 'Invalid response from server');
+                }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showError('consultations-container', 'Failed to load consultations');
+                console.error('Error loading consultations:', error);
+                showError('consultations-container', `Failed to load consultations: ${error.message}`);
             });
     }
     
     function loadCases() {
+        console.log('Loading cases...');
         showLoading('cases-container');
         
-        fetch(admin_url + 'cases/cases_list')
-            .then(response => response.json())
+        safeFetch(admin_url + 'cases/cases_list')
             .then(data => {
-                casesData = data.data || [];
-                renderCases(casesData);
-                updateStats();
+                console.log('Cases response:', data);
+                
+                if (data && data.success) {
+                    casesData = Array.isArray(data.data) ? data.data : [];
+                    renderCases(casesData);
+                    updateStats();
+                } else {
+                    console.error('Invalid cases response:', data);
+                    showError('cases-container', 'Invalid response from server');
+                }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showError('cases-container', 'Failed to load cases');
+                console.error('Error loading cases:', error);
+                showError('cases-container', `Failed to load cases: ${error.message}`);
             });
     }
     
@@ -508,63 +618,22 @@ document.addEventListener('DOMContentLoaded', function() {
             if (c.phase === 'litigation') litigationCount++;
         });
         
-        document.getElementById('consultations-count').textContent = consultationsCount;
-        document.getElementById('cases-count').textContent = casesCount;
-        document.getElementById('litigation-count').textContent = litigationCount;
-        document.getElementById('consultations-badge').textContent = consultationsCount;
-        document.getElementById('cases-badge').textContent = casesCount;
-        document.getElementById('upcoming-count').textContent = '0';
-    }
-    
-    // Utility functions
-    function showLoading(containerId) {
-        document.getElementById(containerId).innerHTML = `
-            <div class="cases-loading-state">
-                <div class="cases-loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <p>Loading...</p>
-            </div>
-        `;
-    }
-    
-    function showError(containerId, message) {
-        document.getElementById(containerId).innerHTML = `
-            <div class="cases-empty-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h5>Error</h5>
-                <p>${htmlEscape(message)}</p>
-                <button class="cases-btn cases-btn-primary" onclick="location.reload()">
-                    Retry
-                </button>
-            </div>
-        `;
-    }
-    
-    function formatDate(dateString) {
-        if (!dateString) return 'N/A';
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (e) {
-            return 'N/A';
-        }
-    }
-    
-    function htmlEscape(str) {
-        if (str === null || str === undefined) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+        // Safely update elements
+        const elements = {
+            'consultations-count': consultationsCount,
+            'cases-count': casesCount,
+            'litigation-count': litigationCount,
+            'consultations-badge': consultationsCount,
+            'cases-badge': casesCount,
+            'upcoming-count': 0
+        };
+        
+        Object.keys(elements).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = elements[id];
+            }
+        });
     }
     
     // Global functions for onclick handlers
@@ -573,38 +642,59 @@ document.addEventListener('DOMContentLoaded', function() {
         const consultation = consultationsData.find(c => c.id == id);
         if (!consultation) {
             console.error('Consultation not found with id:', id);
+            alert('Consultation not found');
             return;
         }
         
-        document.getElementById('noteContent').innerHTML = consultation.note || 'No note available';
-        $('#viewNoteModal').modal('show');
+        const noteContent = document.getElementById('noteContent');
+        if (noteContent) {
+            noteContent.innerHTML = consultation.note || 'No note available';
+        }
+        
+        // Use jQuery modal if available, otherwise try Bootstrap
+        if (typeof $ !== 'undefined' && $.fn.modal) {
+            $('#viewNoteModal').modal('show');
+        } else {
+            // Fallback for Bootstrap without jQuery
+            const modal = document.getElementById('viewNoteModal');
+            if (modal) {
+                modal.style.display = 'block';
+                modal.classList.add('show');
+            }
+        }
     };
     
     window.editConsultation = function(id) {
         const consultation = consultationsData.find(c => c.id == id);
         if (!consultation) {
             console.error('Consultation not found with id:', id);
+            alert('Consultation not found');
             return;
         }
         
         console.log('Editing consultation:', consultation);
         
-        // Populate form fields
-        const consultationIdField = document.getElementById('consultation_id');
-        const clientIdField = document.getElementById('client_id');
-        const tagField = document.getElementById('consultation_tag');
-        const noteField = document.getElementById('consultation-note');
-        const modalTitleField = document.getElementById('modal-title-text');
-        const submitBtnField = document.getElementById('submit-btn-text');
+        // Populate form fields safely
+        const fields = {
+            'consultation_id': consultation.id,
+            'client_id': consultation.client_id,
+            'consultation_tag': consultation.tag || '',
+            'consultation-note': consultation.note || ''
+        };
         
-        if (consultationIdField) consultationIdField.value = consultation.id;
-        if (clientIdField) clientIdField.value = consultation.client_id;
-        if (tagField) tagField.value = consultation.tag || '';
-        if (noteField) noteField.value = consultation.note || '';
+        Object.keys(fields).forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.value = fields[fieldId];
+            }
+        });
         
         // Update modal title and button text
-        if (modalTitleField) modalTitleField.textContent = 'Edit Consultation';
-        if (submitBtnField) submitBtnField.textContent = 'Update Consultation';
+        const modalTitle = document.getElementById('modal-title-text');
+        const submitBtn = document.getElementById('submit-btn-text');
+        
+        if (modalTitle) modalTitle.textContent = 'Edit Consultation';
+        if (submitBtn) submitBtn.textContent = 'Update Consultation';
         
         // Load contacts and invoices for this client
         if (consultation.client_id) {
@@ -621,33 +711,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Show the modal
-        $('#consultationModal').modal('show');
+        if (typeof $ !== 'undefined' && $.fn.modal) {
+            $('#consultationModal').modal('show');
+        }
     };
     
     window.upgradeToLitigation = function(id) {
         console.log('Upgrading consultation to litigation:', id);
-        document.getElementById('litigation_consultation_id').value = id;
+        const consultationIdField = document.getElementById('litigation_consultation_id');
+        if (consultationIdField) {
+            consultationIdField.value = id;
+        }
         
         // Load courts
-        fetch(admin_url + 'cases/courts/get_all_courts')
-            .then(response => response.json())
+        safeFetch(admin_url + 'cases/courts/get_all_courts')
             .then(data => {
                 console.log('Courts loaded:', data);
-                if (data.success && data.data) {
+                if (data && data.success && data.data) {
                     const select = document.getElementById('court_id_upgrade');
-                    select.innerHTML = '<option value="">Select Court</option>';
-                    data.data.forEach(court => {
-                        select.innerHTML += `<option value="${court.id}">${htmlEscape(court.name)}</option>`;
-                    });
+                    if (select) {
+                        select.innerHTML = '<option value="">Select Court</option>';
+                        data.data.forEach(court => {
+                            select.innerHTML += `<option value="${court.id}">${htmlEscape(court.name)}</option>`;
+                        });
+                    }
                 } else {
                     console.error('Failed to load courts:', data);
+                    alert('Failed to load courts');
                 }
             })
             .catch(error => {
                 console.error('Error loading courts:', error);
+                alert('Error loading courts: ' + error.message);
             });
         
-        $('#upgradeModal').modal('show');
+        // Show modal
+        if (typeof $ !== 'undefined' && $.fn.modal) {
+            $('#upgradeModal').modal('show');
+        }
     };
     
     window.deleteConsultation = function(id) {
@@ -659,179 +760,106 @@ document.addEventListener('DOMContentLoaded', function() {
         
         fetch(admin_url + 'cases/delete_consultation/' + id, {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
         .then(response => response.json())
         .then(data => {
             console.log('Delete response:', data);
-            if (data.success) {
+            if (data && data.success) {
                 loadConsultations();
                 alert('Consultation deleted successfully');
             } else {
-                alert('Failed to delete consultation: ' + (data.message || 'Unknown error'));
+                alert('Failed to delete consultation: ' + (data?.message || 'Unknown error'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Network error occurred');
+            alert('Network error occurred: ' + error.message);
         });
     };
     
-    // Form submissions
-    document.getElementById('consultationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        formData.append(csrfTokenName, csrfTokenHash);
-        
-        // Determine if this is an edit or create operation
-        const consultationId = document.getElementById('consultation_id').value;
-        const url = consultationId ? 
-            admin_url + 'cases/update_consultation' : 
-            admin_url + 'cases/create_consultation';
-        
-        // Add consultation ID to form data if editing
-        if (consultationId) {
-            formData.append('id', consultationId);
-        }
-        
-        console.log('Submitting to:', url, 'with consultation_id:', consultationId);
-        
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Response:', data);
-            if (data.success) {
-                $('#consultationModal').modal('hide');
-                loadConsultations();
-                alert(consultationId ? 'Consultation updated successfully' : 'Consultation saved successfully');
-                
-                // Reset form and modal state
-                this.reset();
-                
-                // Reset modal elements safely
-                const modalTitle = document.getElementById('modal-title-text');
-                const submitBtn = document.getElementById('submit-btn-text');
-                const consultationIdField = document.getElementById('consultation_id');
-                
-                if (modalTitle) modalTitle.textContent = 'Add Consultation';
-                if (submitBtn) submitBtn.textContent = 'Save Consultation';
-                if (consultationIdField) consultationIdField.value = '';
-                
-                // Hide contact group
-                const contactGroup = document.getElementById('contact-group');
-                if (contactGroup) contactGroup.style.display = 'none';
-            } else {
-                alert('Failed to save consultation: ' + (data.message || 'Unknown error'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Network error occurred');
-        });
-    });
-    
-    document.getElementById('upgradeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        formData.append(csrfTokenName, csrfTokenHash);
-        
-        fetch(admin_url + 'cases/upgrade_to_litigation', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                $('#upgradeModal').modal('hide');
-                loadConsultations();
-                loadCases();
-                alert('Case registered successfully');
-                this.reset();
-            } else {
-                alert('Failed to register case');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Network error occurred');
-        });
-    });
-    
-    // Client change handler
-    document.getElementById('client_id').addEventListener('change', function() {
-        const clientId = this.value;
-        if (clientId) {
-            loadContactsByClient(clientId);
-            loadInvoicesByClient(clientId);
-        } else {
-            document.getElementById('contact-group').style.display = 'none';
-            document.getElementById('contact_id').innerHTML = '<option value="">Select Contact (Optional)</option>';
-            document.getElementById('invoice_id').innerHTML = '<option value="">Select Invoice</option>';
-        }
-    });
-    
-    // Court change handler
-    document.getElementById('court_id_upgrade').addEventListener('change', function() {
-        const courtId = this.value;
-        if (courtId) {
-            fetch(admin_url + 'cases/courts/get_rooms_by_court/' + courtId)
-                .then(response => response.json())
-                .then(data => {
-                    const select = document.getElementById('court_room_id_upgrade');
-                    select.innerHTML = '<option value="">Select Court Room</option>';
-                    if (data.success && data.data) {
-                        data.data.forEach(room => {
-                            select.innerHTML += `<option value="${room.id}">Court ${room.court_no} - ${htmlEscape(room.judge_name)}</option>`;
-                        });
-                    }
-                });
-        }
-    });
-    
+    // Helper functions for client/contact loading
     function loadContactsByClient(clientId) {
-        fetch(admin_url + 'cases/get_contacts_by_client/' + clientId)
-            .then(response => response.json())
+        if (!clientId) {
+            const contactGroup = document.getElementById('contact-group');
+            if (contactGroup) contactGroup.style.display = 'none';
+            return;
+        }
+        
+        safeFetch(admin_url + 'cases/get_contacts_by_client/' + encodeURIComponent(clientId))
             .then(data => {
                 const select = document.getElementById('contact_id');
+                if (!select) return;
+                
                 select.innerHTML = '<option value="">Select Contact (Optional)</option>';
                 
-                if (data.success && data.data && data.data.length > 0) {
+                if (data && data.success && data.data && data.data.length > 0) {
                     data.data.forEach(contact => {
-                        const contactName = contact.full_name || (contact.firstname + ' ' + contact.lastname).trim();
+                        const contactName = contact.full_name || 
+                            (contact.firstname + ' ' + contact.lastname).trim() ||
+                            'Contact #' + contact.id;
                         select.innerHTML += `<option value="${contact.id}">${htmlEscape(contactName)}</option>`;
                     });
-                    document.getElementById('contact-group').style.display = 'block';
+                    const contactGroup = document.getElementById('contact-group');
+                    if (contactGroup) contactGroup.style.display = 'block';
                 } else {
                     select.innerHTML += '<option value="">No contacts available</option>';
-                    document.getElementById('contact-group').style.display = 'block';
+                    const contactGroup = document.getElementById('contact-group');
+                    if (contactGroup) contactGroup.style.display = 'block';
                 }
             })
             .catch(error => {
                 console.error('Error loading contacts:', error);
-                document.getElementById('contact_id').innerHTML = '<option value="">Error loading contacts</option>';
-                document.getElementById('contact-group').style.display = 'block';
+                const select = document.getElementById('contact_id');
+                if (select) {
+                    select.innerHTML = '<option value="">Error loading contacts</option>';
+                }
             });
     }
     
     function loadInvoicesByClient(clientId) {
+        if (!clientId) {
+            const invoiceSelect = document.getElementById('invoice_id');
+            if (invoiceSelect) {
+                invoiceSelect.innerHTML = '<option value="">Select Invoice</option>';
+            }
+            return;
+        }
+        
         const formData = new FormData();
         formData.append(csrfTokenName, csrfTokenHash);
         
-        fetch(admin_url + 'cases/get_invoices_by_client/' + clientId, {
+        fetch(admin_url + 'cases/get_invoices_by_client/' + encodeURIComponent(clientId), {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.warn('Invoice response is not JSON:', text.substring(0, 200));
+                    return { success: false, data: [] };
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             const select = document.getElementById('invoice_id');
+            if (!select) return;
+            
             select.innerHTML = '<option value="">Select Invoice</option>';
             
-            if (data.success && data.data && data.data.length > 0) {
+            if (data && data.success && data.data && data.data.length > 0) {
                 data.data.forEach(invoice => {
                     const displayText = buildInvoiceDisplayText(invoice);
                     select.innerHTML += `<option value="${invoice.id}">${htmlEscape(displayText)}</option>`;
@@ -843,7 +871,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error loading invoices:', error);
-            document.getElementById('invoice_id').innerHTML = '<option value="">Error loading invoices</option>';
+            const select = document.getElementById('invoice_id');
+            if (select) {
+                select.innerHTML = '<option value="">Error loading invoices</option>';
+                select.innerHTML += '<option value="skip_invoice">Continue Without Invoice</option>';
+            }
         });
     }
     
@@ -862,63 +894,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return displayText;
     }
     
-    // Search functionality
-    document.getElementById('consultations-search').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const filtered = consultationsData.filter(c => 
-            (c.client_name || '').toLowerCase().includes(searchTerm) ||
-            (c.contact_name || '').toLowerCase().includes(searchTerm) ||
-            (c.tag || '').toLowerCase().includes(searchTerm)
-        );
-        renderConsultations(filtered);
-    });
+    // Initialize everything
+    console.log('Initializing Cases Management...');
     
-    document.getElementById('cases-search').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const filtered = casesData.filter(c => 
-            (c.case_title || '').toLowerCase().includes(searchTerm) ||
-            (c.case_number || '').toLowerCase().includes(searchTerm) ||
-            (c.client_name || '').toLowerCase().includes(searchTerm) ||
-            (c.court_display || '').toLowerCase().includes(searchTerm)
-        );
-        renderCases(filtered);
-    });
+    // Load initial data
+    loadConsultations();
+    loadCases();
     
-    // Filter functionality
-    document.getElementById('consultations-filter').addEventListener('change', function() {
-        const filterValue = this.value;
-        let filtered = consultationsData;
-        
-        if (filterValue) {
-            filtered = consultationsData.filter(c => c.phase === filterValue);
-        }
-        
-        renderConsultations(filtered);
-    });
+    // Make functions available globally
+    window.loadContactsByClient = loadContactsByClient;
+    window.loadInvoicesByClient = loadInvoicesByClient;
+    window.safeFetch = safeFetch;
+    window.loadConsultations = loadConsultations;
+    window.loadCases = loadCases;
     
-    // Refresh buttons
-    document.getElementById('refresh-consultations').addEventListener('click', loadConsultations);
-    document.getElementById('refresh-cases').addEventListener('click', loadCases);
-    
-    // Modal reset handlers
-    $('#consultationModal').on('hidden.bs.modal', function () {
-        const form = document.getElementById('consultationForm');
-        const modalTitle = document.getElementById('modal-title-text');
-        const submitBtn = document.getElementById('submit-btn-text');
-        const consultationIdField = document.getElementById('consultation_id');
-        const contactGroup = document.getElementById('contact-group');
-        
-        if (form) form.reset();
-        if (modalTitle) modalTitle.textContent = 'Add Consultation';
-        if (submitBtn) submitBtn.textContent = 'Save Consultation';
-        if (consultationIdField) consultationIdField.value = '';
-        if (contactGroup) contactGroup.style.display = 'none';
-    });
-    
-    $('#upgradeModal').on('hidden.bs.modal', function () {
-        const form = document.getElementById('upgradeForm');
-        if (form) form.reset();
-    });
+    console.log('Cases Management initialized successfully');
 });
 </script>
 
