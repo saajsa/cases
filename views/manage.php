@@ -1,743 +1,184 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
-
-<style>
-/* Minimalist Black & White UI with Status Colors */
-* {
-    box-sizing: border-box;
-}
-
-body {
-    background: #fafafa;
-    color: #2c2c2c;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.page-header {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    padding: 40px;
-    margin-bottom: 30px;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-}
-
-.page-header h1 {
-    margin: 0 0 8px 0;
-    font-weight: 600;
-    font-size: 2.2rem;
-    color: #1a1a1a;
-    letter-spacing: -0.02em;
-}
-
-.page-header .subtitle {
-    font-size: 1rem;
-    color: #666666;
-    font-weight: 400;
-    margin-bottom: 25px;
-}
-
-.page-actions .btn {
-    margin-right: 12px;
-    margin-bottom: 8px;
-    border-radius: 1px;
-    padding: 10px 20px;
-    font-weight: 500;
-    font-size: 0.875rem;
-    border: 1px solid #d1d1d1;
-    background: #ffffff;
-    color: #2c2c2c;
-    transition: all 0.15s ease;
-    text-decoration: none;
-}
-
-.page-actions .btn:hover {
-    background: #f8f8f8;
-    border-color: #999999;
-    color: #1a1a1a;
-}
-
-.page-actions .btn-primary {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
-    color: #ffffff;
-}
-
-.page-actions .btn-primary:hover {
-    background: #000000;
-    border-color: #000000;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    padding: 30px;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    text-align: center;
-}
-
-.stat-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0 0 8px 0;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    color: #666666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-}
-
-.main-content {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    overflow: hidden;
-}
-
-.tab-navigation {
-    background: #f8f8f8;
-    border-bottom: 1px solid #e1e1e1;
-    padding: 0;
-    margin: 0;
-    display: flex;
-}
-
-.tab-btn {
-    background: none;
-    border: none;
-    padding: 20px 30px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #666666;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    border-bottom: 2px solid transparent;
-}
-
-.tab-btn.active {
-    color: #1a1a1a;
-    background: #ffffff;
-    border-bottom-color: #1a1a1a;
-}
-
-.tab-btn:hover {
-    color: #1a1a1a;
-    background: #ffffff;
-}
-
-.tab-content {
-    padding: 30px;
-}
-
-.search-filters {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    gap: 15px;
-    margin-bottom: 25px;
-    align-items: end;
-}
-
-.search-group {
-    position: relative;
-}
-
-.search-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #d1d1d1;
-    border-radius: 1px;
-    font-size: 0.875rem;
-    background: #ffffff;
-    color: #2c2c2c;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #1a1a1a;
-}
-
-.filter-select {
-    padding: 12px 16px;
-    border: 1px solid #d1d1d1;
-    border-radius: 1px;
-    font-size: 0.875rem;
-    background: #ffffff;
-    color: #2c2c2c;
-    min-width: 150px;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #1a1a1a;
-}
-
-.refresh-btn {
-    padding: 12px 20px;
-    border: 1px solid #d1d1d1;
-    border-radius: 1px;
-    background: #ffffff;
-    color: #2c2c2c;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.refresh-btn:hover {
-    background: #f8f8f8;
-    border-color: #999999;
-}
-
-.items-grid {
-    display: grid;
-    gap: 20px;
-}
-
-.item-card {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    padding: 25px;
-    border-radius: 2px;
-    transition: all 0.15s ease;
-}
-
-.item-card:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border-color: #d1d1d1;
-}
-
-.item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 15px;
-}
-
-.item-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0 0 5px 0;
-}
-
-.item-meta {
-    font-size: 0.875rem;
-    color: #666666;
-    margin: 0 0 15px 0;
-}
-
-.item-details {
-    margin-bottom: 20px;
-}
-
-.item-detail {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #f5f5f5;
-    font-size: 0.875rem;
-}
-
-.item-detail:last-child {
-    border-bottom: none;
-}
-
-.item-detail-label {
-    color: #666666;
-    font-weight: 500;
-}
-
-.item-detail-value {
-    color: #2c2c2c;
-    font-weight: 400;
-}
-
-.item-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.action-btn {
-    border-radius: 1px;
-    padding: 8px 16px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    transition: all 0.15s ease;
-    text-decoration: none;
-    border: 1px solid;
-    cursor: pointer;
-}
-
-.action-btn.btn-primary {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
-    color: #ffffff;
-}
-
-.action-btn.btn-primary:hover {
-    background: #000000;
-    border-color: #000000;
-}
-
-.action-btn.btn-success {
-    background: #ffffff;
-    border-color: #2d7d2d;
-    color: #2d7d2d;
-}
-
-.action-btn.btn-success:hover {
-    background: #2d7d2d;
-    color: #ffffff;
-}
-
-.action-btn.btn-info {
-    background: #ffffff;
-    border-color: #1a6bcc;
-    color: #1a6bcc;
-}
-
-.action-btn.btn-info:hover {
-    background: #1a6bcc;
-    color: #ffffff;
-}
-
-.action-btn.btn-danger {
-    background: #ffffff;
-    border-color: #cc1a1a;
-    color: #cc1a1a;
-}
-
-.action-btn.btn-danger:hover {
-    background: #cc1a1a;
-    color: #ffffff;
-}
-
-.action-btn.btn-default {
-    background: #ffffff;
-    border-color: #d1d1d1;
-    color: #2c2c2c;
-}
-
-.action-btn.btn-default:hover {
-    background: #f8f8f8;
-    border-color: #999999;
-}
-
-/* Status Colors */
-.status-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 1px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid;
-}
-
-.status-consultation { 
-    background: #eff8ff; 
-    color: #1a6bcc; 
-    border-color: #1a6bcc; 
-}
-
-.status-litigation { 
-    background: #f0f9f0; 
-    color: #2d7d2d; 
-    border-color: #2d7d2d; 
-}
-
-.status-active { 
-    background: #f0f9f0; 
-    color: #2d7d2d; 
-    border-color: #2d7d2d; 
-}
-
-.status-scheduled { 
-    background: #eff8ff; 
-    color: #1a6bcc; 
-    border-color: #1a6bcc; 
-}
-
-.status-completed { 
-    background: #f0f9f0; 
-    color: #2d7d2d; 
-    border-color: #2d7d2d; 
-}
-
-.status-pending { 
-    background: #fff8e6; 
-    color: #cc8c1a; 
-    border-color: #cc8c1a; 
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 40px;
-    color: #999999;
-    background: #fafafa;
-    border: 1px dashed #d1d1d1;
-    border-radius: 2px;
-}
-
-.empty-state i {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    opacity: 0.6;
-    color: #cccccc;
-}
-
-.empty-state h5 {
-    font-weight: 600;
-    color: #666666;
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    color: #999999;
-    margin-bottom: 20px;
-}
-
-.loading-state {
-    text-align: center;
-    padding: 60px 40px;
-    color: #999999;
-}
-
-.loading-spinner {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #cccccc;
-}
-
-/* Modal Styles */
-.modal-content {
-    border: 1px solid #e1e1e1;
-    border-radius: 2px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-
-.modal-header {
-    background: #f8f8f8;
-    border-bottom: 1px solid #e1e1e1;
-    padding: 20px 30px;
-}
-
-.modal-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
-}
-
-.modal-body {
-    padding: 30px;
-}
-
-.modal-footer {
-    background: #f8f8f8;
-    border-top: 1px solid #e1e1e1;
-    padding: 20px 30px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #1a1a1a;
-    margin-bottom: 8px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 2px 16px;
-    border: 1px solid #d1d1d1;
-    border-radius: 1px;
-    font-size: 0.875rem;
-    background: #ffffff;
-    color: #2c2c2c;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #1a1a1a;
-}
-
-.form-control.is-invalid {
-    border-color: #cc1a1a;
-}
-
-.invalid-feedback {
-    display: block;
-    margin-top: 5px;
-    font-size: 0.75rem;
-    color: #cc1a1a;
-}
-
-.help-text {
-    font-size: 0.75rem;
-    color: #999999;
-    margin-top: 5px;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .page-header {
-        padding: 25px 20px;
-    }
-    
-    .page-header h1 {
-        font-size: 1.8rem;
-    }
-    
-    .page-actions .btn {
-        width: 100%;
-        margin-bottom: 8px;
-        margin-right: 0;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .search-filters {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .tab-navigation {
-        flex-direction: column;
-    }
-    
-    .tab-btn {
-        text-align: left;
-    }
-    
-    .tab-content {
-        padding: 20px;
-    }
-    
-    .item-actions {
-        justify-content: stretch;
-    }
-    
-    .action-btn {
-        flex: 1;
-        text-align: center;
-    }
-}
-</style>
-
-<div id="wrapper">
-    <div class="content">
-        <!-- Minimalist Page Header -->
-        <div class="page-header">
-            <div class="row">
-                <div class="col-md-8">
-                    <h1>Cases Management</h1>
-                    <div class="subtitle">Manage consultations and track litigation cases</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="page-actions text-right">
-                        <button class="btn btn-primary" data-toggle="modal" data-target="#consultationModal">
-                            Add Consultation
-                        </button>
-                        <a href="<?php echo admin_url('cases/caseboard'); ?>" class="btn">
-                            Dashboard
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="consultations-count">-</div>
-                <div class="stat-label">Consultations</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="cases-count">-</div>
-                <div class="stat-label">Active Cases</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="litigation-count">-</div>
-                <div class="stat-label">Litigations</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="upcoming-count">-</div>
-                <div class="stat-label">Upcoming</div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Tab Navigation -->
-            <div class="tab-navigation">
-                <button class="tab-btn active" data-tab="consultations">
-                    Consultations <span id="consultations-badge">0</span>
-                </button>
-                <button class="tab-btn" data-tab="cases">
-                    Cases <span id="cases-badge">0</span>
-                </button>
-            </div>
-
-            <!-- Consultations Tab -->
-            <div class="tab-content" id="consultations-tab">
-                <!-- Search and Filters -->
-                <div class="search-filters">
-                    <div class="search-group">
-                        <input type="text" class="search-input" id="consultations-search" 
-                               placeholder="Search consultations by client, contact, or tag...">
-                    </div>
-                    <select class="filter-select" id="consultations-filter">
-                        <option value="">All Status</option>
-                        <option value="consultation">Consultation</option>
-                        <option value="litigation">Litigation</option>
-                    </select>
-                    <button class="refresh-btn" id="refresh-consultations">
-                        Refresh
-                    </button>
-                </div>
-
-                <!-- Consultations Container -->
-                <div id="consultations-container">
-                    <div class="loading-state">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i>
-                        </div>
-                        <p>Loading consultations...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cases Tab -->
-            <div class="tab-content" id="cases-tab" style="display: none;">
-                <!-- Search and Filters -->
-                <div class="search-filters">
-                    <div class="search-group">
-                        <input type="text" class="search-input" id="cases-search" 
-                               placeholder="Search cases by title, number, client, or court...">
-                    </div>
-                    <select class="filter-select" id="cases-filter">
-                        <option value="">All Courts</option>
-                    </select>
-                    <button class="refresh-btn" id="refresh-cases">
-                        Refresh
-                    </button>
-                </div>
-
-                <!-- Cases Container -->
-                <div id="cases-container">
-                    <div class="loading-state">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i>
-                        </div>
-                        <p>Loading cases...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<?php 
+init_head();
+echo load_cases_css(['cards', 'buttons', 'forms', 'status', 'modals']);
+echo cases_page_wrapper_start(
+    'Cases Management',
+    'Manage consultations and track litigation cases',
+    [
+        [
+            'text' => 'Add Consultation',
+            'class' => 'cases-btn cases-btn-primary',
+            'data' => ['toggle' => 'modal', 'target' => '#consultationModal']
+        ],
+        [
+            'text' => 'Dashboard',
+            'href' => admin_url('cases/caseboard'),
+            'class' => 'cases-btn'
+        ]
+    ]
+);
+?>
+
+<!-- Stats Grid -->
+<div class="cases-grid cases-grid-4 cases-mb-lg">
+    <div class="cases-card cases-text-center">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--cases-primary); margin: 0 0 8px 0;" id="consultations-count">-</div>
+        <div class="cases-text-muted cases-font-size-sm" style="text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">Consultations</div>
+    </div>
+    <div class="cases-card cases-text-center">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--cases-primary); margin: 0 0 8px 0;" id="cases-count">-</div>
+        <div class="cases-text-muted cases-font-size-sm" style="text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">Active Cases</div>
+    </div>
+    <div class="cases-card cases-text-center">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--cases-primary); margin: 0 0 8px 0;" id="litigation-count">-</div>
+        <div class="cases-text-muted cases-font-size-sm" style="text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">Litigations</div>
+    </div>
+    <div class="cases-card cases-text-center">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--cases-primary); margin: 0 0 8px 0;" id="upcoming-count">-</div>
+        <div class="cases-text-muted cases-font-size-sm" style="text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">Upcoming</div>
     </div>
 </div>
+
+<!-- Main Content -->
+<?php echo cases_section_start(''); ?>
+<!-- Tab Navigation -->
+<div style="background: var(--cases-bg-tertiary); border-bottom: 1px solid var(--cases-border); padding: 0; margin: -30px -30px 30px -30px; display: flex;">
+    <button class="cases-btn active" data-tab="consultations" style="background: none; border: none; padding: 20px 30px; font-size: 0.875rem; font-weight: 500; color: var(--cases-text-light); cursor: pointer; transition: var(--cases-transition); border-bottom: 2px solid transparent; border-radius: 0;">
+        Consultations <span id="consultations-badge" class="cases-count-badge">0</span>
+    </button>
+    <button class="cases-btn" data-tab="cases" style="background: none; border: none; padding: 20px 30px; font-size: 0.875rem; font-weight: 500; color: var(--cases-text-light); cursor: pointer; transition: var(--cases-transition); border-bottom: 2px solid transparent; border-radius: 0;">
+        Cases <span id="cases-badge" class="cases-count-badge">0</span>
+    </button>
+</div>
+
+<!-- Consultations Tab -->
+<div class="tab-content" id="consultations-tab">
+    <!-- Search and Filters -->
+    <div class="cases-flex cases-flex-between cases-mb-md cases-flex-wrap" style="gap: 15px; align-items: end;">
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" class="cases-form-control" id="consultations-search" 
+                   placeholder="Search consultations by client, contact, or tag...">
+        </div>
+        <select class="cases-form-control" id="consultations-filter" style="min-width: 150px;">
+            <option value="">All Status</option>
+            <option value="consultation">Consultation</option>
+            <option value="litigation">Litigation</option>
+        </select>
+        <?php echo cases_button('Refresh', [
+            'type' => 'default',
+            'id' => 'refresh-consultations',
+            'icon' => 'fas fa-sync-alt'
+        ]); ?>
+    </div>
+
+    <!-- Consultations Container -->
+    <div id="consultations-container">
+        <?php echo cases_loading_state('Loading consultations...'); ?>
+    </div>
+</div>
+
+<!-- Cases Tab -->
+<div class="tab-content" id="cases-tab" style="display: none;">
+    <!-- Search and Filters -->
+    <div class="cases-flex cases-flex-between cases-mb-md cases-flex-wrap" style="gap: 15px; align-items: end;">
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" class="cases-form-control" id="cases-search" 
+                   placeholder="Search cases by title, number, client, or court...">
+        </div>
+        <select class="cases-form-control" id="cases-filter" style="min-width: 150px;">
+            <option value="">All Courts</option>
+        </select>
+        <?php echo cases_button('Refresh', [
+            'type' => 'default',
+            'id' => 'refresh-cases',
+            'icon' => 'fas fa-sync-alt'
+        ]); ?>
+    </div>
+
+    <!-- Cases Container -->
+    <div id="cases-container">
+        <?php echo cases_loading_state('Loading cases...'); ?>
+    </div>
+</div>
+
+<?php echo cases_section_end(); ?>
+
+<?php echo cases_page_wrapper_end(); ?>
 
 <!-- Consultation Modal -->
 <div class="modal fade" id="consultationModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
+        <div class="cases-modal-content">
             <form id="consultationForm">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="modal-title-text">Add Consultation</h4>
-                    <button type="button" class="close" data-dismiss="modal">
+                <div class="cases-modal-header">
+                    <h4 class="cases-modal-title" id="modal-title-text">Add Consultation</h4>
+                    <button type="button" class="cases-modal-close" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="cases-modal-body">
                     <input type="hidden" name="consultation_id" id="consultation_id">
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Client <span style="color: #cc1a1a;">*</span>
-                                </label>
-                                <select name="client_id" id="client_id" class="form-control" required>
-                                    <option value="">Select Client</option>
-                                    <?php if (isset($clients) && !empty($clients)): ?>
-                                        <?php foreach ($clients as $client): ?>
-                                            <option value="<?php echo htmlspecialchars($client['userid']); ?>">
-                                                <?php echo htmlspecialchars($client['company'] ?: 'Individual Client'); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
+                    <div class="cases-grid cases-grid-2">
+                        <div class="cases-form-group">
+                            <label class="cases-form-label cases-label-required">Client</label>
+                            <select name="client_id" id="client_id" class="cases-form-control" required>
+                                <option value="">Select Client</option>
+                                <?php if (isset($clients) && !empty($clients)): ?>
+                                    <?php foreach ($clients as $client): ?>
+                                        <option value="<?php echo htmlspecialchars($client['userid']); ?>">
+                                            <?php echo htmlspecialchars($client['company'] ?: 'Individual Client'); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            <div class="cases-invalid-feedback"></div>
+                        </div>
 
-                            <div class="form-group" id="contact-group" style="display: none;">
-                                <label class="form-label">Contact Person</label>
-                                <select name="contact_id" id="contact_id" class="form-control">
-                                    <option value="">Select Contact (Optional)</option>
-                                </select>
-                            </div>
+                        <div class="cases-form-group" id="contact-group" style="display: none;">
+                            <label class="cases-form-label cases-label-optional">Contact Person</label>
+                            <select name="contact_id" id="contact_id" class="cases-form-control">
+                                <option value="">Select Contact (Optional)</option>
+                            </select>
+                        </div>
+                    </div>
 
-                            <div class="form-group">
-                                <label class="form-label">Tag</label>
-                                <input type="text" name="tag" id="consultation_tag" class="form-control" 
-                                       placeholder="e.g., Family Law, Property, Criminal">
-                            </div>
+                    <div class="cases-grid cases-grid-2">
+                        <div class="cases-form-group">
+                            <label class="cases-form-label">Tag</label>
+                            <input type="text" name="tag" id="consultation_tag" class="cases-form-control" 
+                                   placeholder="e.g., Family Law, Property, Criminal">
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Invoice <span style="color: #cc8c1a;">*</span>
-                                    <small style="color: #999999;">(Recommended)</small>
-                                </label>
-                                <select name="invoice_id" id="invoice_id" class="form-control">
-                                    <option value="">Select Invoice</option>
-                                </select>
-                                <div class="invalid-feedback"></div>
-                                <div class="help-text">
-                                    If no invoices are available, you can create one after saving.
-                                </div>
+                        <div class="cases-form-group">
+                            <label class="cases-form-label">
+                                Invoice 
+                                <small style="color: var(--cases-warning);">(Recommended)</small>
+                            </label>
+                            <select name="invoice_id" id="invoice_id" class="cases-form-control">
+                                <option value="">Select Invoice</option>
+                            </select>
+                            <div class="cases-invalid-feedback"></div>
+                            <div class="cases-form-help">
+                                If no invoices are available, you can create one after saving.
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">
-                            Consultation Note <span style="color: #cc1a1a;">*</span>
-                        </label>
-                        <textarea name="note" id="consultation-note" class="form-control" rows="6" 
+                    <div class="cases-form-group">
+                        <label class="cases-form-label cases-label-required">Consultation Note</label>
+                        <textarea name="note" id="consultation-note" class="cases-form-control cases-textarea" rows="6" 
                                   placeholder="Enter detailed consultation notes..." required></textarea>
-                        <div class="invalid-feedback"></div>
+                        <div class="cases-invalid-feedback"></div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="action-btn btn-default" data-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="submit" class="action-btn btn-primary">
+                <div class="cases-modal-footer">
+                    <?php echo cases_button('Cancel', [
+                        'type' => 'default',
+                        'data' => ['dismiss' => 'modal']
+                    ]); ?>
+                    <button type="submit" class="cases-btn cases-btn-primary">
                         <span id="submit-btn-text">Save Consultation</span>
                     </button>
                 </div>
@@ -749,20 +190,21 @@ body {
 <!-- View Note Modal -->
 <div class="modal fade" id="viewNoteModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Consultation Note</h4>
-                <button type="button" class="close" data-dismiss="modal">
+        <div class="cases-modal-content">
+            <div class="cases-modal-header">
+                <h4 class="cases-modal-title">Consultation Note</h4>
+                <button type="button" class="cases-modal-close" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <div id="noteContent" style="background: #fafafa; padding: 20px; border: 1px solid #e1e1e1; border-left: 3px solid #666666; line-height: 1.6; font-size: 0.875rem; color: #2c2c2c; border-radius: 2px;"></div>
+            <div class="cases-modal-body">
+                <div id="noteContent" class="cases-consultation-note"></div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="action-btn btn-default" data-dismiss="modal">
-                    Close
-                </button>
+            <div class="cases-modal-footer">
+                <?php echo cases_button('Close', [
+                    'type' => 'default',
+                    'data' => ['dismiss' => 'modal']
+                ]); ?>
             </div>
         </div>
     </div>
@@ -771,87 +213,68 @@ body {
 <!-- Upgrade Modal -->
 <div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
+        <div class="cases-modal-content">
             <form id="upgradeForm">
-                <div class="modal-header">
-                    <h4 class="modal-title">Register Litigation Case</h4>
-                    <button type="button" class="close" data-dismiss="modal">
+                <div class="cases-modal-header">
+                    <h4 class="cases-modal-title">Register Litigation Case</h4>
+                    <button type="button" class="cases-modal-close" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="cases-modal-body">
                     <input type="hidden" name="litigation_consultation_id" id="litigation_consultation_id">
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Case Title <span style="color: #cc1a1a;">*</span>
-                                </label>
-                                <input type="text" name="case_title" id="case_title" class="form-control" 
-                                       placeholder="Enter descriptive case title" required>
-                                <div class="invalid-feedback"></div>
-                            </div>
+                    <div class="cases-grid cases-grid-2">
+                        <div class="cases-form-group">
+                            <label class="cases-form-label cases-label-required">Case Title</label>
+                            <input type="text" name="case_title" id="case_title" class="cases-form-control" 
+                                   placeholder="Enter descriptive case title" required>
+                            <div class="cases-invalid-feedback"></div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Case Number <span style="color: #cc1a1a;">*</span>
-                                </label>
-                                <input type="text" name="case_number" id="case_number" class="form-control" 
-                                       placeholder="Court assigned case number" required>
-                                <div class="invalid-feedback"></div>
-                            </div>
+                        <div class="cases-form-group">
+                            <label class="cases-form-label cases-label-required">Case Number</label>
+                            <input type="text" name="case_number" id="case_number" class="cases-form-control" 
+                                   placeholder="Court assigned case number" required>
+                            <div class="cases-invalid-feedback"></div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Court <span style="color: #cc1a1a;">*</span>
-                                </label>
-                                <select name="court_id" id="court_id_upgrade" class="form-control" required>
-                                    <option value="">Select Court</option>
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
+                    <div class="cases-grid cases-grid-2">
+                        <div class="cases-form-group">
+                            <label class="cases-form-label cases-label-required">Court</label>
+                            <select name="court_id" id="court_id_upgrade" class="cases-form-control" required>
+                                <option value="">Select Court</option>
+                            </select>
+                            <div class="cases-invalid-feedback"></div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Court Room / Judge <span style="color: #cc1a1a;">*</span>
-                                </label>
-                                <select name="court_room_id" id="court_room_id_upgrade" class="form-control" required>
-                                    <option value="">Select Court Room</option>
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
+                        <div class="cases-form-group">
+                            <label class="cases-form-label cases-label-required">Court Room / Judge</label>
+                            <select name="court_room_id" id="court_room_id_upgrade" class="cases-form-control" required>
+                                <option value="">Select Court Room</option>
+                            </select>
+                            <div class="cases-invalid-feedback"></div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">
-                            Date Filed <span style="color: #cc1a1a;">*</span>
-                        </label>
-                        <input type="date" name="date_filed" id="date_filed" class="form-control" required>
-                        <div class="invalid-feedback"></div>
+                    <div class="cases-form-group">
+                        <label class="cases-form-label cases-label-required">Date Filed</label>
+                        <input type="date" name="date_filed" id="date_filed" class="cases-form-control" required>
+                        <div class="cases-invalid-feedback"></div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="action-btn btn-default" data-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="submit" class="action-btn btn-success">
-                        Register Case
+                <div class="cases-modal-footer">
+                    <?php echo cases_button('Cancel', [
+                        'type' => 'default',
+                        'data' => ['dismiss' => 'modal']
+                    ]); ?>
+                    <button type="submit" class="cases-btn cases-btn-success">
+                        <span id="upgrade-btn-text">Register Case</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<?php init_tail(); ?>
 
 <script>
 // Clean, minimal JavaScript
@@ -863,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let csrfTokenHash = '<?php echo $this->security->get_csrf_hash(); ?>';
     
     // Tab functionality
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabButtons = document.querySelectorAll('[data-tab]');
     const tabContents = document.querySelectorAll('.tab-content');
     
     tabButtons.forEach(button => {
@@ -871,8 +294,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetTab = this.dataset.tab;
             
             // Update active states
-            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.color = 'var(--cases-text-light)';
+                btn.style.borderBottomColor = 'transparent';
+                btn.style.background = 'none';
+            });
+            
             this.classList.add('active');
+            this.style.color = 'var(--cases-primary)';
+            this.style.background = 'var(--cases-bg-primary)';
+            this.style.borderBottomColor = 'var(--cases-primary)';
             
             // Show/hide content
             tabContents.forEach(content => {
@@ -886,17 +318,26 @@ document.addEventListener('DOMContentLoaded', function() {
     loadConsultations();
     loadCases();
     
-    // Render consultations with minimalist cards
+    // Debug: Check if modal elements exist
+    console.log('Modal elements check:', {
+        consultationModal: document.getElementById('consultationModal'),
+        modalTitle: document.getElementById('modal-title-text'),
+        submitBtn: document.getElementById('submit-btn-text'),
+        submitBtnParent: document.getElementById('submit-btn-text')?.parentElement,
+        consultationForm: document.getElementById('consultationForm')
+    });
+    
+    // Render consultations with cases framework
     function renderConsultations(data) {
         const container = document.getElementById('consultations-container');
         
         if (!data || data.length === 0) {
             container.innerHTML = `
-                <div class="empty-state">
+                <div class="cases-empty-state">
                     <i class="fas fa-comments"></i>
                     <h5>No consultations found</h5>
                     <p>Start by adding your first consultation</p>
-                    <button class="action-btn btn-primary" data-toggle="modal" data-target="#consultationModal">
+                    <button class="cases-btn cases-btn-primary" data-toggle="modal" data-target="#consultationModal">
                         Add Consultation
                     </button>
                 </div>
@@ -904,57 +345,57 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        let html = '<div class="items-grid">';
+        let html = '<div class="cases-grid cases-grid-responsive">';
         
         data.forEach(consultation => {
-            const statusClass = consultation.phase === 'litigation' ? 'status-litigation' : 'status-consultation';
+            const statusType = consultation.phase === 'litigation' ? 'litigation' : 'consultation';
             const statusText = consultation.phase === 'litigation' ? 'Litigation' : 'Consultation';
             
             html += `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div>
-                            <h3 class="item-title">${htmlEscape(consultation.client_name || 'Unknown Client')}</h3>
-                            <div class="item-meta">
-                                <span class="status-badge ${statusClass}">${statusText}</span>
+                <div class="cases-card cases-hover-lift">
+                    <div class="cases-card-header">
+                        <div class="cases-card-title">${htmlEscape(consultation.client_name || 'Unknown Client')}</div>
+                        <span class="cases-status-badge cases-status-${statusType}">${statusText}</span>
+                    </div>
+                    
+                    <div class="cases-card-body">
+                        <div class="cases-card-meta-grid">
+                            ${consultation.contact_name ? `
+                                <div class="cases-card-meta-item">
+                                    <span class="cases-card-meta-label">Contact:</span>
+                                    <span class="cases-card-meta-value">${htmlEscape(consultation.contact_name)}</span>
+                                </div>
+                            ` : ''}
+                            ${consultation.tag ? `
+                                <div class="cases-card-meta-item">
+                                    <span class="cases-card-meta-label">Tag:</span>
+                                    <span class="cases-card-meta-value">${htmlEscape(consultation.tag)}</span>
+                                </div>
+                            ` : ''}
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Date:</span>
+                                <span class="cases-card-meta-value">${formatDate(consultation.date_added)}</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="item-details">
-                        ${consultation.contact_name ? `
-                            <div class="item-detail">
-                                <span class="item-detail-label">Contact:</span>
-                                <span class="item-detail-value">${htmlEscape(consultation.contact_name)}</span>
-                            </div>
-                        ` : ''}
-                        ${consultation.tag ? `
-                            <div class="item-detail">
-                                <span class="item-detail-label">Tag:</span>
-                                <span class="item-detail-value">${htmlEscape(consultation.tag)}</span>
-                            </div>
-                        ` : ''}
-                        <div class="item-detail">
-                            <span class="item-detail-label">Date:</span>
-                            <span class="item-detail-value">${formatDate(consultation.date_added)}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="item-actions">
-                        <button class="action-btn btn-default" onclick="viewNote(${consultation.id})">
-                            View
-                        </button>
-                        <button class="action-btn btn-primary" onclick="editConsultation(${consultation.id})">
-                            Edit
-                        </button>
-                        ${consultation.phase === 'consultation' ? `
-                            <button class="action-btn btn-success" onclick="upgradeToLitigation(${consultation.id})">
-                                Upgrade
+                    <div class="cases-card-footer">
+                        <div class="cases-card-actions">
+                            <button class="cases-action-btn cases-btn-default" onclick="viewNote(${consultation.id})">
+                                View
                             </button>
-                        ` : ''}
-                        <button class="action-btn btn-danger" onclick="deleteConsultation(${consultation.id})">
-                            Delete
-                        </button>
+                            <button class="cases-action-btn cases-btn-primary" onclick="editConsultation(${consultation.id})">
+                                Edit
+                            </button>
+                            ${consultation.phase === 'consultation' ? `
+                                <button class="cases-action-btn cases-btn-success" onclick="upgradeToLitigation(${consultation.id})">
+                                    Upgrade
+                                </button>
+                            ` : ''}
+                            <button class="cases-action-btn cases-btn-danger" onclick="deleteConsultation(${consultation.id})">
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -964,13 +405,13 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = html;
     }
     
-    // Render cases with minimalist cards
+    // Render cases with cases framework
     function renderCases(data) {
         const container = document.getElementById('cases-container');
         
         if (!data || data.length === 0) {
             container.innerHTML = `
-                <div class="empty-state">
+                <div class="cases-empty-state">
                     <i class="fas fa-briefcase"></i>
                     <h5>No cases found</h5>
                     <p>Cases will appear here when consultations are upgraded</p>
@@ -979,42 +420,42 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        let html = '<div class="items-grid">';
+        let html = '<div class="cases-grid cases-grid-responsive">';
         
         data.forEach(caseItem => {
             html += `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div>
-                            <h3 class="item-title">${htmlEscape(caseItem.case_title)}</h3>
-                            <div class="item-meta">
-                                <span class="status-badge status-active">${htmlEscape(caseItem.case_number)}</span>
+                <div class="cases-card cases-hover-lift">
+                    <div class="cases-card-header">
+                        <div class="cases-card-title">${htmlEscape(caseItem.case_title)}</div>
+                        <span class="cases-status-badge cases-status-active">${htmlEscape(caseItem.case_number)}</span>
+                    </div>
+                    
+                    <div class="cases-card-body">
+                        <div class="cases-card-meta-grid">
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Client:</span>
+                                <span class="cases-card-meta-value">${htmlEscape(caseItem.client_name || 'Unknown Client')}</span>
+                            </div>
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Court:</span>
+                                <span class="cases-card-meta-value">${htmlEscape(caseItem.court_display || 'Court not specified')}</span>
+                            </div>
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Filed:</span>
+                                <span class="cases-card-meta-value">${formatDate(caseItem.date_filed)}</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="item-details">
-                        <div class="item-detail">
-                            <span class="item-detail-label">Client:</span>
-                            <span class="item-detail-value">${htmlEscape(caseItem.client_name || 'Unknown Client')}</span>
+                    <div class="cases-card-footer">
+                        <div class="cases-card-actions">
+                            <a href="${admin_url}cases/details?id=${encodeURIComponent(caseItem.id)}" class="cases-action-btn cases-btn-primary">
+                                Details
+                            </a>
+                            <a href="${admin_url}cases/hearings/add?case_id=${encodeURIComponent(caseItem.id)}" class="cases-action-btn cases-btn-success">
+                                Add Hearing
+                            </a>
                         </div>
-                        <div class="item-detail">
-                            <span class="item-detail-label">Court:</span>
-                            <span class="item-detail-value">${htmlEscape(caseItem.court_display || 'Court not specified')}</span>
-                        </div>
-                        <div class="item-detail">
-                            <span class="item-detail-label">Filed:</span>
-                            <span class="item-detail-value">${formatDate(caseItem.date_filed)}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="item-actions">
-                        <a href="${admin_url}cases/details?id=${encodeURIComponent(caseItem.id)}" class="action-btn btn-primary">
-                            Details
-                        </a>
-                        <a href="${admin_url}cases/hearings/add?case_id=${encodeURIComponent(caseItem.id)}" class="action-btn btn-success">
-                            Add Hearing
-                        </a>
                     </div>
                 </div>
             `;
@@ -1078,8 +519,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Utility functions
     function showLoading(containerId) {
         document.getElementById(containerId).innerHTML = `
-            <div class="loading-state">
-                <div class="loading-spinner">
+            <div class="cases-loading-state">
+                <div class="cases-loading-spinner">
                     <i class="fas fa-spinner fa-spin"></i>
                 </div>
                 <p>Loading...</p>
@@ -1089,11 +530,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function showError(containerId, message) {
         document.getElementById(containerId).innerHTML = `
-            <div class="empty-state">
+            <div class="cases-empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
                 <h5>Error</h5>
                 <p>${htmlEscape(message)}</p>
-                <button class="action-btn btn-primary" onclick="location.reload()">
+                <button class="cases-btn cases-btn-primary" onclick="location.reload()">
                     Retry
                 </button>
             </div>
@@ -1128,48 +569,89 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Global functions for onclick handlers
     window.viewNote = function(id) {
+        console.log('Viewing note for consultation:', id);
         const consultation = consultationsData.find(c => c.id == id);
-        if (!consultation) return;
+        if (!consultation) {
+            console.error('Consultation not found with id:', id);
+            return;
+        }
         
         document.getElementById('noteContent').innerHTML = consultation.note || 'No note available';
         $('#viewNoteModal').modal('show');
     };
     
     window.editConsultation = function(id) {
-        // Implementation for edit
         const consultation = consultationsData.find(c => c.id == id);
-        if (!consultation) return;
+        if (!consultation) {
+            console.error('Consultation not found with id:', id);
+            return;
+        }
         
-        document.getElementById('consultation_id').value = consultation.id;
-        document.getElementById('client_id').value = consultation.client_id;
-        document.getElementById('consultation_tag').value = consultation.tag || '';
-        document.getElementById('consultation-note').value = consultation.note || '';
-        document.getElementById('modal-title-text').textContent = 'Edit Consultation';
-        document.getElementById('submit-btn-text').textContent = 'Update Consultation';
+        console.log('Editing consultation:', consultation);
         
+        // Populate form fields
+        const consultationIdField = document.getElementById('consultation_id');
+        const clientIdField = document.getElementById('client_id');
+        const tagField = document.getElementById('consultation_tag');
+        const noteField = document.getElementById('consultation-note');
+        const modalTitleField = document.getElementById('modal-title-text');
+        const submitBtnField = document.getElementById('submit-btn-text');
+        
+        if (consultationIdField) consultationIdField.value = consultation.id;
+        if (clientIdField) clientIdField.value = consultation.client_id;
+        if (tagField) tagField.value = consultation.tag || '';
+        if (noteField) noteField.value = consultation.note || '';
+        
+        // Update modal title and button text
+        if (modalTitleField) modalTitleField.textContent = 'Edit Consultation';
+        if (submitBtnField) submitBtnField.textContent = 'Update Consultation';
+        
+        // Load contacts and invoices for this client
+        if (consultation.client_id) {
+            loadContactsByClient(consultation.client_id);
+            loadInvoicesByClient(consultation.client_id);
+            
+            // Set contact after a brief delay to allow the options to load
+            setTimeout(() => {
+                const contactField = document.getElementById('contact_id');
+                if (contactField && consultation.contact_id) {
+                    contactField.value = consultation.contact_id;
+                }
+            }, 500);
+        }
+        
+        // Show the modal
         $('#consultationModal').modal('show');
     };
     
     window.upgradeToLitigation = function(id) {
+        console.log('Upgrading consultation to litigation:', id);
         document.getElementById('litigation_consultation_id').value = id;
         
         // Load courts
         fetch(admin_url + 'cases/courts/get_all_courts')
             .then(response => response.json())
             .then(data => {
+                console.log('Courts loaded:', data);
                 if (data.success && data.data) {
                     const select = document.getElementById('court_id_upgrade');
                     select.innerHTML = '<option value="">Select Court</option>';
                     data.data.forEach(court => {
                         select.innerHTML += `<option value="${court.id}">${htmlEscape(court.name)}</option>`;
                     });
+                } else {
+                    console.error('Failed to load courts:', data);
                 }
+            })
+            .catch(error => {
+                console.error('Error loading courts:', error);
             });
         
         $('#upgradeModal').modal('show');
     };
     
     window.deleteConsultation = function(id) {
+        console.log('Deleting consultation:', id);
         if (!confirm('Are you sure you want to delete this consultation?')) return;
         
         const formData = new FormData();
@@ -1181,11 +663,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Delete response:', data);
             if (data.success) {
                 loadConsultations();
                 alert('Consultation deleted successfully');
             } else {
-                alert('Failed to delete consultation');
+                alert('Failed to delete consultation: ' + (data.message || 'Unknown error'));
             }
         })
         .catch(error => {
@@ -1201,19 +684,48 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(this);
         formData.append(csrfTokenName, csrfTokenHash);
         
-        fetch(admin_url + 'cases/create_consultation', {
+        // Determine if this is an edit or create operation
+        const consultationId = document.getElementById('consultation_id').value;
+        const url = consultationId ? 
+            admin_url + 'cases/update_consultation' : 
+            admin_url + 'cases/create_consultation';
+        
+        // Add consultation ID to form data if editing
+        if (consultationId) {
+            formData.append('id', consultationId);
+        }
+        
+        console.log('Submitting to:', url, 'with consultation_id:', consultationId);
+        
+        fetch(url, {
             method: 'POST',
             body: formData
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Response:', data);
             if (data.success) {
                 $('#consultationModal').modal('hide');
                 loadConsultations();
-                alert('Consultation saved successfully');
+                alert(consultationId ? 'Consultation updated successfully' : 'Consultation saved successfully');
+                
+                // Reset form and modal state
                 this.reset();
+                
+                // Reset modal elements safely
+                const modalTitle = document.getElementById('modal-title-text');
+                const submitBtn = document.getElementById('submit-btn-text');
+                const consultationIdField = document.getElementById('consultation_id');
+                
+                if (modalTitle) modalTitle.textContent = 'Add Consultation';
+                if (submitBtn) submitBtn.textContent = 'Save Consultation';
+                if (consultationIdField) consultationIdField.value = '';
+                
+                // Hide contact group
+                const contactGroup = document.getElementById('contact-group');
+                if (contactGroup) contactGroup.style.display = 'none';
             } else {
-                alert('Failed to save consultation');
+                alert('Failed to save consultation: ' + (data.message || 'Unknown error'));
             }
         })
         .catch(error => {
@@ -1387,6 +899,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Refresh buttons
     document.getElementById('refresh-consultations').addEventListener('click', loadConsultations);
     document.getElementById('refresh-cases').addEventListener('click', loadCases);
+    
+    // Modal reset handlers
+    $('#consultationModal').on('hidden.bs.modal', function () {
+        const form = document.getElementById('consultationForm');
+        const modalTitle = document.getElementById('modal-title-text');
+        const submitBtn = document.getElementById('submit-btn-text');
+        const consultationIdField = document.getElementById('consultation_id');
+        const contactGroup = document.getElementById('contact-group');
+        
+        if (form) form.reset();
+        if (modalTitle) modalTitle.textContent = 'Add Consultation';
+        if (submitBtn) submitBtn.textContent = 'Save Consultation';
+        if (consultationIdField) consultationIdField.value = '';
+        if (contactGroup) contactGroup.style.display = 'none';
+    });
+    
+    $('#upgradeModal').on('hidden.bs.modal', function () {
+        const form = document.getElementById('upgradeForm');
+        if (form) form.reset();
+    });
 });
 </script>
 

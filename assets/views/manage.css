@@ -1,0 +1,78 @@
+/* ========================================
+   MANAGE VIEW SPECIFIC STYLES
+======================================== */
+
+/* Tab Navigation Enhancements */
+.tab-content {
+    min-height: 400px;
+}
+
+/* Enhanced Card Animations for Management View */
+.cases-card.cases-hover-lift {
+    transform: translateY(0);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cases-card.cases-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+/* Stats Grid Enhancements */
+.cases-grid-4 .cases-card {
+    padding: var(--cases-spacing-lg);
+    text-align: center;
+    transition: var(--cases-transition);
+}
+
+.cases-grid-4 .cases-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--cases-shadow-md);
+}
+
+/* Tab Button Active States */
+.cases-btn.active {
+    color: var(--cases-primary) !important;
+    background: var(--cases-bg-primary) !important;
+    border-bottom-color: var(--cases-primary) !important;
+}
+
+/* Search and Filter Enhancements */
+.cases-flex-between {
+    align-items: end;
+}
+
+/* Modal Form Enhancements */
+.cases-modal-body .cases-grid {
+    margin-bottom: var(--cases-spacing-md);
+}
+
+/* Loading and Empty State Refinements */
+.cases-loading-state,
+.cases-empty-state {
+    padding: var(--cases-spacing-xl) var(--cases-spacing-lg);
+}
+
+/* Mobile Responsive for Management View */
+@media (max-width: 768px) {
+    .cases-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--cases-spacing-sm);
+    }
+    
+    .cases-flex-between {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--cases-spacing-sm);
+    }
+    
+    .cases-flex-between > * {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .cases-grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
