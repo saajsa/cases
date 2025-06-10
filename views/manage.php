@@ -276,89 +276,660 @@ echo cases_page_wrapper_start(
     </div>
 </div>
 
-
 <script>
-// FIXED AND RECODED JavaScript for Cases Management
+    document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced AJAX configuration
+    const ajaxConfig = {
+        timeout: 30000, // 30 seconds timeout
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    };
+    
+    // Global error handler for fetch requests
+    function handleFetchError(response, context = '') {
+        console.error(`AJAX Error in ${context}:`, {
+            status: response.status,
+            statusText: response.statusText,
+            url: response.url,
+            type: response.type
+        });
+        
+        if (response.status === 403) {
+            alert('Access denied. Please check your permissions.');
+            return null;
+        } else if (response.status === 404) {
+            alert('The requested resource was not found.');
+            return null;
+        } else if (response.status >= 500) {
+            alert('Server error occurred. Please try again later.');
+            return null;
+        }
+        
+        return response;
+    }
+    
+    // Enhanced fetch wrapper with error handling
+    function safeFetch(url, options = {}) {
+        const defaultOptions = {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            timeout: 30000
+        };
+        
+        const finalOptions = { ...defaultOptions, ...options };
+        
+        return fetch(url, finalOptions)
+            .then(response => {
+                if (!response.ok) {
+                    return handleFetchError(response, url);
+                }
+                
+                // Check if response is actually JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.warn('Response is not JSON:', contentType);
+                    return response.text().then(text => {
+                        console.error('Non-JSON response:', text.substring(0, 500));
+                        throw new Error('Server returned non-JSON response');
+                    });
+                }
+                
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                throw error;
+            });
+    }
+    
+    // Fixed loadConsultations function
+    function loadConsultations() {
+        showLoading('consultations-container');
+        
+        safeFetch(admin_url + 'cases/consultations_list')
+            .then(data => {
+                console.log('Consultations response:', data);
+                
+                if (data && data.success) {
+                    consultationsData = data.data || [];
+                    renderConsultations(consultationsData);
+                    updateStats();
+                } else {
+                    console.error('Invalid consultations response:', data);
+                    showError('consultations-container', 'Invalid response from server');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading consultations:', error);
+                showError('consultations-container', 'Failed to load consultations: ' + error.message);
+            });
+    }
+    
+    // Fixed loadCases function
+    function loadCases() {
+        showLoading('cases-container');
+        
+        safeFetch(admin_url + 'cases/cases_list')
+            .then(data => {
+                console.log('Cases response:', data);
+                
+                if (data && data.success) {
+                    casesData = data.data || [];
+                    renderCases(casesData);
+                    updateStats();
+                } else {
+                    console.error('Invalid cases response:', data);
+                    showError('cases-container', 'Invalid response from server');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading cases:', error);
+                showError('cases-container', 'Failed to load cases: ' + error.message);
+            });
+    }
+    
+    // Enhanced form submission with proper error handling
+    document.getElementById('consultationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const consultationId = document.getElementById('consultation_id').value;
+        
+        // Add CSRF token
+        formData.append(csrfTokenName, csrfTokenHash);
+        
+        const url = consultationId ? 
+            admin_url + 'cases/update_consultation' : 
+            admin_url + 'cases/create_consultation';
+        
+        // Add consultation ID to form data if editing
+        if (consultationId) {
+            formData.append('id', consultationId);
+        }
+        
+        console.log('Submitting to:', url, 'with consultation_id:', consultationId);
+        
+        const submitBtn = document.getElementById('submit-btn-text');
+        const originalText = submitBtn ? submitBtn.textContent : '';
+        
+        if (submitBtn) {
+            submitBtn.textContent = 'Saving...';
+            submitBtn.parentElement.disabled = true;
+        }
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.error('Non-JSON response received:', text.substring(0, 500));
+                    throw new Error('Server returned invalid response');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Submit response:', data);
+            
+            if (data && data.success) {
+                $('#consultationModal').modal('hide');
+                loadConsultations();
+                alert(consultationId ? 'Consultation updated successfully' : 'Consultation saved successfully');
+                
+                // Reset form and modal state
+                this.reset();
+                resetModalState();
+            } else {
+                const errorMessage = data && data.message ? data.message : 'Failed to save consultation';
+                alert('Error: ' + errorMessage);
+            }
+        })
+        .catch(error => {
+            console.error('Submit error:', error);
+            alert('Network error: ' + error.message);
+        })
+        .finally(() => {
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.parentElement.disabled = false;
+            }
+        });
+    });
+    
+    // Function to reset modal state
+    function resetModalState() {
+        const modalTitle = document.getElementById('modal-title-text');
+        const submitBtn = document.getElementById('submit-btn-text');
+        const consultationIdField = document.getElementById('consultation_id');
+        const contactGroup = document.getElementById('contact-group');
+        
+        if (modalTitle) modalTitle.textContent = 'Add Consultation';
+        if (submitBtn) submitBtn.textContent = 'Save Consultation';
+        if (consultationIdField) consultationIdField.value = '';
+        if (contactGroup) contactGroup.style.display = 'none';
+    }
+    
+    // Enhanced loadContactsByClient function
+    function loadContactsByClient(clientId) {
+        if (!clientId) {
+            document.getElementById('contact-group').style.display = 'none';
+            return;
+        }
+        
+        safeFetch(admin_url + 'cases/get_contacts_by_client/' + encodeURIComponent(clientId))
+            .then(data => {
+                const select = document.getElementById('contact_id');
+                select.innerHTML = '<option value="">Select Contact (Optional)</option>';
+                
+                if (data && data.success && data.data && data.data.length > 0) {
+                    data.data.forEach(contact => {
+                        const contactName = contact.full_name || 
+                            (contact.firstname + ' ' + contact.lastname).trim() ||
+                            'Contact #' + contact.id;
+                        select.innerHTML += `<option value="${contact.id}">${htmlEscape(contactName)}</option>`;
+                    });
+                    document.getElementById('contact-group').style.display = 'block';
+                } else {
+                    select.innerHTML += '<option value="">No contacts available</option>';
+                    document.getElementById('contact-group').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading contacts:', error);
+                const select = document.getElementById('contact_id');
+                select.innerHTML = '<option value="">Error loading contacts</option>';
+                document.getElementById('contact-group').style.display = 'block';
+            });
+    }
+    
+    // Enhanced loadInvoicesByClient function
+    function loadInvoicesByClient(clientId) {
+        if (!clientId) {
+            document.getElementById('invoice_id').innerHTML = '<option value="">Select Invoice</option>';
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append(csrfTokenName, csrfTokenHash);
+        
+        fetch(admin_url + 'cases/get_invoices_by_client/' + encodeURIComponent(clientId), {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.warn('Invoice response is not JSON:', text.substring(0, 200));
+                    // Return a default structure
+                    return { success: false, data: [] };
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            const select = document.getElementById('invoice_id');
+            select.innerHTML = '<option value="">Select Invoice</option>';
+            
+            if (data && data.success && data.data && data.data.length > 0) {
+                data.data.forEach(invoice => {
+                    const displayText = buildInvoiceDisplayText(invoice);
+                    select.innerHTML += `<option value="${invoice.id}">${htmlEscape(displayText)}</option>`;
+                });
+            } else {
+                select.innerHTML += '<option value="">No invoices available</option>';
+                select.innerHTML += '<option value="skip_invoice">Continue Without Invoice</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading invoices:', error);
+            const select = document.getElementById('invoice_id');
+            select.innerHTML = '<option value="">Error loading invoices</option>';
+            select.innerHTML += '<option value="skip_invoice">Continue Without Invoice</option>';
+        });
+    }
+    
+    // Enhanced error checking for menu stats
+    function loadMenuStats() {
+        safeFetch(admin_url + 'cases/get_menu_stats')
+            .then(data => {
+                if (data && data.success) {
+                    if (data.consultations > 0) {
+                        addBadge("manage_cases_and_consultations", data.consultations, "warning");
+                    }
+                    if (data.today_hearings > 0) {
+                        addBadge("cases-causelist", data.today_hearings, "danger");
+                    }
+                } else {
+                    console.warn('Menu stats request failed:', data);
+                }
+            })
+            .catch(error => {
+                console.warn('Menu stats loading failed:', error.message);
+            });
+    }
+    
+    function addBadge(slug, count, type) {
+        try {
+            const menu = document.querySelector(`[data-slug="${slug}"]`);
+            if (menu && count > 0) {
+                menu.innerHTML += ` <span class="badge badge-${type}">${count}</span>`;
+            }
+        } catch (e) {
+            console.warn('Error adding badge:', e);
+        }
+    }
+    
+    // Debug function to test endpoints
+    function testEndpoints() {
+        if (!window.location.search.includes('debug=1')) return;
+        
+        console.log('=== TESTING ENDPOINTS ===');
+        
+        const endpoints = [
+            admin_url + 'cases/check_database',
+            admin_url + 'cases/get_menu_stats',
+            admin_url + 'cases/consultations_list',
+            admin_url + 'cases/cases_list'
+        ];
+        
+        endpoints.forEach(endpoint => {
+            fetch(endpoint, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log(`${endpoint}: ${response.status} ${response.statusText}`);
+                return response.text();
+            })
+            .then(text => {
+                try {
+                    const json = JSON.parse(text);
+                    console.log(`${endpoint} JSON:`, json);
+                } catch (e) {
+                    console.log(`${endpoint} TEXT:`, text.substring(0, 200));
+                }
+            })
+            .catch(error => {
+                console.error(`${endpoint} ERROR:`, error);
+            });
+        });
+    }
+    
+    // Initialize everything
+    loadConsultations();
+    loadCases();
+    
+    // Load menu stats if we're in the admin area
+    if (typeof admin_url !== 'undefined') {
+        loadMenuStats();
+    }
+    
+    // Run debug tests if requested
+    testEndpoints();
+    
+    // Make functions available globally for onclick handlers
+    window.loadContactsByClient = loadContactsByClient;
+    window.loadInvoicesByClient = loadInvoicesByClient;
+    window.safeFetch = safeFetch;
+});
+
+// Clean, minimal JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    // Core variables
+    // Variables
     let consultationsData = [];
     let casesData = [];
-    const csrfTokenName = '<?php echo $this->security->get_csrf_token_name(); ?>';
-    const csrfTokenHash = '<?php echo $this->security->get_csrf_hash(); ?>';
+    let csrfTokenName = '<?php echo $this->security->get_csrf_token_name(); ?>';
+    let csrfTokenHash = '<?php echo $this->security->get_csrf_hash(); ?>';
     
-    console.log('🚀 Cases Management System Starting...');
-    console.log('Admin URL:', admin_url);
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('[data-tab]');
+    const tabContents = document.querySelectorAll('.tab-content');
     
-    // ===== UTILITY FUNCTIONS =====
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+            
+            // Update active states
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.color = 'var(--cases-text-light)';
+                btn.style.borderBottomColor = 'transparent';
+                btn.style.background = 'none';
+            });
+            
+            this.classList.add('active');
+            this.style.color = 'var(--cases-primary)';
+            this.style.background = 'var(--cases-bg-primary)';
+            this.style.borderBottomColor = 'var(--cases-primary)';
+            
+            // Show/hide content
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(targetTab + '-tab').style.display = 'block';
+        });
+    });
     
-    function showLoading(containerId, message = 'Loading...') {
-        const container = document.getElementById(containerId);
-        if (!container) return;
+    // Load initial data
+    loadConsultations();
+    loadCases();
+    
+    // Debug: Check if modal elements exist
+    console.log('Modal elements check:', {
+        consultationModal: document.getElementById('consultationModal'),
+        modalTitle: document.getElementById('modal-title-text'),
+        submitBtn: document.getElementById('submit-btn-text'),
+        submitBtnParent: document.getElementById('submit-btn-text')?.parentElement,
+        consultationForm: document.getElementById('consultationForm')
+    });
+    
+    // Render consultations with cases framework
+    function renderConsultations(data) {
+        const container = document.getElementById('consultations-container');
         
-        container.innerHTML = `
-            <div class="cases-loading-state" style="text-align: center; padding: 60px 40px; color: #666;">
-                <div style="margin-bottom: 20px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--cases-primary);"></i>
+        if (!data || data.length === 0) {
+            container.innerHTML = `
+                <div class="cases-empty-state">
+                    <i class="fas fa-comments"></i>
+                    <h5>No consultations found</h5>
+                    <p>Start by adding your first consultation</p>
+                    <button class="cases-btn cases-btn-primary" data-toggle="modal" data-target="#consultationModal">
+                        Add Consultation
+                    </button>
                 </div>
-                <p style="margin: 0; font-weight: 500;">${message}</p>
+            `;
+            return;
+        }
+        
+        let html = '<div class="cases-grid cases-grid-responsive">';
+        
+        data.forEach(consultation => {
+            const statusType = consultation.phase === 'litigation' ? 'litigation' : 'consultation';
+            const statusText = consultation.phase === 'litigation' ? 'Litigation' : 'Consultation';
+            
+            html += `
+                <div class="cases-card cases-hover-lift">
+                    <div class="cases-card-header">
+                        <div class="cases-card-title">${htmlEscape(consultation.client_name || 'Unknown Client')}</div>
+                        <span class="cases-status-badge cases-status-${statusType}">${statusText}</span>
+                    </div>
+                    
+                    <div class="cases-card-body">
+                        <div class="cases-card-meta-grid">
+                            ${consultation.contact_name ? `
+                                <div class="cases-card-meta-item">
+                                    <span class="cases-card-meta-label">Contact:</span>
+                                    <span class="cases-card-meta-value">${htmlEscape(consultation.contact_name)}</span>
+                                </div>
+                            ` : ''}
+                            ${consultation.tag ? `
+                                <div class="cases-card-meta-item">
+                                    <span class="cases-card-meta-label">Tag:</span>
+                                    <span class="cases-card-meta-value">${htmlEscape(consultation.tag)}</span>
+                                </div>
+                            ` : ''}
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Date:</span>
+                                <span class="cases-card-meta-value">${formatDate(consultation.date_added)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cases-card-footer">
+                        <div class="cases-card-actions">
+                            <button class="cases-action-btn cases-btn-default" onclick="viewNote(${consultation.id})">
+                                View
+                            </button>
+                            <button class="cases-action-btn cases-btn-primary" onclick="editConsultation(${consultation.id})">
+                                Edit
+                            </button>
+                            ${consultation.phase === 'consultation' ? `
+                                <button class="cases-action-btn cases-btn-success" onclick="upgradeToLitigation(${consultation.id})">
+                                    Upgrade
+                                </button>
+                            ` : ''}
+                            <button class="cases-action-btn cases-btn-danger" onclick="deleteConsultation(${consultation.id})">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    // Render cases with cases framework
+    function renderCases(data) {
+        const container = document.getElementById('cases-container');
+        
+        if (!data || data.length === 0) {
+            container.innerHTML = `
+                <div class="cases-empty-state">
+                    <i class="fas fa-briefcase"></i>
+                    <h5>No cases found</h5>
+                    <p>Cases will appear here when consultations are upgraded</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '<div class="cases-grid cases-grid-responsive">';
+        
+        data.forEach(caseItem => {
+            html += `
+                <div class="cases-card cases-hover-lift">
+                    <div class="cases-card-header">
+                        <div class="cases-card-title">${htmlEscape(caseItem.case_title)}</div>
+                        <span class="cases-status-badge cases-status-active">${htmlEscape(caseItem.case_number)}</span>
+                    </div>
+                    
+                    <div class="cases-card-body">
+                        <div class="cases-card-meta-grid">
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Client:</span>
+                                <span class="cases-card-meta-value">${htmlEscape(caseItem.client_name || 'Unknown Client')}</span>
+                            </div>
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Court:</span>
+                                <span class="cases-card-meta-value">${htmlEscape(caseItem.court_display || 'Court not specified')}</span>
+                            </div>
+                            <div class="cases-card-meta-item">
+                                <span class="cases-card-meta-label">Filed:</span>
+                                <span class="cases-card-meta-value">${formatDate(caseItem.date_filed)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cases-card-footer">
+                        <div class="cases-card-actions">
+                            <a href="${admin_url}cases/details?id=${encodeURIComponent(caseItem.id)}" class="cases-action-btn cases-btn-primary">
+                                Details
+                            </a>
+                            <a href="${admin_url}cases/hearings/add?case_id=${encodeURIComponent(caseItem.id)}" class="cases-action-btn cases-btn-success">
+                                Add Hearing
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    // Load data functions
+    function loadConsultations() {
+        showLoading('consultations-container');
+        
+        fetch(admin_url + 'cases/consultations_list')
+            .then(response => response.json())
+            .then(data => {
+                consultationsData = data.data || [];
+                renderConsultations(consultationsData);
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('consultations-container', 'Failed to load consultations');
+            });
+    }
+    
+    function loadCases() {
+        showLoading('cases-container');
+        
+        fetch(admin_url + 'cases/cases_list')
+            .then(response => response.json())
+            .then(data => {
+                casesData = data.data || [];
+                renderCases(casesData);
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('cases-container', 'Failed to load cases');
+            });
+    }
+    
+    // Update stats
+    function updateStats() {
+        const consultationsCount = consultationsData.length;
+        const casesCount = casesData.length;
+        let litigationCount = 0;
+        
+        consultationsData.forEach(c => {
+            if (c.phase === 'litigation') litigationCount++;
+        });
+        
+        document.getElementById('consultations-count').textContent = consultationsCount;
+        document.getElementById('cases-count').textContent = casesCount;
+        document.getElementById('litigation-count').textContent = litigationCount;
+        document.getElementById('consultations-badge').textContent = consultationsCount;
+        document.getElementById('cases-badge').textContent = casesCount;
+        document.getElementById('upcoming-count').textContent = '0';
+    }
+    
+    // Utility functions
+    function showLoading(containerId) {
+        document.getElementById(containerId).innerHTML = `
+            <div class="cases-loading-state">
+                <div class="cases-loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <p>Loading...</p>
             </div>
         `;
     }
     
-    function showError(containerId, message, details = null) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        const timestamp = new Date().toLocaleString();
-        const debugInfo = details ? `
-            <details style="margin-top: 15px; text-align: left;">
-                <summary style="cursor: pointer; color: #6c757d; font-size: 0.875rem;">Show Debug Info</summary>
-                <div style="background: #f8f9fa; padding: 15px; margin-top: 10px; border-radius: 5px; font-family: monospace; font-size: 0.8rem; border: 1px solid #e9ecef;">
-                    <p><strong>Error:</strong> ${htmlEscape(details)}</p>
-                    <p><strong>Time:</strong> ${timestamp}</p>
-                    <p><strong>Container:</strong> ${containerId}</p>
-                    <p><strong>URL:</strong> ${window.location.href}</p>
-                </div>
-            </details>
-        ` : '';
-        
-        container.innerHTML = `
-            <div class="cases-empty-state" style="text-align: center; padding: 60px 40px;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; margin-bottom: 20px;"></i>
-                <h5 style="color: #dc3545; margin-bottom: 15px;">Error Loading Data</h5>
-                <p style="color: #6c757d; margin-bottom: 25px;">${htmlEscape(message)}</p>
-                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    <button class="cases-btn cases-btn-primary" onclick="location.reload()">
-                        <i class="fas fa-sync"></i> Reload Page
-                    </button>
-                    <button class="cases-btn cases-btn-default" onclick="retryLoad('${containerId}')">
-                        <i class="fas fa-redo"></i> Retry
-                    </button>
-                </div>
-                ${debugInfo}
+    function showError(containerId, message) {
+        document.getElementById(containerId).innerHTML = `
+            <div class="cases-empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h5>Error</h5>
+                <p>${htmlEscape(message)}</p>
+                <button class="cases-btn cases-btn-primary" onclick="location.reload()">
+                    Retry
+                </button>
             </div>
         `;
     }
     
-    function showEmpty(containerId, title, message, actionButton = null) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        const action = actionButton ? `
-            <button class="cases-btn cases-btn-primary" ${actionButton.onclick ? `onclick="${actionButton.onclick}"` : ''} 
-                    ${actionButton.modal ? `data-toggle="modal" data-target="${actionButton.modal}"` : ''}>
-                ${actionButton.icon ? `<i class="${actionButton.icon}"></i> ` : ''}${actionButton.text}
-            </button>
-        ` : '';
-        
-        container.innerHTML = `
-            <div class="cases-empty-state" style="text-align: center; padding: 60px 40px; color: #6c757d;">
-                <i class="fas fa-${actionButton?.emptyIcon || 'inbox'}" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5;"></i>
-                <h5 style="margin-bottom: 10px; color: #495057;">${title}</h5>
-                <p style="margin-bottom: 25px;">${message}</p>
-                ${action}
-            </div>
-        `;
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return 'N/A';
+        }
     }
     
     function htmlEscape(str) {
@@ -371,467 +942,358 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, '&#39;');
     }
     
-    function formatDate(dateString) {
-        if (!dateString) return 'N/A';
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric'
-            }) + ' ' + date.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (e) {
-            return dateString;
-        }
-    }
-    
-    // ===== ENHANCED FETCH WITH MIXED CONTENT HANDLING =====
-    
-    function safeFetch(url, options = {}) {
-        const defaultOptions = {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                'Cache-Control': 'no-cache'
-            },
-            credentials: 'same-origin'
-        };
-        
-        const finalOptions = { ...defaultOptions, ...options };
-        
-        console.log(`📡 Fetching: ${url}`);
-        
-        return fetch(url, finalOptions)
-            .then(response => {
-                console.log(`📥 Response: ${response.status} for ${url}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                return response.text(); // Always get as text first
-            })
-            .then(text => {
-                console.log(`📄 Response length: ${text.length} chars`);
-                console.log(`📄 Response preview: ${text.substring(0, 100)}...`);
-                
-                // Handle mixed content (script + JSON)
-                if (text.trim().startsWith('<script>')) {
-                    console.warn('⚠️ Mixed content detected! Extracting JSON...');
-                    
-                    const jsonMatch = text.match(/\{.*\}/s);
-                    if (jsonMatch) {
-                        const jsonPart = jsonMatch[0];
-                        console.log(`✅ Extracted JSON: ${jsonPart.substring(0, 100)}...`);
-                        return JSON.parse(jsonPart);
-                    } else {
-                        throw new Error('No JSON found in mixed content response');
-                    }
-                }
-                
-                // Handle pure HTML response (error pages)
-                if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
-                    throw new Error('Received HTML page instead of JSON (possible login redirect)');
-                }
-                
-                // Try normal JSON parsing
-                try {
-                    return JSON.parse(text);
-                } catch (e) {
-                    console.error('❌ JSON parse failed:', e);
-                    console.error('📄 Full response:', text.substring(0, 1000));
-                    throw new Error(`Invalid JSON response: ${e.message}`);
-                }
-            })
-            .catch(error => {
-                console.error(`❌ Fetch failed for ${url}:`, error);
-                throw error;
-            });
-    }
-    
-    // ===== TAB SYSTEM =====
-    
-    function initializeTabs() {
-        const tabButtons = document.querySelectorAll('[data-tab]');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        if (tabButtons.length === 0) {
-            console.warn('⚠️ No tab buttons found');
-            return;
-        }
-        
-        tabButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const targetTab = this.dataset.tab;
-                console.log(`🔄 Switching to tab: ${targetTab}`);
-                
-                // Update button states
-                tabButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                    btn.style.color = 'var(--cases-text-light)';
-                    btn.style.borderBottomColor = 'transparent';
-                    btn.style.background = 'none';
-                });
-                
-                this.classList.add('active');
-                this.style.color = 'var(--cases-primary)';
-                this.style.background = 'var(--cases-bg-primary)';
-                this.style.borderBottomColor = 'var(--cases-primary)';
-                
-                // Update content visibility
-                tabContents.forEach(content => {
-                    content.style.display = 'none';
-                });
-                
-                const targetContent = document.getElementById(targetTab + '-tab');
-                if (targetContent) {
-                    targetContent.style.display = 'block';
-                } else {
-                    console.error(`❌ Tab content not found: ${targetTab}-tab`);
-                }
-            });
-        });
-        
-        console.log('✅ Tabs initialized');
-    }
-    
-    // ===== DATA LOADING FUNCTIONS =====
-    
-    function loadConsultations() {
-        console.log('📋 Loading consultations...');
-        showLoading('consultations-container', 'Loading consultations...');
-        
-        safeFetch(admin_url + 'cases/consultations_list')
-            .then(data => {
-                console.log('📋 Consultations response:', data);
-                
-                if (data && data.success) {
-                    consultationsData = Array.isArray(data.data) ? data.data : [];
-                    console.log(`✅ Loaded ${consultationsData.length} consultations`);
-                    renderConsultations(consultationsData);
-                    updateStats();
-                } else {
-                    const errorMsg = data?.message || 'Invalid response structure';
-                    console.error('❌ Invalid consultations response:', data);
-                    showError('consultations-container', 'Failed to load consultations', errorMsg);
-                }
-            })
-            .catch(error => {
-                console.error('❌ Consultations load failed:', error);
-                showError('consultations-container', 'Network error loading consultations', error.message);
-            });
-    }
-    
-    function loadCases() {
-        console.log('💼 Loading cases...');
-        showLoading('cases-container', 'Loading cases...');
-        
-        safeFetch(admin_url + 'cases/cases_list')
-            .then(data => {
-                console.log('💼 Cases response:', data);
-                
-                if (data && data.success) {
-                    casesData = Array.isArray(data.data) ? data.data : [];
-                    console.log(`✅ Loaded ${casesData.length} cases`);
-                    renderCases(casesData);
-                    updateStats();
-                } else {
-                    const errorMsg = data?.message || 'Invalid response structure';
-                    console.error('❌ Invalid cases response:', data);
-                    showError('cases-container', 'Failed to load cases', errorMsg);
-                }
-            })
-            .catch(error => {
-                console.error('❌ Cases load failed:', error);
-                showError('cases-container', 'Network error loading cases', error.message);
-            });
-    }
-    
-    // ===== RENDERING FUNCTIONS =====
-    
-    function renderConsultations(data) {
-        const container = document.getElementById('consultations-container');
-        if (!container) {
-            console.error('❌ Consultations container not found');
-            return;
-        }
-        
-        if (!data || data.length === 0) {
-            showEmpty('consultations-container', 
-                'No Consultations Found', 
-                'Start by adding your first consultation',
-                {
-                    text: 'Add Consultation',
-                    icon: 'fas fa-plus',
-                    modal: '#consultationModal',
-                    emptyIcon: 'comments'
-                }
-            );
-            return;
-        }
-        
-        let html = '<div class="cases-grid cases-grid-responsive">';
-        
-        data.forEach(consultation => {
-            const statusType = consultation.phase === 'litigation' ? 'litigation' : 'consultation';
-            const statusText = consultation.phase === 'litigation' ? 'Litigation' : 'Consultation';
-            const statusColor = consultation.phase === 'litigation' ? 'success' : 'info';
-            
-            html += `
-                <div class="cases-card cases-hover-lift" style="transition: all 0.2s ease;">
-                    <div class="cases-card-header">
-                        <div class="cases-card-title" style="font-weight: 600; margin-bottom: 5px;">
-                            ${htmlEscape(consultation.client_name || 'Unknown Client')}
-                        </div>
-                        <span class="cases-status-badge cases-status-${statusType}" 
-                              style="background: var(--cases-${statusColor}); color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
-                            ${statusText}
-                        </span>
-                    </div>
-                    
-                    <div class="cases-card-body">
-                        <div class="cases-card-meta-grid" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-                            ${consultation.contact_name ? `
-                                <div class="cases-card-meta-item">
-                                    <span class="cases-card-meta-label" style="color: #6c757d; font-size: 0.8rem;">Contact:</span>
-                                    <span class="cases-card-meta-value" style="font-weight: 500;">${htmlEscape(consultation.contact_name)}</span>
-                                </div>
-                            ` : ''}
-                            ${consultation.tag ? `
-                                <div class="cases-card-meta-item">
-                                    <span class="cases-card-meta-label" style="color: #6c757d; font-size: 0.8rem;">Category:</span>
-                                    <span class="cases-card-meta-value" style="font-weight: 500; color: var(--cases-primary);">${htmlEscape(consultation.tag)}</span>
-                                </div>
-                            ` : ''}
-                            <div class="cases-card-meta-item">
-                                <span class="cases-card-meta-label" style="color: #6c757d; font-size: 0.8rem;">Date:</span>
-                                <span class="cases-card-meta-value" style="font-weight: 500;">${formatDate(consultation.date_added)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="cases-card-footer">
-                        <div class="cases-card-actions" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="cases-action-btn cases-btn-default" onclick="viewNote(${consultation.id})" 
-                                    style="padding: 5px 10px; font-size: 0.8rem;">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <button class="cases-action-btn cases-btn-primary" onclick="editConsultation(${consultation.id})"
-                                    style="padding: 5px 10px; font-size: 0.8rem;">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            ${consultation.phase === 'consultation' ? `
-                                <button class="cases-action-btn cases-btn-success" onclick="upgradeToLitigation(${consultation.id})"
-                                        style="padding: 5px 10px; font-size: 0.8rem;">
-                                    <i class="fas fa-arrow-up"></i> Upgrade
-                                </button>
-                            ` : ''}
-                            <button class="cases-action-btn cases-btn-danger" onclick="deleteConsultation(${consultation.id})"
-                                    style="padding: 5px 10px; font-size: 0.8rem;">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        container.innerHTML = html;
-        console.log('✅ Consultations rendered');
-    }
-    
-    function renderCases(data) {
-        const container = document.getElementById('cases-container');
-        if (!container) {
-            console.error('❌ Cases container not found');
-            return;
-        }
-        
-        if (!data || data.length === 0) {
-            showEmpty('cases-container', 
-                'No Cases Found', 
-                'Cases will appear here when consultations are upgraded to litigation',
-                {
-                    emptyIcon: 'briefcase'
-                }
-            );
-            return;
-        }
-        
-        let html = '<div class="cases-grid cases-grid-responsive">';
-        
-        data.forEach(caseItem => {
-            html += `
-                <div class="cases-card cases-hover-lift" style="transition: all 0.2s ease;">
-                    <div class="cases-card-header">
-                        <div class="cases-card-title" style="font-weight: 600; margin-bottom: 5px;">
-                            ${htmlEscape(caseItem.case_title || 'Untitled Case')}
-                        </div>
-                        <span class="cases-status-badge cases-status-active" 
-                              style="background: var(--cases-primary); color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
-                            ${htmlEscape(caseItem.case_number || 'No Number')}
-                        </span>
-                    </div>
-                    
-                    <div class="cases-card-body">
-                        <div class="cases-card-meta-grid" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-                            <div class="cases-card-meta-item">
-                                <span class="cases-card-meta-label" style="color: #6c757d; font-size: 0.8rem;">Client:</span>
-                                <span class="cases-card-meta-value" style="font-weight: 500;">${htmlEscape(caseItem.client_name || 'Unknown Client')}</span>
-                            </div>
-                            <div class="cases-card-meta-item">
-                                <span class="cases-card-meta-label" style="color: #6c757d; font-size: 0.8rem;">Court:</span>
-                                <span class="cases-card-meta-value" style="font-weight: 500;">${htmlEscape(caseItem.court_display || 'Court not specified')}</span>
-                            </div>
-                            <div class="cases-card-meta-item">
-                                <span class="cases-card-meta-label" style="color: #6c757d; font-size: 0.8rem;">Filed:</span>
-                                <span class="cases-card-meta-value" style="font-weight: 500;">${formatDate(caseItem.date_filed)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="cases-card-footer">
-                        <div class="cases-card-actions" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <a href="${admin_url}cases/details?id=${encodeURIComponent(caseItem.id)}" 
-                               class="cases-action-btn cases-btn-primary" style="padding: 5px 10px; font-size: 0.8rem; text-decoration: none;">
-                                <i class="fas fa-info-circle"></i> Details
-                            </a>
-                            <a href="${admin_url}cases/hearings/add?case_id=${encodeURIComponent(caseItem.id)}" 
-                               class="cases-action-btn cases-btn-success" style="padding: 5px 10px; font-size: 0.8rem; text-decoration: none;">
-                                <i class="fas fa-calendar-plus"></i> Add Hearing
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        container.innerHTML = html;
-        console.log('✅ Cases rendered');
-    }
-    
-    // ===== STATISTICS UPDATE =====
-    
-    function updateStats() {
-        const consultationsCount = consultationsData.length;
-        const casesCount = casesData.length;
-        let litigationCount = 0;
-        
-        consultationsData.forEach(c => {
-            if (c.phase === 'litigation') litigationCount++;
-        });
-        
-        const elements = {
-            'consultations-count': consultationsCount,
-            'cases-count': casesCount,
-            'litigation-count': litigationCount,
-            'consultations-badge': consultationsCount,
-            'cases-badge': casesCount,
-            'upcoming-count': 0 // TODO: Calculate from hearings
-        };
-        
-        Object.keys(elements).forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                const oldValue = element.textContent;
-                const newValue = elements[id];
-                element.textContent = newValue;
-                
-                // Add animation for changed values
-                if (oldValue !== '-' && oldValue !== newValue.toString()) {
-                    element.style.transform = 'scale(1.1)';
-                    element.style.color = 'var(--cases-success)';
-                    setTimeout(() => {
-                        element.style.transform = 'scale(1)';
-                        element.style.color = '';
-                    }, 300);
-                }
-            }
-        });
-        
-        console.log('📊 Stats updated:', elements);
-    }
-    
-    // ===== GLOBAL ACTION FUNCTIONS =====
-    
+    // Global functions for onclick handlers
     window.viewNote = function(id) {
-        console.log(`👁️ Viewing note for consultation: ${id}`);
+        console.log('Viewing note for consultation:', id);
         const consultation = consultationsData.find(c => c.id == id);
         if (!consultation) {
-            alert('Consultation not found');
+            console.error('Consultation not found with id:', id);
             return;
         }
         
-        const noteContent = document.getElementById('noteContent');
-        if (noteContent) {
-            noteContent.innerHTML = consultation.note || '<em>No note available</em>';
-        }
-        
-        // Show modal
-        if (typeof $ !== 'undefined' && $.fn.modal) {
-            $('#viewNoteModal').modal('show');
-        }
+        document.getElementById('noteContent').innerHTML = consultation.note || 'No note available';
+        $('#viewNoteModal').modal('show');
     };
     
     window.editConsultation = function(id) {
-        console.log(`✏️ Editing consultation: ${id}`);
-        // TODO: Implement edit functionality
-        alert('Edit functionality will be implemented');
+        const consultation = consultationsData.find(c => c.id == id);
+        if (!consultation) {
+            console.error('Consultation not found with id:', id);
+            return;
+        }
+        
+        console.log('Editing consultation:', consultation);
+        
+        // Populate form fields
+        const consultationIdField = document.getElementById('consultation_id');
+        const clientIdField = document.getElementById('client_id');
+        const tagField = document.getElementById('consultation_tag');
+        const noteField = document.getElementById('consultation-note');
+        const modalTitleField = document.getElementById('modal-title-text');
+        const submitBtnField = document.getElementById('submit-btn-text');
+        
+        if (consultationIdField) consultationIdField.value = consultation.id;
+        if (clientIdField) clientIdField.value = consultation.client_id;
+        if (tagField) tagField.value = consultation.tag || '';
+        if (noteField) noteField.value = consultation.note || '';
+        
+        // Update modal title and button text
+        if (modalTitleField) modalTitleField.textContent = 'Edit Consultation';
+        if (submitBtnField) submitBtnField.textContent = 'Update Consultation';
+        
+        // Load contacts and invoices for this client
+        if (consultation.client_id) {
+            loadContactsByClient(consultation.client_id);
+            loadInvoicesByClient(consultation.client_id);
+            
+            // Set contact after a brief delay to allow the options to load
+            setTimeout(() => {
+                const contactField = document.getElementById('contact_id');
+                if (contactField && consultation.contact_id) {
+                    contactField.value = consultation.contact_id;
+                }
+            }, 500);
+        }
+        
+        // Show the modal
+        $('#consultationModal').modal('show');
     };
     
     window.upgradeToLitigation = function(id) {
-        console.log(`⬆️ Upgrading consultation to litigation: ${id}`);
-        // TODO: Implement upgrade functionality
-        alert('Upgrade functionality will be implemented');
+        console.log('Upgrading consultation to litigation:', id);
+        document.getElementById('litigation_consultation_id').value = id;
+        
+        // Load courts
+        fetch(admin_url + 'cases/courts/get_all_courts')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Courts loaded:', data);
+                if (data.success && data.data) {
+                    const select = document.getElementById('court_id_upgrade');
+                    select.innerHTML = '<option value="">Select Court</option>';
+                    data.data.forEach(court => {
+                        select.innerHTML += `<option value="${court.id}">${htmlEscape(court.name)}</option>`;
+                    });
+                } else {
+                    console.error('Failed to load courts:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading courts:', error);
+            });
+        
+        $('#upgradeModal').modal('show');
     };
     
     window.deleteConsultation = function(id) {
-        console.log(`🗑️ Deleting consultation: ${id}`);
+        console.log('Deleting consultation:', id);
         if (!confirm('Are you sure you want to delete this consultation?')) return;
         
-        // TODO: Implement delete functionality
-        alert('Delete functionality will be implemented');
+        const formData = new FormData();
+        formData.append(csrfTokenName, csrfTokenHash);
+        
+        fetch(admin_url + 'cases/delete_consultation/' + id, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Delete response:', data);
+            if (data.success) {
+                loadConsultations();
+                alert('Consultation deleted successfully');
+            } else {
+                alert('Failed to delete consultation: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Network error occurred');
+        });
     };
     
-    // ===== RETRY FUNCTIONALITY =====
-    
-    window.retryLoad = function(containerId) {
-        console.log(`🔄 Retrying load for: ${containerId}`);
-        if (containerId === 'consultations-container') {
-            loadConsultations();
-        } else if (containerId === 'cases-container') {
-            loadCases();
+    // Form submissions
+    document.getElementById('consultationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        formData.append(csrfTokenName, csrfTokenHash);
+        
+        // Determine if this is an edit or create operation
+        const consultationId = document.getElementById('consultation_id').value;
+        const url = consultationId ? 
+            admin_url + 'cases/update_consultation' : 
+            admin_url + 'cases/create_consultation';
+        
+        // Add consultation ID to form data if editing
+        if (consultationId) {
+            formData.append('id', consultationId);
         }
-    };
+        
+        console.log('Submitting to:', url, 'with consultation_id:', consultationId);
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response:', data);
+            if (data.success) {
+                $('#consultationModal').modal('hide');
+                loadConsultations();
+                alert(consultationId ? 'Consultation updated successfully' : 'Consultation saved successfully');
+                
+                // Reset form and modal state
+                this.reset();
+                
+                // Reset modal elements safely
+                const modalTitle = document.getElementById('modal-title-text');
+                const submitBtn = document.getElementById('submit-btn-text');
+                const consultationIdField = document.getElementById('consultation_id');
+                
+                if (modalTitle) modalTitle.textContent = 'Add Consultation';
+                if (submitBtn) submitBtn.textContent = 'Save Consultation';
+                if (consultationIdField) consultationIdField.value = '';
+                
+                // Hide contact group
+                const contactGroup = document.getElementById('contact-group');
+                if (contactGroup) contactGroup.style.display = 'none';
+            } else {
+                alert('Failed to save consultation: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Network error occurred');
+        });
+    });
     
-    // ===== INITIALIZATION =====
+    document.getElementById('upgradeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        formData.append(csrfTokenName, csrfTokenHash);
+        
+        fetch(admin_url + 'cases/upgrade_to_litigation', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                $('#upgradeModal').modal('hide');
+                loadConsultations();
+                loadCases();
+                alert('Case registered successfully');
+                this.reset();
+            } else {
+                alert('Failed to register case');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Network error occurred');
+        });
+    });
     
-    function initialize() {
-        console.log('🔧 Initializing Cases Management System...');
-        
-        // Initialize tabs
-        initializeTabs();
-        
-        // Load initial data
-        loadConsultations();
-        loadCases();
-        
-        // Make functions globally available
-        window.loadConsultations = loadConsultations;
-        window.loadCases = loadCases;
-        window.safeFetch = safeFetch;
-        
-        console.log('✅ Cases Management System initialized successfully!');
+    // Client change handler
+    document.getElementById('client_id').addEventListener('change', function() {
+        const clientId = this.value;
+        if (clientId) {
+            loadContactsByClient(clientId);
+            loadInvoicesByClient(clientId);
+        } else {
+            document.getElementById('contact-group').style.display = 'none';
+            document.getElementById('contact_id').innerHTML = '<option value="">Select Contact (Optional)</option>';
+            document.getElementById('invoice_id').innerHTML = '<option value="">Select Invoice</option>';
+        }
+    });
+    
+    // Court change handler
+    document.getElementById('court_id_upgrade').addEventListener('change', function() {
+        const courtId = this.value;
+        if (courtId) {
+            fetch(admin_url + 'cases/courts/get_rooms_by_court/' + courtId)
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('court_room_id_upgrade');
+                    select.innerHTML = '<option value="">Select Court Room</option>';
+                    if (data.success && data.data) {
+                        data.data.forEach(room => {
+                            select.innerHTML += `<option value="${room.id}">Court ${room.court_no} - ${htmlEscape(room.judge_name)}</option>`;
+                        });
+                    }
+                });
+        }
+    });
+    
+    function loadContactsByClient(clientId) {
+        fetch(admin_url + 'cases/get_contacts_by_client/' + clientId)
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('contact_id');
+                select.innerHTML = '<option value="">Select Contact (Optional)</option>';
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    data.data.forEach(contact => {
+                        const contactName = contact.full_name || (contact.firstname + ' ' + contact.lastname).trim();
+                        select.innerHTML += `<option value="${contact.id}">${htmlEscape(contactName)}</option>`;
+                    });
+                    document.getElementById('contact-group').style.display = 'block';
+                } else {
+                    select.innerHTML += '<option value="">No contacts available</option>';
+                    document.getElementById('contact-group').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading contacts:', error);
+                document.getElementById('contact_id').innerHTML = '<option value="">Error loading contacts</option>';
+                document.getElementById('contact-group').style.display = 'block';
+            });
     }
     
-    // Start the system
-    initialize();
+    function loadInvoicesByClient(clientId) {
+        const formData = new FormData();
+        formData.append(csrfTokenName, csrfTokenHash);
+        
+        fetch(admin_url + 'cases/get_invoices_by_client/' + clientId, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('invoice_id');
+            select.innerHTML = '<option value="">Select Invoice</option>';
+            
+            if (data.success && data.data && data.data.length > 0) {
+                data.data.forEach(invoice => {
+                    const displayText = buildInvoiceDisplayText(invoice);
+                    select.innerHTML += `<option value="${invoice.id}">${htmlEscape(displayText)}</option>`;
+                });
+            } else {
+                select.innerHTML += '<option value="">No invoices available</option>';
+                select.innerHTML += '<option value="skip_invoice">Continue Without Invoice</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading invoices:', error);
+            document.getElementById('invoice_id').innerHTML = '<option value="">Error loading invoices</option>';
+        });
+    }
+    
+    function buildInvoiceDisplayText(invoice) {
+        let displayText = invoice.formatted_number || 'Invoice #' + invoice.id;
+        
+        if (invoice.total && parseFloat(invoice.total) > 0) {
+            const currency = invoice.currency_symbol || '₹';
+            displayText += ' - ' + currency + parseFloat(invoice.total).toFixed(2);
+        }
+        
+        if (invoice.status_text) {
+            displayText += ' (' + invoice.status_text + ')';
+        }
+        
+        return displayText;
+    }
+    
+    // Search functionality
+    document.getElementById('consultations-search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const filtered = consultationsData.filter(c => 
+            (c.client_name || '').toLowerCase().includes(searchTerm) ||
+            (c.contact_name || '').toLowerCase().includes(searchTerm) ||
+            (c.tag || '').toLowerCase().includes(searchTerm)
+        );
+        renderConsultations(filtered);
+    });
+    
+    document.getElementById('cases-search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const filtered = casesData.filter(c => 
+            (c.case_title || '').toLowerCase().includes(searchTerm) ||
+            (c.case_number || '').toLowerCase().includes(searchTerm) ||
+            (c.client_name || '').toLowerCase().includes(searchTerm) ||
+            (c.court_display || '').toLowerCase().includes(searchTerm)
+        );
+        renderCases(filtered);
+    });
+    
+    // Filter functionality
+    document.getElementById('consultations-filter').addEventListener('change', function() {
+        const filterValue = this.value;
+        let filtered = consultationsData;
+        
+        if (filterValue) {
+            filtered = consultationsData.filter(c => c.phase === filterValue);
+        }
+        
+        renderConsultations(filtered);
+    });
+    
+    // Refresh buttons
+    document.getElementById('refresh-consultations').addEventListener('click', loadConsultations);
+    document.getElementById('refresh-cases').addEventListener('click', loadCases);
+    
+    // Modal reset handlers
+    $('#consultationModal').on('hidden.bs.modal', function () {
+        const form = document.getElementById('consultationForm');
+        const modalTitle = document.getElementById('modal-title-text');
+        const submitBtn = document.getElementById('submit-btn-text');
+        const consultationIdField = document.getElementById('consultation_id');
+        const contactGroup = document.getElementById('contact-group');
+        
+        if (form) form.reset();
+        if (modalTitle) modalTitle.textContent = 'Add Consultation';
+        if (submitBtn) submitBtn.textContent = 'Save Consultation';
+        if (consultationIdField) consultationIdField.value = '';
+        if (contactGroup) contactGroup.style.display = 'none';
+    });
+    
+    $('#upgradeModal').on('hidden.bs.modal', function () {
+        const form = document.getElementById('upgradeForm');
+        if (form) form.reset();
+    });
 });
 </script>
 
