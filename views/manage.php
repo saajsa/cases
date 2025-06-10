@@ -276,7 +276,6 @@ echo cases_page_wrapper_start(
     </div>
 </div>
 
-// Replace the entire <script> section in your views/manage.php with this:
 
 <script>
 // Clean, minimal JavaScript with all required functions
