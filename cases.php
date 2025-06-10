@@ -34,24 +34,24 @@ function cases_module_init() {
     }
 }
 
-// Add admin menu item and submenus
+// SAFE MENU STRUCTURE - Basic but working
 hooks()->add_action('admin_init', 'cases_module_init_menu_items');
 
 function cases_module_init_menu_items() {
     $CI = &get_instance();
 
-    // Main Cases menu
+    // Main Cases menu - IMPROVED NAME
     $CI->app_menu->add_sidebar_menu_item('cases', [
-        'name'     => _l('Cases'),
+        'name'     => 'Legal Practice',
         'href'     => admin_url('cases'),
-        'icon'     => 'fa fa-briefcase',
+        'icon'     => 'fa fa-balance-scale',
         'position' => 4,
     ]);
 
     // Submenu: Dashboard
     $CI->app_menu->add_sidebar_children_item('cases', [
         'slug'     => 'cases_dashboard',
-        'name'     => 'Cases Dashboard',
+        'name'     => 'Dashboard',
         'href'     => admin_url('cases/caseboard'),
         'position' => 0,
     ]);
@@ -61,32 +61,43 @@ function cases_module_init_menu_items() {
         'slug'     => 'manage_cases_and_consultations',
         'name'     => 'Consultations & Cases',
         'href'     => admin_url('cases'),
-        'position' => 0,
-    ]);
-
-    // Submenu: Courts
-    $CI->app_menu->add_sidebar_children_item('cases', [
-        'slug'     => 'courts',
-        'name'     => 'Courts',
-        'href'     => admin_url('cases/courts/manage_courts'),
         'position' => 1,
     ]);
-    
-    // Submenu: Court Rooms
+
+    // Submenu: Hearings
     $CI->app_menu->add_sidebar_children_item('cases', [
-        'slug'     => 'court_rooms',
-        'name'     => 'Court Rooms',
-        'href'     => admin_url('cases/courts/manage_rooms'),
+        'slug'     => 'hearings_management',
+        'name'     => 'Hearings',
+        'href'     => admin_url('cases/hearings'),
         'position' => 2,
     ]);
 
     // Submenu: Cause List
     $CI->app_menu->add_sidebar_children_item('cases', [
         'slug'     => 'cases-causelist',
-        'name'     => 'Cause List',
+        'name'     => 'Daily Cause List',
         'href'     => admin_url('cases/hearings/causelist'),
         'position' => 3,
     ]);
+
+    // Admin only items
+    if (is_admin()) {
+        // Submenu: Courts
+        $CI->app_menu->add_sidebar_children_item('cases', [
+            'slug'     => 'courts',
+            'name'     => 'Courts',
+            'href'     => admin_url('cases/courts/manage_courts'),
+            'position' => 4,
+        ]);
+        
+        // Submenu: Court Rooms
+        $CI->app_menu->add_sidebar_children_item('cases', [
+            'slug'     => 'court_rooms',
+            'name'     => 'Court Rooms',
+            'href'     => admin_url('cases/courts/manage_rooms'),
+            'position' => 5,
+        ]);
+    }
 }
 
 // Register module-specific permissions
@@ -102,4 +113,42 @@ function cases_permissions() {
         ]
     ];
     register_staff_capabilities('cases', $capabilities, _l('Cases'));
+}
+
+// Add simple menu badges
+hooks()->add_action('admin_init', 'add_simple_cases_badges');
+
+function add_simple_cases_badges() {
+    // Only add badges if user has permission
+    if (!has_permission('cases', '', 'view')) {
+        return;
+    }
+
+    echo '<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        try {
+            // Get current counts (simple version)
+            fetch("' . admin_url('cases/get_menu_stats') . '")
+            .then(response => response.json())
+            .then(data => {
+                if (data.consultations > 0) {
+                    addBadge("manage_cases_and_consultations", data.consultations, "warning");
+                }
+                if (data.today_hearings > 0) {
+                    addBadge("cases-causelist", data.today_hearings, "danger");
+                }
+            })
+            .catch(e => console.log("Badge loading failed:", e));
+        } catch (e) {
+            console.log("Badge script error:", e);
+        }
+    });
+    
+    function addBadge(slug, count, type) {
+        var menu = document.querySelector(\'[data-slug="\' + slug + \'"]\');
+        if (menu && count > 0) {
+            menu.innerHTML += \' <span class="badge badge-\' + type + \'">\' + count + \'</span>\';
+        }
+    }
+    </script>';
 }

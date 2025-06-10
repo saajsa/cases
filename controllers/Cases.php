@@ -678,4 +678,83 @@ public function caseboard()
     $this->load->view('cases/caseboard', $data);
 }
 
+// Start Here for Badges and New Menu 
+
+/**
+ * AJAX endpoint for menu statistics
+ */
+public function get_menu_stats()
+{
+    header('Content-Type: application/json');
+    
+    if (!has_permission('cases', '', 'view')) {
+        echo json_encode(['error' => 'No permission']);
+        return;
+    }
+
+    try {
+        $today = date('Y-m-d');
+        
+        // Count pending consultations
+        $this->db->where('phase', 'consultation');
+        $consultations = $this->db->count_all_results(db_prefix() . 'case_consultations');
+        
+        // Count today's hearings
+        $this->db->where('DATE(date)', $today);
+        $this->db->or_where('DATE(next_date)', $today);
+        $today_hearings = $this->db->count_all_results(db_prefix() . 'hearings');
+        
+        echo json_encode([
+            'consultations' => (int)$consultations,
+            'today_hearings' => (int)$today_hearings,
+            'success' => true
+        ]);
+        
+    } catch (Exception $e) {
+        echo json_encode(['error' => $e->getMessage(), 'success' => false]);
+    }
+}
+
+/**
+ * Fix existing consultations_list method
+ */
+public function consultations_list()
+{
+    header('Content-Type: application/json');
+    
+    if (!has_permission('cases', '', 'view')) {
+        echo json_encode(['success' => false, 'data' => []]);
+        return;
+    }
+
+    try {
+        // Use the updated model method which includes client and contact names
+        $result = $this->Cases_model->get_consultations_with_names();
+        echo json_encode(['data' => $result, 'success' => true]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'data' => [], 'error' => $e->getMessage()]);
+    }
+}
+
+/**
+ * Fix existing cases_list method
+ */
+public function cases_list()
+{
+    header('Content-Type: application/json');
+    
+    if (!has_permission('cases', '', 'view')) {
+        echo json_encode(['success' => false, 'data' => []]);
+        return;
+    }
+
+    try {
+        // Use the updated model method which includes client and court information
+        $result = $this->Cases_model->get_all_cases_with_details();
+        echo json_encode(['data' => $result, 'success' => true]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'data' => [], 'error' => $e->getMessage()]);
+    }
+}
+
 }
