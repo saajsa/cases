@@ -34,7 +34,9 @@ class Cases extends AdminController
 
     public function consultations_list()
 {
-    // Enhanced error handling and JSON response
+    // Set JSON header first
+    header('Content-Type: application/json');
+    
     try {
         if (!has_permission('cases', '', 'view')) {
             http_response_code(403);
@@ -43,9 +45,14 @@ class Cases extends AdminController
                 'message' => 'Access denied',
                 'data' => []
             ]);
-            return;
+            exit;
         }
 
+        // Load model if not already loaded
+        if (!isset($this->Cases_model)) {
+            $this->load->model('Cases_model');
+        }
+        
         $result = $this->Cases_model->get_consultations_with_names();
         
         // Ensure we have valid data
@@ -53,10 +60,14 @@ class Cases extends AdminController
             $result = [];
         }
         
+        // Log for debugging
+        log_message('debug', 'Consultations loaded: ' . count($result));
+        
         echo json_encode([
             'success' => true,
             'data' => $result,
-            'count' => count($result)
+            'count' => count($result),
+            'message' => count($result) . ' consultations loaded'
         ]);
         
     } catch (Exception $e) {
@@ -69,11 +80,13 @@ class Cases extends AdminController
             'error' => ENVIRONMENT === 'development' ? $e->getMessage() : 'Internal server error'
         ]);
     }
-    exit; // Important: prevent any additional output
+    exit;
 }
 
     public function cases_list()
 {
+    header('Content-Type: application/json');
+    
     try {
         if (!has_permission('cases', '', 'view')) {
             http_response_code(403);
@@ -82,9 +95,14 @@ class Cases extends AdminController
                 'message' => 'Access denied',
                 'data' => []
             ]);
-            return;
+            exit;
         }
 
+        // Load model if not already loaded
+        if (!isset($this->Cases_model)) {
+            $this->load->model('Cases_model');
+        }
+        
         $result = $this->Cases_model->get_all_cases_with_details();
         
         // Ensure we have valid data
@@ -92,10 +110,14 @@ class Cases extends AdminController
             $result = [];
         }
         
+        // Log for debugging
+        log_message('debug', 'Cases loaded: ' . count($result));
+        
         echo json_encode([
             'success' => true,
             'data' => $result,
-            'count' => count($result)
+            'count' => count($result),
+            'message' => count($result) . ' cases loaded'
         ]);
         
     } catch (Exception $e) {
@@ -108,7 +130,7 @@ class Cases extends AdminController
             'error' => ENVIRONMENT === 'development' ? $e->getMessage() : 'Internal server error'
         ]);
     }
-    exit; // Important: prevent any additional output
+    exit;
 }
 
 public function check_database()
@@ -1842,4 +1864,69 @@ public function get_menu_stats()
     
     exit; // Important: prevent any additional output
 }
+
+public function debug_data()
+{
+    if (!is_admin()) {
+        access_denied();
+    }
+    
+    header('Content-Type: application/json');
+    
+    $debug_info = [];
+    
+    // Check database tables
+    $tables_to_check = [
+        db_prefix() . 'case_consultations',
+        db_prefix() . 'cases', 
+        db_prefix() . 'clients',
+        db_prefix() . 'contacts'
+    ];
+    
+    foreach ($tables_to_check as $table) {
+        $table_name = str_replace(db_prefix(), '', $table);
+        $exists = $this->db->table_exists($table_name);
+        $debug_info['tables'][$table] = [
+            'exists' => $exists,
+            'count' => $exists ? $this->db->count_all($table) : 0
+        ];
+        
+        if ($exists) {
+            // Get sample data
+            $this->db->limit(1);
+            $sample = $this->db->get($table)->row_array();
+            $debug_info['tables'][$table]['sample'] = $sample;
+        }
+    }
+    
+    // Test consultations query
+    try {
+        $consultations = $this->Cases_model->get_consultations_with_names();
+        $debug_info['consultations'] = [
+            'count' => count($consultations),
+            'data' => array_slice($consultations, 0, 2) // First 2 records
+        ];
+    } catch (Exception $e) {
+        $debug_info['consultations'] = [
+            'error' => $e->getMessage()
+        ];
+    }
+    
+    // Test cases query  
+    try {
+        $cases = $this->Cases_model->get_all_cases_with_details();
+        $debug_info['cases'] = [
+            'count' => count($cases),
+            'data' => array_slice($cases, 0, 2) // First 2 records
+        ];
+    } catch (Exception $e) {
+        $debug_info['cases'] = [
+            'error' => $e->getMessage()
+        ];
+    }
+    
+    echo json_encode($debug_info, JSON_PRETTY_PRINT);
+    exit;
+}
+
 }
