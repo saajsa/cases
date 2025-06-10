@@ -1,0 +1,194 @@
+/* ========================================
+   STATUS BADGES & INDICATORS
+======================================== */
+
+/* Base Status Badge */
+.cases-status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    line-height: 1;
+}
+
+/* Status Variants */
+.cases-status-consultation { 
+    background: var(--cases-info-bg); 
+    color: var(--cases-info); 
+    border-color: var(--cases-info); 
+}
+
+.cases-status-litigation { 
+    background: var(--cases-success-bg); 
+    color: var(--cases-success); 
+    border-color: var(--cases-success); 
+}
+
+.cases-status-active { 
+    background: var(--cases-success-bg); 
+    color: var(--cases-success); 
+    border-color: var(--cases-success); 
+}
+
+.cases-status-scheduled { 
+    background: var(--cases-info-bg); 
+    color: var(--cases-info); 
+    border-color: var(--cases-info); 
+}
+
+.cases-status-completed { 
+    background: var(--cases-success-bg); 
+    color: var(--cases-success); 
+    border-color: var(--cases-success); 
+}
+
+.cases-status-adjourned { 
+    background: var(--cases-warning-bg); 
+    color: var(--cases-warning); 
+    border-color: var(--cases-warning); 
+}
+
+.cases-status-cancelled { 
+    background: var(--cases-danger-bg); 
+    color: var(--cases-danger); 
+    border-color: var(--cases-danger); 
+}
+
+.cases-status-pending { 
+    background: var(--cases-warning-bg); 
+    color: var(--cases-warning); 
+    border-color: var(--cases-warning); 
+}
+
+.cases-status-inactive { 
+    background: var(--cases-bg-tertiary); 
+    color: var(--cases-text-light); 
+    border-color: var(--cases-text-light); 
+}
+
+.cases-status-on-hold { 
+    background: var(--cases-bg-tertiary); 
+    color: var(--cases-text-light); 
+    border-color: var(--cases-text-light); 
+}
+
+.cases-status-dismissed { 
+    background: var(--cases-danger-bg); 
+    color: var(--cases-danger); 
+    border-color: var(--cases-danger); 
+}
+
+/* Badge Sizes */
+.cases-status-badge-sm {
+    padding: 2px 6px;
+    font-size: 0.6rem;
+}
+
+.cases-status-badge-lg {
+    padding: 6px var(--cases-spacing-sm);
+    font-size: var(--cases-font-size-sm);
+}
+
+/* Priority Indicators */
+.cases-priority-badge {
+    display: inline-block;
+    padding: 3px var(--cases-spacing-xs);
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+}
+
+.cases-priority-high {
+    background: var(--cases-danger-bg);
+    color: var(--cases-danger);
+    border-color: var(--cases-danger);
+}
+
+.cases-priority-medium {
+    background: var(--cases-warning-bg);
+    color: var(--cases-warning);
+    border-color: var(--cases-warning);
+}
+
+.cases-priority-low {
+    background: var(--cases-info-bg);
+    color: var(--cases-info);
+    border-color: var(--cases-info);
+}
+
+/* Count Badges */
+.cases-count-badge {
+    background: var(--cases-bg-tertiary);
+    color: var(--cases-primary);
+    border: 1px solid var(--cases-border);
+    padding: 2px var(--cases-spacing-xs);
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-xs);
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+/* Notification Badges */
+.cases-notification-badge {
+    background: var(--cases-danger);
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+}
+
+/* Status Indicators (dots) */
+.cases-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: var(--cases-spacing-xs);
+}
+
+.cases-status-dot.active { background: var(--cases-success); }
+.cases-status-dot.pending { background: var(--cases-warning); }
+.cases-status-dot.inactive { background: var(--cases-text-muted); }
+.cases-status-dot.cancelled { background: var(--cases-danger); }
+
+/* Animated Status Indicators */
+.cases-status-pulse {
+    animation: cases-pulse 2s infinite;
+}
+
+@keyframes cases-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cases-status-badge {
+        font-size: 0.6rem;
+        padding: 3px var(--cases-spacing-xs);
+    }
+    
+    .cases-status-badge-lg {
+        font-size: var(--cases-font-size-xs);
+        padding: 4px var(--cases-spacing-xs);
+    }
+}

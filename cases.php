@@ -21,6 +21,19 @@ function cases_module_activation_hook() {
 // Register language files
 register_language_files(CASES_MODULE_NAME, [CASES_MODULE_NAME]);
 
+// Load module helpers and assets
+hooks()->add_action('admin_init', 'cases_module_init');
+
+function cases_module_init() {
+    $CI = &get_instance();
+    
+    // Load the CSS framework helper manually since it's in module directory
+    $helper_path = FCPATH . 'modules/cases/helpers/cases_css_helper.php';
+    if (file_exists($helper_path)) {
+        require_once($helper_path);
+    }
+}
+
 // Add admin menu item and submenus
 hooks()->add_action('admin_init', 'cases_module_init_menu_items');
 
@@ -39,7 +52,7 @@ function cases_module_init_menu_items() {
     $CI->app_menu->add_sidebar_children_item('cases', [
         'slug'     => 'cases_dashboard',
         'name'     => 'Cases Dashboard',
-        'href'     => admin_url('cases/caseboard'), // Change this line from 'caseboard' to 'cases/caseboard'
+        'href'     => admin_url('cases/caseboard'),
         'position' => 0,
     ]);
 
@@ -51,13 +64,14 @@ function cases_module_init_menu_items() {
         'position' => 0,
     ]);
 
-        // Submenu: Courts
+    // Submenu: Courts
     $CI->app_menu->add_sidebar_children_item('cases', [
-    'slug'     => 'courts',
-    'name'     => 'Courts',
-    'href'     => admin_url('cases/courts/manage_courts'),
-    'position' => 1,
+        'slug'     => 'courts',
+        'name'     => 'Courts',
+        'href'     => admin_url('cases/courts/manage_courts'),
+        'position' => 1,
     ]);
+    
     // Submenu: Court Rooms
     $CI->app_menu->add_sidebar_children_item('cases', [
         'slug'     => 'court_rooms',
@@ -73,7 +87,6 @@ function cases_module_init_menu_items() {
         'href'     => admin_url('cases/hearings/causelist'),
         'position' => 3,
     ]);
-
 }
 
 // Register module-specific permissions

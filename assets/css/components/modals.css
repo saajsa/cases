@@ -1,0 +1,230 @@
+/* ========================================
+   MODALS COMPONENT
+======================================== */
+
+/* Base Modal Styles */
+.cases-modal-content {
+    border: 1px solid var(--cases-border);
+    border-radius: var(--cases-radius);
+    box-shadow: var(--cases-shadow-lg);
+    background: var(--cases-bg-primary);
+}
+
+.cases-modal-header {
+    background: var(--cases-bg-tertiary);
+    border-bottom: 1px solid var(--cases-border);
+    padding: var(--cases-spacing-md) var(--cases-spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cases-modal-title {
+    font-size: var(--cases-font-size-2xl);
+    font-weight: 600;
+    color: var(--cases-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.cases-modal-close {
+    border: none;
+    background: none;
+    font-size: 1.5rem;
+    color: var(--cases-text-light);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--cases-transition);
+}
+
+.cases-modal-close:hover {
+    color: var(--cases-primary);
+}
+
+.cases-modal-body {
+    padding: var(--cases-spacing-lg);
+    min-height: 100px;
+}
+
+.cases-modal-footer {
+    background: var(--cases-bg-tertiary);
+    border-top: 1px solid var(--cases-border);
+    padding: var(--cases-spacing-md) var(--cases-spacing-lg);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--cases-spacing-sm);
+}
+
+/* Modal Sizes */
+.cases-modal-sm .cases-modal-content {
+    max-width: 400px;
+}
+
+.cases-modal-lg .cases-modal-content {
+    max-width: 800px;
+}
+
+.cases-modal-xl .cases-modal-content {
+    max-width: 1200px;
+}
+
+/* Modal Variants */
+.cases-modal-success .cases-modal-header {
+    background: var(--cases-success-bg);
+    border-bottom-color: var(--cases-success);
+}
+
+.cases-modal-success .cases-modal-title {
+    color: var(--cases-success);
+}
+
+.cases-modal-warning .cases-modal-header {
+    background: var(--cases-warning-bg);
+    border-bottom-color: var(--cases-warning);
+}
+
+.cases-modal-warning .cases-modal-title {
+    color: var(--cases-warning);
+}
+
+.cases-modal-danger .cases-modal-header {
+    background: var(--cases-danger-bg);
+    border-bottom-color: var(--cases-danger);
+}
+
+.cases-modal-danger .cases-modal-title {
+    color: var(--cases-danger);
+}
+
+/* Form Modal Styles */
+.cases-form-modal .cases-modal-body {
+    padding: var(--cases-spacing-lg) var(--cases-spacing-lg) var(--cases-spacing-md);
+}
+
+/* Confirmation Modal */
+.cases-confirmation-modal {
+    text-align: center;
+}
+
+.cases-confirmation-modal .cases-modal-body {
+    padding: var(--cases-spacing-xl) var(--cases-spacing-lg);
+}
+
+.cases-confirmation-icon {
+    font-size: 3rem;
+    margin-bottom: var(--cases-spacing-md);
+}
+
+.cases-confirmation-icon.success {
+    color: var(--cases-success);
+}
+
+.cases-confirmation-icon.warning {
+    color: var(--cases-warning);
+}
+
+.cases-confirmation-icon.danger {
+    color: var(--cases-danger);
+}
+
+.cases-confirmation-title {
+    font-size: var(--cases-font-size-xl);
+    font-weight: 600;
+    color: var(--cases-primary);
+    margin-bottom: var(--cases-spacing-sm);
+}
+
+.cases-confirmation-text {
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-text-light);
+    margin-bottom: var(--cases-spacing-lg);
+    line-height: 1.5;
+}
+
+/* Loading Modal */
+.cases-loading-modal .cases-modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--cases-spacing-xl);
+    min-height: 200px;
+}
+
+.cases-loading-spinner {
+    font-size: 2rem;
+    color: var(--cases-primary);
+    margin-bottom: var(--cases-spacing-md);
+    animation: cases-spin 1s linear infinite;
+}
+
+.cases-loading-text {
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-text-light);
+    text-align: center;
+}
+
+/* Modal Overlay Customization */
+.cases-modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+/* Fullscreen Modal */
+.cases-modal-fullscreen .cases-modal-content {
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+}
+
+.cases-modal-fullscreen .cases-modal-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cases-modal-content {
+        margin: var(--cases-spacing-md);
+        max-width: none;
+        width: calc(100% - var(--cases-spacing-lg));
+    }
+    
+    .cases-modal-header,
+    .cases-modal-footer {
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-modal-body {
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-modal-title {
+        font-size: var(--cases-font-size-xl);
+    }
+    
+    .cases-modal-footer {
+        flex-direction: column;
+    }
+    
+    .cases-modal-footer .cases-btn {
+        width: 100%;
+        margin-bottom: var(--cases-spacing-xs);
+    }
+    
+    .cases-modal-footer .cases-btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .modal {
+        display: none !important;
+    }
+}

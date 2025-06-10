@@ -1,0 +1,321 @@
+/* ========================================
+   CARDS COMPONENT
+======================================== */
+
+/* Base Card Styles */
+.cases-card {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: 25px;
+    border-radius: var(--cases-radius);
+    box-shadow: var(--cases-shadow-sm);
+    transition: var(--cases-transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.cases-card:hover {
+    box-shadow: var(--cases-shadow-md);
+    border-color: var(--cases-border-dark);
+}
+
+/* Card Header */
+.cases-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--cases-spacing-md);
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--cases-border-light);
+}
+
+.cases-card-title {
+    font-size: var(--cases-font-size-lg);
+    font-weight: 600;
+    color: var(--cases-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.cases-card-subtitle {
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-primary);
+    font-weight: 500;
+    margin-bottom: var(--cases-spacing-sm);
+    line-height: 1.4;
+}
+
+/* Card Body */
+.cases-card-body {
+    flex: 1;
+    margin-bottom: var(--cases-spacing-md);
+}
+
+/* Card Meta Information */
+.cases-card-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--cases-spacing-sm);
+    margin-bottom: 15px;
+}
+
+.cases-card-meta-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: var(--cases-font-size-sm);
+    line-height: 1.3;
+}
+
+.cases-card-meta-label {
+    color: var(--cases-text-light);
+    font-weight: 500;
+    margin-right: var(--cases-spacing-xs);
+    flex-shrink: 0;
+}
+
+.cases-card-meta-value {
+    color: var(--cases-primary);
+    font-weight: 500;
+    text-align: right;
+    word-break: break-word;
+}
+
+/* Card Footer */
+.cases-card-footer {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid var(--cases-border-light);
+}
+
+/* Card Actions */
+.cases-card-actions {
+    display: flex;
+    gap: var(--cases-spacing-xs);
+    flex-wrap: wrap;
+}
+
+/* Special Card Types */
+.cases-card-highlight {
+    border-left: 3px solid var(--cases-info);
+}
+
+.cases-card-success {
+    border-left: 3px solid var(--cases-success);
+}
+
+.cases-card-warning {
+    border-left: 3px solid var(--cases-warning);
+}
+
+.cases-card-danger {
+    border-left: 3px solid var(--cases-danger);
+}
+
+/* Dashboard Card (specific styling) */
+.cases-dashboard-card {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: 25px;
+    border-radius: var(--cases-radius);
+    box-shadow: var(--cases-shadow-sm);
+    transition: var(--cases-transition);
+}
+
+.cases-dashboard-card:hover {
+    box-shadow: var(--cases-shadow-md);
+    border-color: var(--cases-border-dark);
+}
+
+/* Info Card (for case details pages) */
+.cases-info-card {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: var(--cases-spacing-lg);
+    margin-bottom: 25px;
+    border-radius: var(--cases-radius);
+    box-shadow: var(--cases-shadow-sm);
+}
+
+.cases-info-card-header {
+    border-bottom: 1px solid var(--cases-border);
+    padding-bottom: var(--cases-spacing-md);
+    margin-bottom: 25px;
+}
+
+.cases-info-card-title {
+    font-size: var(--cases-font-size-xl);
+    font-weight: 600;
+    color: var(--cases-primary);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+/* Stat Cards */
+.cases-stat-card {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: var(--cases-spacing-lg);
+    border-radius: var(--cases-radius);
+    box-shadow: var(--cases-shadow-sm);
+    text-align: center;
+    transition: var(--cases-transition);
+}
+
+.cases-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--cases-shadow-md);
+}
+
+.cases-stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--cases-primary);
+    margin: 0 0 var(--cases-spacing-xs) 0;
+    line-height: 1;
+}
+
+.cases-stat-label {
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Card with Image */
+.cases-card-with-image {
+    overflow: hidden;
+}
+
+.cases-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    margin: -25px -25px var(--cases-spacing-md) -25px;
+}
+
+/* Compact Card */
+.cases-card-compact {
+    padding: 15px;
+}
+
+.cases-card-compact .cases-card-header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.cases-card-compact .cases-card-title {
+    font-size: var(--cases-font-size-base);
+}
+
+/* Card List Style */
+.cases-card-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 15px 20px;
+}
+
+.cases-card-list .cases-card-header {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    flex: 1;
+}
+
+.cases-card-list .cases-card-body {
+    margin-bottom: 0;
+    margin-left: var(--cases-spacing-md);
+    flex: 2;
+}
+
+.cases-card-list .cases-card-footer {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    margin-left: var(--cases-spacing-md);
+}
+
+/* Consultation Note Styling */
+.cases-consultation-note {
+    background: var(--cases-bg-secondary);
+    padding: var(--cases-spacing-md);
+    border: 1px solid var(--cases-border);
+    border-left: 3px solid var(--cases-text-light);
+    line-height: 1.6;
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-text);
+    border-radius: var(--cases-radius);
+}
+
+/* Case Information Box */
+.cases-case-info-box {
+    background: var(--cases-bg-tertiary);
+    border: 1px solid var(--cases-border);
+    border-left: 3px solid var(--cases-primary);
+    padding: var(--cases-spacing-md);
+    margin-bottom: 25px;
+    border-radius: var(--cases-radius);
+}
+
+.cases-case-title {
+    font-size: var(--cases-font-size-xl);
+    font-weight: 600;
+    color: var(--cases-primary);
+    margin-bottom: 5px;
+}
+
+.cases-case-number {
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-text-light);
+    margin-bottom: 15px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cases-card {
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-card-meta-grid {
+        grid-template-columns: 1fr;
+        gap: var(--cases-spacing-xs);
+    }
+    
+    .cases-card-meta-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .cases-card-meta-value {
+        text-align: left;
+        margin-top: 2px;
+    }
+    
+    .cases-card-actions {
+        justify-content: stretch;
+    }
+    
+    .cases-card-actions .cases-action-btn {
+        flex: 1;
+        text-align: center;
+        margin-bottom: var(--cases-spacing-xs);
+    }
+    
+    .cases-card-list {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .cases-card-list .cases-card-body,
+    .cases-card-list .cases-card-footer {
+        margin-left: 0;
+        margin-top: var(--cases-spacing-sm);
+    }
+    
+    .cases-stat-number {
+        font-size: 2rem;
+    }
+}

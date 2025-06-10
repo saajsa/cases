@@ -1,0 +1,352 @@
+/* ========================================
+   CASES MODULE - CSS FRAMEWORK
+   Minimalist Black & White Design System
+======================================== */
+
+/* CSS Variables for consistent theming */
+:root {
+    /* Core Colors */
+    --cases-primary: #1a1a1a;
+    --cases-primary-hover: #000000;
+    --cases-secondary: #666666;
+    --cases-text: #2c2c2c;
+    --cases-text-light: #666666;
+    --cases-text-muted: #999999;
+    
+    /* Background Colors */
+    --cases-bg-primary: #ffffff;
+    --cases-bg-secondary: #fafafa;
+    --cases-bg-tertiary: #f8f8f8;
+    --cases-bg-hover: #fafafa;
+    
+    /* Border Colors */
+    --cases-border: #e1e1e1;
+    --cases-border-light: #f0f0f0;
+    --cases-border-dark: #d1d1d1;
+    
+    /* Status Colors */
+    --cases-success: #2d7d2d;
+    --cases-success-bg: #f0f9f0;
+    --cases-warning: #cc8c1a;
+    --cases-warning-bg: #fff8e6;
+    --cases-danger: #cc1a1a;
+    --cases-danger-bg: #fff0f0;
+    --cases-info: #1a6bcc;
+    --cases-info-bg: #eff8ff;
+    
+    /* Spacing */
+    --cases-spacing-xs: 8px;
+    --cases-spacing-sm: 12px;
+    --cases-spacing-md: 20px;
+    --cases-spacing-lg: 30px;
+    --cases-spacing-xl: 40px;
+    
+    /* Typography */
+    --cases-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --cases-font-size-xs: 0.65rem;
+    --cases-font-size-sm: 0.75rem;
+    --cases-font-size-base: 0.875rem;
+    --cases-font-size-lg: 1rem;
+    --cases-font-size-xl: 1.1rem;
+    --cases-font-size-2xl: 1.2rem;
+    --cases-font-size-3xl: 2.2rem;
+    
+    /* Shadows */
+    --cases-shadow-sm: 0 1px 3px rgba(0,0,0,0.02);
+    --cases-shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --cases-shadow-lg: 0 4px 20px rgba(0,0,0,0.1);
+    
+    /* Transitions */
+    --cases-transition: all 0.15s ease;
+    
+    /* Border Radius */
+    --cases-radius: 2px;
+}
+
+/* Base Styles */
+.cases-module {
+    box-sizing: border-box;
+    font-family: var(--cases-font-family);
+    background: var(--cases-bg-secondary);
+    color: var(--cases-text);
+}
+
+.cases-module *,
+.cases-module *::before,
+.cases-module *::after {
+    box-sizing: border-box;
+}
+
+/* ========================================
+   LAYOUT COMPONENTS
+======================================== */
+
+/* Page Header */
+.cases-page-header {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: var(--cases-spacing-xl);
+    margin-bottom: var(--cases-spacing-lg);
+    border-radius: var(--cases-radius);
+    box-shadow: var(--cases-shadow-sm);
+}
+
+.cases-page-header h1 {
+    margin: 0 0 var(--cases-spacing-xs) 0;
+    font-weight: 600;
+    font-size: var(--cases-font-size-3xl);
+    color: var(--cases-primary);
+    letter-spacing: -0.02em;
+}
+
+.cases-page-header .subtitle {
+    font-size: var(--cases-font-size-lg);
+    color: var(--cases-text-light);
+    font-weight: 400;
+    margin-bottom: var(--cases-spacing-md);
+}
+
+/* Content Sections */
+.cases-content-section {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: var(--cases-spacing-lg);
+    margin-bottom: var(--cases-spacing-lg);
+    border-radius: var(--cases-radius);
+    box-shadow: var(--cases-shadow-sm);
+}
+
+.cases-section-header {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: 25px var(--cases-spacing-lg);
+    margin: var(--cases-spacing-lg) 0 var(--cases-spacing-md) 0;
+    border-radius: var(--cases-radius);
+    border-left: 3px solid var(--cases-primary);
+}
+
+.cases-section-title {
+    font-size: var(--cases-font-size-2xl);
+    font-weight: 600;
+    color: var(--cases-primary);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+/* Grid Layouts */
+.cases-grid {
+    display: grid;
+    gap: var(--cases-spacing-md);
+}
+
+.cases-grid-2 { grid-template-columns: 1fr 1fr; }
+.cases-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.cases-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.cases-grid-auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.cases-grid-responsive { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+
+/* Flex Layouts */
+.cases-flex {
+    display: flex;
+    gap: var(--cases-spacing-md);
+}
+
+.cases-flex-between { justify-content: space-between; }
+.cases-flex-center { justify-content: center; align-items: center; }
+.cases-flex-end { justify-content: flex-end; }
+.cases-flex-wrap { flex-wrap: wrap; }
+.cases-flex-column { flex-direction: column; }
+
+/* ========================================
+   UTILITY CLASSES
+======================================== */
+
+/* Spacing */
+.cases-m-0 { margin: 0; }
+.cases-mb-sm { margin-bottom: var(--cases-spacing-sm); }
+.cases-mb-md { margin-bottom: var(--cases-spacing-md); }
+.cases-mb-lg { margin-bottom: var(--cases-spacing-lg); }
+.cases-mt-md { margin-top: var(--cases-spacing-md); }
+.cases-mt-lg { margin-top: var(--cases-spacing-lg); }
+
+.cases-p-sm { padding: var(--cases-spacing-sm); }
+.cases-p-md { padding: var(--cases-spacing-md); }
+.cases-p-lg { padding: var(--cases-spacing-lg); }
+
+/* Text Utilities */
+.cases-text-center { text-align: center; }
+.cases-text-right { text-align: right; }
+.cases-text-muted { color: var(--cases-text-muted); }
+.cases-text-light { color: var(--cases-text-light); }
+.cases-text-primary { color: var(--cases-primary); }
+.cases-text-success { color: var(--cases-success); }
+.cases-text-warning { color: var(--cases-warning); }
+.cases-text-danger { color: var(--cases-danger); }
+.cases-text-info { color: var(--cases-info); }
+
+.cases-font-weight-normal { font-weight: 400; }
+.cases-font-weight-medium { font-weight: 500; }
+.cases-font-weight-semibold { font-weight: 600; }
+.cases-font-weight-bold { font-weight: 700; }
+
+.cases-font-size-sm { font-size: var(--cases-font-size-sm); }
+.cases-font-size-base { font-size: var(--cases-font-size-base); }
+.cases-font-size-lg { font-size: var(--cases-font-size-lg); }
+
+/* Display Utilities */
+.cases-hidden { display: none; }
+.cases-block { display: block; }
+.cases-inline-block { display: inline-block; }
+
+/* Border Utilities */
+.cases-border { border: 1px solid var(--cases-border); }
+.cases-border-top { border-top: 1px solid var(--cases-border); }
+.cases-border-bottom { border-bottom: 1px solid var(--cases-border); }
+.cases-border-left { border-left: 1px solid var(--cases-border); }
+.cases-border-right { border-right: 1px solid var(--cases-border); }
+
+/* Background Utilities */
+.cases-bg-white { background: var(--cases-bg-primary); }
+.cases-bg-gray { background: var(--cases-bg-tertiary); }
+.cases-bg-light { background: var(--cases-bg-secondary); }
+
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+======================================== */
+
+/* Mobile First Approach */
+@media (max-width: 768px) {
+    .cases-page-header {
+        padding: 25px var(--cases-spacing-md);
+    }
+    
+    .cases-page-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .cases-content-section {
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-section-header {
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-grid-2,
+    .cases-grid-3,
+    .cases-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .cases-grid-responsive {
+        grid-template-columns: 1fr;
+    }
+    
+    .cases-flex {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .cases-page-header {
+        padding: var(--cases-spacing-md) 15px;
+    }
+    
+    .cases-content-section {
+        padding: 15px;
+    }
+    
+    .cases-section-header {
+        padding: 15px;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+======================================== */
+
+@media print {
+    .cases-module {
+        background: #ffffff;
+    }
+    
+    .cases-page-header,
+    .cases-content-section,
+    .cases-section-header {
+        border: 1px solid #000000;
+        box-shadow: none;
+    }
+    
+    .cases-no-print {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   ANIMATION HELPERS
+======================================== */
+
+.cases-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cases-fade-in.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.cases-hover-lift {
+    transition: var(--cases-transition);
+}
+
+.cases-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--cases-shadow-md);
+}
+
+/* ========================================
+   FOCUS MANAGEMENT
+======================================== */
+
+.cases-module *:focus {
+    outline: 2px solid var(--cases-info);
+    outline-offset: 2px;
+}
+
+.cases-module *:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ========================================
+   ACCESSIBILITY HELPERS
+======================================== */
+
+.cases-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.cases-skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--cases-primary);
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: var(--cases-radius);
+    z-index: 1000;
+}
+
+.cases-skip-link:focus {
+    top: 6px;
+}

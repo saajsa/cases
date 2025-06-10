@@ -1,0 +1,208 @@
+/* ========================================
+   BUTTONS COMPONENT
+======================================== */
+
+/* Base Button Styles */
+.cases-btn {
+    border-radius: var(--cases-radius);
+    padding: 10px var(--cases-spacing-md);
+    font-weight: 500;
+    font-size: var(--cases-font-size-base);
+    border: 1px solid var(--cases-border-dark);
+    background: var(--cases-bg-primary);
+    color: var(--cases-text);
+    transition: var(--cases-transition);
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.cases-btn:hover {
+    background: var(--cases-bg-hover);
+    border-color: var(--cases-secondary);
+    color: var(--cases-primary);
+    text-decoration: none;
+}
+
+.cases-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Button Variants */
+.cases-btn-primary {
+    background: var(--cases-primary);
+    border-color: var(--cases-primary);
+    color: #ffffff;
+}
+
+.cases-btn-primary:hover {
+    background: var(--cases-primary-hover);
+    border-color: var(--cases-primary-hover);
+    color: #ffffff;
+}
+
+.cases-btn-success {
+    background: var(--cases-bg-primary);
+    border-color: var(--cases-success);
+    color: var(--cases-success);
+}
+
+.cases-btn-success:hover {
+    background: var(--cases-success);
+    color: #ffffff;
+}
+
+.cases-btn-info {
+    background: var(--cases-bg-primary);
+    border-color: var(--cases-info);
+    color: var(--cases-info);
+}
+
+.cases-btn-info:hover {
+    background: var(--cases-info);
+    color: #ffffff;
+}
+
+.cases-btn-warning {
+    background: var(--cases-bg-primary);
+    border-color: var(--cases-warning);
+    color: var(--cases-warning);
+}
+
+.cases-btn-warning:hover {
+    background: var(--cases-warning);
+    color: #ffffff;
+}
+
+.cases-btn-danger {
+    background: var(--cases-bg-primary);
+    border-color: var(--cases-danger);
+    color: var(--cases-danger);
+}
+
+.cases-btn-danger:hover {
+    background: var(--cases-danger);
+    color: #ffffff;
+}
+
+/* Button Sizes */
+.cases-btn-sm {
+    padding: 6px var(--cases-spacing-sm);
+    font-size: var(--cases-font-size-sm);
+}
+
+.cases-btn-lg {
+    padding: var(--cases-spacing-sm) 24px;
+    font-size: var(--cases-font-size-lg);
+}
+
+.cases-btn-xl {
+    padding: 16px var(--cases-spacing-lg);
+    font-size: var(--cases-font-size-xl);
+}
+
+/* Button Groups */
+.cases-btn-group {
+    display: flex;
+    gap: var(--cases-spacing-xs);
+}
+
+.cases-btn-group .cases-btn {
+    margin-right: 0;
+}
+
+/* Action Buttons (smaller for tables/cards) */
+.cases-action-btn {
+    border-radius: var(--cases-radius);
+    padding: 6px var(--cases-spacing-sm);
+    font-size: var(--cases-font-size-sm);
+    font-weight: 500;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    transition: var(--cases-transition);
+    text-decoration: none;
+    border: 1px solid;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.cases-action-btn:last-child {
+    margin-right: 0;
+}
+
+/* Apply button variants to action buttons */
+.cases-action-btn.cases-btn-primary {
+    background: var(--cases-primary);
+    border-color: var(--cases-primary);
+    color: #ffffff;
+}
+
+.cases-action-btn.cases-btn-primary:hover {
+    background: var(--cases-primary-hover);
+    border-color: var(--cases-primary-hover);
+}
+
+/* Icon Buttons */
+.cases-btn-icon {
+    padding: var(--cases-spacing-xs) var(--cases-spacing-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cases-spacing-xs);
+}
+
+.cases-btn-icon i {
+    font-size: var(--cases-font-size-sm);
+}
+
+/* Full Width Button */
+.cases-btn-block {
+    width: 100%;
+    display: block;
+}
+
+/* Loading State */
+.cases-btn-loading {
+    position: relative;
+    color: transparent;
+}
+
+.cases-btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: cases-spin 1s linear infinite;
+}
+
+@keyframes cases-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cases-btn-group {
+        flex-direction: column;
+    }
+    
+    .cases-btn,
+    .cases-action-btn {
+        width: 100%;
+        text-align: center;
+        margin-bottom: var(--cases-spacing-xs);
+        margin-right: 0;
+    }
+    
+    .cases-btn-group .cases-btn {
+        margin-bottom: var(--cases-spacing-xs);
+    }
+}

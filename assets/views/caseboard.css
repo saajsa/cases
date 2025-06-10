@@ -1,0 +1,333 @@
+/* ========================================
+   CASEBOARD VIEW SPECIFIC STYLES
+======================================== */
+
+/* Filter Pills Styling */
+.cases-filter-pills {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cases-filter-pill {
+    padding: 8px 16px;
+    border: 1px solid var(--cases-border-dark);
+    background: var(--cases-bg-primary);
+    color: var(--cases-text-light);
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--cases-transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cases-filter-pill:hover {
+    border-color: var(--cases-secondary);
+    color: var(--cases-primary);
+}
+
+.cases-filter-pill.active {
+    background: var(--cases-primary);
+    border-color: var(--cases-primary);
+    color: #ffffff;
+}
+
+/* Section Headers with Actions */
+.cases-section-with-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    padding: 25px var(--cases-spacing-lg);
+    margin: var(--cases-spacing-lg) 0 var(--cases-spacing-md) 0;
+    border-radius: var(--cases-radius);
+    border-left: 3px solid var(--cases-primary);
+}
+
+.cases-section-with-actions .cases-section-title {
+    margin: 0;
+}
+
+.cases-section-actions {
+    font-size: var(--cases-font-size-base);
+}
+
+.cases-section-actions a {
+    color: var(--cases-text-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}
+
+.cases-section-actions a:hover {
+    color: var(--cases-primary);
+}
+
+/* Dashboard Cards Grid */
+.cases-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--cases-spacing-md);
+    margin-bottom: var(--cases-spacing-lg);
+}
+
+/* Enhanced Card Animations */
+.cases-card.cases-dashboard-card {
+    transform: translateY(0);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cases-card.cases-dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* Card Date Badge */
+.cases-card-date-badge {
+    background: var(--cases-primary);
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-sm);
+    font-weight: 600;
+    text-align: center;
+    min-width: 60px;
+}
+
+/* Special Status Colors for Caseboard */
+.caseboard-status-urgent {
+    background: var(--cases-danger-bg);
+    color: var(--cases-danger);
+    border-color: var(--cases-danger);
+    animation: cases-pulse 2s infinite;
+}
+
+.caseboard-status-today {
+    background: var(--cases-warning-bg);
+    color: var(--cases-warning);
+    border-color: var(--cases-warning);
+    font-weight: 700;
+}
+
+.caseboard-status-overdue {
+    background: var(--cases-danger-bg);
+    color: var(--cases-danger);
+    border-color: var(--cases-danger);
+}
+
+/* Count Badges for Caseboard */
+.cases-count-badge {
+    background: var(--cases-bg-tertiary);
+    color: var(--cases-primary);
+    border: 1px solid var(--cases-border);
+    padding: 2px var(--cases-spacing-xs);
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-xs);
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+/* Empty State Enhancements */
+.cases-empty-state {
+    text-align: center;
+    padding: 60px 40px;
+    color: var(--cases-text-muted);
+    background: var(--cases-bg-secondary);
+    border: 1px dashed var(--cases-border-dark);
+    border-radius: var(--cases-radius);
+}
+
+.cases-empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: var(--cases-spacing-md);
+    opacity: 0.6;
+    color: var(--cases-text-muted);
+}
+
+.cases-empty-state h5 {
+    font-weight: 600;
+    color: var(--cases-text-light);
+    margin-bottom: var(--cases-spacing-xs);
+    font-size: var(--cases-font-size-lg);
+}
+
+.cases-empty-state p {
+    color: var(--cases-text-muted);
+    margin-bottom: var(--cases-spacing-md);
+    font-size: var(--cases-font-size-base);
+}
+
+/* Loading State */
+.cases-loading-state {
+    text-align: center;
+    padding: 60px 40px;
+    color: var(--cases-text-muted);
+}
+
+.cases-loading-spinner {
+    font-size: 2rem;
+    margin-bottom: var(--cases-spacing-md);
+    color: var(--cases-text-muted);
+}
+
+/* Consultation Notes Styling */
+.cases-consultation-note {
+    background: var(--cases-bg-secondary);
+    padding: var(--cases-spacing-md);
+    border: 1px solid var(--cases-border);
+    border-left: 3px solid var(--cases-text-light);
+    line-height: 1.6;
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-text);
+    border-radius: var(--cases-radius);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Time-based Highlights */
+.cases-hearing-today {
+    border-left: 3px solid var(--cases-warning);
+    background: linear-gradient(to right, var(--cases-warning-bg), var(--cases-bg-primary));
+}
+
+.cases-hearing-tomorrow {
+    border-left: 3px solid var(--cases-info);
+    background: linear-gradient(to right, var(--cases-info-bg), var(--cases-bg-primary));
+}
+
+.cases-hearing-this-week {
+    border-left: 3px solid var(--cases-success);
+}
+
+/* Priority Indicators */
+.cases-priority-high {
+    position: relative;
+}
+
+.cases-priority-high::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 8px;
+    height: 8px;
+    background: var(--cases-danger);
+    border-radius: 50%;
+    animation: cases-pulse 2s infinite;
+}
+
+/* Section Visibility Controls */
+.cases-section-hidden {
+    display: none !important;
+}
+
+.cases-section-visible {
+    display: block !important;
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 1200px) {
+    .cases-dashboard-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .cases-section-with-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-section-actions {
+        margin-top: 10px;
+        width: 100%;
+        text-align: left;
+    }
+    
+    .cases-dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: var(--cases-spacing-sm);
+    }
+    
+    .cases-filter-pills {
+        justify-content: center;
+        gap: var(--cases-spacing-xs);
+    }
+    
+    .cases-filter-pill {
+        font-size: var(--cases-font-size-xs);
+        padding: 6px 12px;
+    }
+    
+    .cases-card-meta-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cases-card-actions {
+        justify-content: stretch;
+    }
+    
+    .cases-action-btn {
+        flex: 1;
+        text-align: center;
+        margin-bottom: var(--cases-spacing-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .cases-empty-state {
+        padding: 40px 20px;
+    }
+    
+    .cases-empty-state i {
+        font-size: 2rem;
+    }
+    
+    .cases-card {
+        padding: 15px;
+    }
+    
+    .cases-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .cases-card-title {
+        margin-bottom: var(--cases-spacing-xs);
+    }
+}
+
+/* Dark Mode Support (if needed) */
+@media (prefers-color-scheme: dark) {
+    .cases-module {
+        /* Dark mode variables would go here */
+    }
+}
+
+/* Print Styles */
+@media print {
+    .cases-filter-pills,
+    .cases-section-actions,
+    .cases-card-actions {
+        display: none;
+    }
+    
+    .cases-card {
+        break-inside: avoid;
+        border: 1px solid #000;
+        margin-bottom: 15px;
+    }
+    
+    .cases-section-with-actions {
+        border: 1px solid #000;
+        background: #f0f0f0;
+    }
+}
