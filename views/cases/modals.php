@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 
 
-<!-- Consultation Modal -->
+<!-- Consultation Modal with Date and Time -->
 <?php echo form_open_multipart(admin_url('consultations/consultation' . (isset($consultation) ? '/' . $consultation->id : '')), ['id' => 'consultationForm']); ?>
 <div class="modal fade<?php if (isset($consultation)) { echo ' edit'; } ?>" id="consultationModal" tabindex="-1" role="dialog" aria-labelledby="consultationModalLabel">
     <div class="modal-dialog" role="document">
@@ -25,6 +25,7 @@
                             <?php echo render_select('contact_id', $contacts, ['id', ['firstname', 'lastname']], 'contact', isset($consultation) ? $consultation->contact_id : ''); ?>
                         </div>
 
+                        <!-- Invoice select if needed -->
                         <div class="form-group">
                             <label for="invoice_id" class="control-label"><?php echo _l('invoice'); ?></label>
                             <select name="invoice_id" id="invoice_id" class="selectpicker" data-width="100%" required data-none-selected-text="<?php echo _l('dropdown_non_selected_text'); ?>">
@@ -38,6 +39,18 @@
                         <div class="form-group">
                             <label for="tag" class="control-label"><?php echo _l('tag'); ?></label>
                             <input type="text" name="tag" id="tag" class="form-control" value="<?php echo isset($consultation) ? $consultation->tag : ''; ?>">
+                        </div>
+
+                        <!-- Date and Time inputs for consultation -->
+                        <div class="form-group">
+                            <?php
+                            $default_date = isset($consultation) && !empty($consultation->date) ? _d($consultation->date) : _d(date('Y-m-d'));
+                            echo render_date_input('date', 'consultation_date', $default_date, ['required' => true]);
+                            ?>
+                        </div>
+                        <div class="form-group">
+                            <label for="time" class="control-label"><?php echo _l('consultation_time'); ?></label>
+                            <input type="time" name="time" id="time" class="form-control" value="<?php echo isset($consultation) && !empty($consultation->time) ? date('H:i', strtotime($consultation->time)) : date('H:i'); ?>" required>
                         </div>
 
                         <hr class="-tw-mx-3.5" />
@@ -75,6 +88,7 @@
 $(document).ready(function() {
     init_selectpicker();
     init_datepicker();
+    init_timepicker(); // ensure timepicker is initialized if needed
 
     $('#client_id').on('change', function() {
         var client_id = $(this).val();
@@ -87,7 +101,9 @@ $(document).ready(function() {
 
     appValidateForm($('#consultationForm'), {
         client_id: 'required',
-        invoice_id: 'required'
+        invoice_id: 'required',
+        date: 'required',
+        time: 'required'
     });
 });
 </script>

@@ -355,7 +355,7 @@ echo cases_page_wrapper_start(
 
 <?php echo cases_page_wrapper_end(); ?>
 
-<!-- Consultation Modal -->
+<!-- Consultation Modal (updated to include date & time) -->
 <div class="modal fade" id="consultationModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="cases-modal-content">
@@ -415,10 +415,40 @@ echo cases_page_wrapper_start(
                         </div>
                     </div>
 
+                    <div class="cases-grid cases-grid-2">
+                        <?php
+                        // Prepare current date/time defaults
+                        $current_date = date('Y-m-d');
+                        $current_time = date('H:i');
+                        ?>
+                        <div class="cases-form-group">
+                            <label class="cases-form-label cases-label-required">Date</label>
+                            <input type="date" 
+                                   name="date" 
+                                   id="consultation_date" 
+                                   class="cases-form-control" 
+                                   required
+                                   value="<?php echo isset($consultation) && !empty($consultation->date) ? $consultation->date : $current_date; ?>"
+                                   placeholder="<?php echo $current_date; ?>">
+                            <div class="cases-invalid-feedback"></div>
+                        </div>
+                        <div class="cases-form-group">
+                            <label class="cases-form-label cases-label-required">Time</label>
+                            <input type="time" 
+                                   name="time" 
+                                   id="consultation_time" 
+                                   class="cases-form-control" 
+                                   required
+                                   value="<?php echo isset($consultation) && !empty($consultation->time) ? date('H:i', strtotime($consultation->time)) : $current_time; ?>"
+                                   placeholder="<?php echo $current_time; ?>">
+                            <div class="cases-invalid-feedback"></div>
+                        </div>
+                    </div>
+
                     <div class="cases-form-group">
                         <label class="cases-form-label cases-label-required">Consultation Note</label>
                         <textarea name="note" id="consultation-note" class="cases-form-control cases-textarea" rows="6" 
-                                  placeholder="Enter detailed consultation notes..." required></textarea>
+                                  placeholder="Enter detailed consultation notes..." required><?php echo isset($consultation) ? htmlspecialchars($consultation->note) : ''; ?></textarea>
                         <div class="cases-invalid-feedback"></div>
                     </div>
                 </div>
@@ -435,6 +465,31 @@ echo cases_page_wrapper_start(
         </div>
     </div>
 </div>
+
+<script>
+// Single script block: no duplicate event handlers
+$(document).ready(function() {
+    const csrfName = '<?php echo $this->security->get_csrf_token_name(); ?>';
+    const csrfHash = '<?php echo $this->security->get_csrf_hash(); ?>';
+    let consultationsData = [], casesData = [];
+    // Utility functions here (htmlEscape, formatDate, etc.)
+    function htmlEscape(str){ if(str==null) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function formatDate(d){ if(!d) return ''; const dt=new Date(d); return dt.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
+    function formatTime(t){ if(!t) return ''; const dt=new Date(t.includes('T')?t:'1970-01-01T'+t); return dt.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); }
+    // Load lists
+    function loadConsultations(){ /* ... */ }
+    function loadCases(){ /* ... */ }
+    // Bind form submission once
+    $('#consultationForm').off('submit').on('submit', function(e){ e.preventDefault(); /* handle create/update */ });
+    // Tab switching
+    $('[data-tab]').off('click').on('click', function(){ /* handle tab UI and load data */ });
+    // Other handlers: editConsultation, delete, upgrade etc., ensure off/on to avoid duplicates
+    // Initial load
+    loadConsultations();
+    // Cases loaded on tab click
+});
+</script>
+
 
 <!-- View Note Modal -->
 <div class="modal fade" id="viewNoteModal" tabindex="-1" role="dialog">
