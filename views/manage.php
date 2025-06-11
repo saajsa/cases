@@ -20,6 +20,249 @@ echo cases_page_wrapper_start(
 );
 ?>
 
+<style>
+/* Enhanced Loading States */
+.cases-loading-container {
+    position: relative;
+    min-height: 400px;
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    border-radius: var(--cases-border-radius);
+    overflow: hidden;
+}
+
+.cases-loading-state {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--cases-bg-primary);
+    z-index: 10;
+}
+
+.cases-loading-spinner {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 20px;
+}
+
+.cases-loading-spinner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 3px solid var(--cases-border);
+    border-top-color: var(--cases-primary);
+    border-radius: 50%;
+    animation: cases-spin 1s linear infinite;
+}
+
+.cases-loading-spinner::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 36px;
+    height: 36px;
+    border: 2px solid transparent;
+    border-top-color: var(--cases-primary);
+    border-radius: 50%;
+    animation: cases-spin 0.6s linear infinite reverse;
+}
+
+@keyframes cases-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cases-loading-text {
+    font-size: var(--cases-font-size-base);
+    color: var(--cases-text-light);
+    font-weight: 500;
+    margin: 0;
+    animation: cases-pulse 2s ease-in-out infinite;
+}
+
+@keyframes cases-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Skeleton Loading Animation */
+.cases-skeleton {
+    background: linear-gradient(90deg, 
+        var(--cases-bg-tertiary) 25%, 
+        var(--cases-bg-secondary) 50%, 
+        var(--cases-bg-tertiary) 75%
+    );
+    background-size: 200% 100%;
+    animation: cases-skeleton-loading 2s infinite;
+}
+
+@keyframes cases-skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.cases-skeleton-card {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    border-radius: var(--cases-border-radius);
+    padding: var(--cases-spacing-lg);
+    margin-bottom: var(--cases-spacing-md);
+}
+
+.cases-skeleton-line {
+    height: 16px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.cases-skeleton-line.short {
+    width: 60%;
+}
+
+.cases-skeleton-line.medium {
+    width: 80%;
+}
+
+.cases-skeleton-line.long {
+    width: 95%;
+}
+
+.cases-skeleton-line.title {
+    height: 20px;
+    width: 70%;
+    margin-bottom: 16px;
+}
+
+/* Error State Styling */
+.cases-error-state {
+    text-align: center;
+    padding: var(--cases-spacing-xl);
+    color: var(--cases-danger);
+    background: var(--cases-danger-bg);
+    border: 1px solid var(--cases-danger-border);
+    border-radius: var(--cases-border-radius);
+}
+
+.cases-error-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--cases-spacing-md);
+    opacity: 0.7;
+}
+
+.cases-error-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--cases-spacing-sm);
+}
+
+.cases-error-message {
+    color: var(--cases-text-light);
+    margin-bottom: var(--cases-spacing-md);
+}
+
+/* Enhanced Empty State */
+.cases-empty-state {
+    text-align: center;
+    padding: var(--cases-spacing-xl);
+    background: var(--cases-bg-primary);
+    border: 2px dashed var(--cases-border);
+    border-radius: var(--cases-border-radius);
+    transition: var(--cases-transition);
+}
+
+.cases-empty-state:hover {
+    border-color: var(--cases-primary);
+    background: var(--cases-bg-secondary);
+}
+
+.cases-empty-icon {
+    font-size: 3rem;
+    color: var(--cases-text-muted);
+    margin-bottom: var(--cases-spacing-md);
+    opacity: 0.6;
+}
+
+.cases-empty-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--cases-text-light);
+    margin-bottom: var(--cases-spacing-sm);
+}
+
+.cases-empty-description {
+    color: var(--cases-text-muted);
+    margin-bottom: var(--cases-spacing-md);
+}
+
+/* Content Transition */
+.cases-content-transition {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cases-content-transition.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Tab loading indicator */
+.cases-tab-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.cases-tab-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cases-primary), transparent);
+    animation: cases-tab-progress 2s infinite;
+}
+
+@keyframes cases-tab-progress {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .cases-loading-container {
+        min-height: 300px;
+    }
+    
+    .cases-loading-spinner {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .cases-loading-spinner::after {
+        top: 4px;
+        left: 4px;
+        width: 28px;
+        height: 28px;
+    }
+    
+    .cases-empty-icon {
+        font-size: 2.5rem;
+    }
+}
+</style>
+
 <!-- Stats Grid -->
 <div class="cases-grid cases-grid-4 cases-mb-lg">
     <div class="cases-card cases-text-center">
@@ -73,8 +316,11 @@ echo cases_page_wrapper_start(
     </div>
 
     <!-- Consultations Container -->
-    <div id="consultations-container">
-        <?php echo cases_loading_state('Loading consultations...'); ?>
+    <div id="consultations-container" class="cases-loading-container">
+        <div class="cases-loading-state">
+            <div class="cases-loading-spinner"></div>
+            <p class="cases-loading-text">Loading consultations...</p>
+        </div>
     </div>
 </div>
 
@@ -97,8 +343,11 @@ echo cases_page_wrapper_start(
     </div>
 
     <!-- Cases Container -->
-    <div id="cases-container">
-        <?php echo cases_loading_state('Loading cases...'); ?>
+    <div id="cases-container" class="cases-loading-container">
+        <div class="cases-loading-state">
+            <div class="cases-loading-spinner"></div>
+            <p class="cases-loading-text">Loading cases...</p>
+        </div>
     </div>
 </div>
 
@@ -277,7 +526,7 @@ echo cases_page_wrapper_start(
 </div>
 
 <script>
-// Clean, minimal JavaScript - FIXED VERSION
+// Clean, minimal JavaScript - FIXED VERSION with Better Loading States
 document.addEventListener('DOMContentLoaded', function() {
     // Variables
     let consultationsData = [];
@@ -286,38 +535,129 @@ document.addEventListener('DOMContentLoaded', function() {
     let csrfTokenHash = '<?php echo $this->security->get_csrf_hash(); ?>';
     
     // ===============================
-    // UTILITY FUNCTIONS (DEFINED FIRST)
+    // ENHANCED LOADING FUNCTIONS
     // ===============================
     
-    function showLoading(containerId) {
+    function showSkeletonLoading(containerId) {
         const container = document.getElementById(containerId);
-        if (container) {
-            container.innerHTML = `
-                <div class="cases-loading-state">
-                    <div class="cases-loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i>
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="cases-grid cases-grid-responsive">
+                ${Array.from({length: 6}, () => `
+                    <div class="cases-skeleton-card">
+                        <div class="cases-skeleton cases-skeleton-line title"></div>
+                        <div class="cases-skeleton cases-skeleton-line medium"></div>
+                        <div class="cases-skeleton cases-skeleton-line short"></div>
+                        <div class="cases-skeleton cases-skeleton-line long"></div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <div class="cases-skeleton cases-skeleton-line" style="width: 60px; height: 32px;"></div>
+                            <div class="cases-skeleton cases-skeleton-line" style="width: 60px; height: 32px;"></div>
+                            <div class="cases-skeleton cases-skeleton-line" style="width: 60px; height: 32px;"></div>
+                        </div>
                     </div>
-                    <p>Loading...</p>
-                </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    function showContentLoading(containerId, message = 'Loading...') {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        // Check if already has loading container structure
+        if (!container.classList.contains('cases-loading-container')) {
+            container.classList.add('cases-loading-container');
+        }
+        
+        container.innerHTML = `
+            <div class="cases-loading-state">
+                <div class="cases-loading-spinner"></div>
+                <p class="cases-loading-text">${htmlEscape(message)}</p>
+            </div>
+        `;
+    }
+    
+    function showErrorState(containerId, message, retryCallback = null) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        container.classList.remove('cases-loading-container');
+        
+        let retryButton = '';
+        if (retryCallback) {
+            retryButton = `
+                <button class="cases-btn cases-btn-primary" onclick="${retryCallback}">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
             `;
+        }
+        
+        container.innerHTML = `
+            <div class="cases-error-state">
+                <i class="fas fa-exclamation-triangle cases-error-icon"></i>
+                <h5 class="cases-error-title">Something went wrong</h5>
+                <p class="cases-error-message">${htmlEscape(message)}</p>
+                ${retryButton}
+            </div>
+        `;
+    }
+    
+    function showEmptyState(containerId, title, description, actionButton = null) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        container.classList.remove('cases-loading-container');
+        
+        let button = '';
+        if (actionButton) {
+            button = `
+                <button class="cases-btn cases-btn-primary" 
+                        data-toggle="modal" 
+                        data-target="#${actionButton.modal || 'consultationModal'}">
+                    <i class="fas fa-plus"></i> ${actionButton.text}
+                </button>
+            `;
+        }
+        
+        container.innerHTML = `
+            <div class="cases-empty-state">
+                <i class="fas fa-${actionButton?.icon || 'folder-open'} cases-empty-icon"></i>
+                <h5 class="cases-empty-title">${htmlEscape(title)}</h5>
+                <p class="cases-empty-description">${htmlEscape(description)}</p>
+                ${button}
+            </div>
+        `;
+    }
+    
+    function showContentWithTransition(containerId, content) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        container.classList.remove('cases-loading-container');
+        container.innerHTML = `<div class="cases-content-transition">${content}</div>`;
+        
+        // Trigger transition after a brief delay
+        setTimeout(() => {
+            const transition = container.querySelector('.cases-content-transition');
+            if (transition) {
+                transition.classList.add('loaded');
+            }
+        }, 50);
+    }
+    
+    function addTabLoadingIndicator(tabButton) {
+        if (tabButton && !tabButton.classList.contains('cases-tab-loading')) {
+            tabButton.classList.add('cases-tab-loading');
+            setTimeout(() => {
+                tabButton.classList.remove('cases-tab-loading');
+            }, 2000);
         }
     }
     
-    function showError(containerId, message) {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.innerHTML = `
-                <div class="cases-empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h5>Error</h5>
-                    <p>${htmlEscape(message)}</p>
-                    <button class="cases-btn cases-btn-primary" onclick="location.reload()">
-                        Retry
-                    </button>
-                </div>
-            `;
-        }
-    }
+    // ===============================
+    // UTILITY FUNCTIONS
+    // ===============================
     
     function formatDate(dateString) {
         if (!dateString) return 'N/A';
@@ -370,20 +710,40 @@ document.addEventListener('DOMContentLoaded', function() {
             if (c.phase === 'litigation') litigationCount++;
         });
         
-        // Update stat cards
-        const consultationsCountEl = document.getElementById('consultations-count');
-        const casesCountEl = document.getElementById('cases-count');
-        const litigationCountEl = document.getElementById('litigation-count');
-        const consultationsBadgeEl = document.getElementById('consultations-badge');
-        const casesBadgeEl = document.getElementById('cases-badge');
-        const upcomingCountEl = document.getElementById('upcoming-count');
+        // Animate counter updates
+        const counters = [
+            { element: document.getElementById('consultations-count'), target: consultationsCount },
+            { element: document.getElementById('cases-count'), target: casesCount },
+            { element: document.getElementById('litigation-count'), target: litigationCount },
+            { element: document.getElementById('consultations-badge'), target: consultationsCount },
+            { element: document.getElementById('cases-badge'), target: casesCount },
+            { element: document.getElementById('upcoming-count'), target: 0 }
+        ];
         
-        if (consultationsCountEl) consultationsCountEl.textContent = consultationsCount;
-        if (casesCountEl) casesCountEl.textContent = casesCount;
-        if (litigationCountEl) litigationCountEl.textContent = litigationCount;
-        if (consultationsBadgeEl) consultationsBadgeEl.textContent = consultationsCount;
-        if (casesBadgeEl) casesBadgeEl.textContent = casesCount;
-        if (upcomingCountEl) upcomingCountEl.textContent = '0';
+        counters.forEach(counter => {
+            if (counter.element) {
+                animateCounter(counter.element, parseInt(counter.element.textContent) || 0, counter.target);
+            }
+        });
+    }
+    
+    function animateCounter(element, start, end, duration = 500) {
+        const range = end - start;
+        const startTime = performance.now();
+        
+        function updateCounter(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const current = Math.floor(start + (range * progress));
+            element.textContent = current;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            }
+        }
+        
+        requestAnimationFrame(updateCounter);
     }
     
     // ===============================
@@ -392,24 +752,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Render consultations with cases framework
     function renderConsultations(data) {
-        const container = document.getElementById('consultations-container');
-        
-        if (!container) {
-            console.error('Consultations container not found');
-            return;
-        }
+        const containerId = 'consultations-container';
         
         if (!data || data.length === 0) {
-            container.innerHTML = `
-                <div class="cases-empty-state">
-                    <i class="fas fa-comments"></i>
-                    <h5>No consultations found</h5>
-                    <p>Start by adding your first consultation</p>
-                    <button class="cases-btn cases-btn-primary" data-toggle="modal" data-target="#consultationModal">
-                        Add Consultation
-                    </button>
-                </div>
-            `;
+            showEmptyState(
+                containerId,
+                'No consultations found',
+                'Start by adding your first consultation to track client meetings and legal advice.',
+                { text: 'Add Consultation', icon: 'comments', modal: 'consultationModal' }
+            );
             return;
         }
         
@@ -470,26 +821,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         html += '</div>';
-        container.innerHTML = html;
+        showContentWithTransition(containerId, html);
     }
     
     // Render cases with cases framework
     function renderCases(data) {
-        const container = document.getElementById('cases-container');
-        
-        if (!container) {
-            console.error('Cases container not found');
-            return;
-        }
+        const containerId = 'cases-container';
         
         if (!data || data.length === 0) {
-            container.innerHTML = `
-                <div class="cases-empty-state">
-                    <i class="fas fa-briefcase"></i>
-                    <h5>No cases found</h5>
-                    <p>Cases will appear here when consultations are upgraded</p>
-                </div>
-            `;
+            showEmptyState(
+                containerId,
+                'No cases found',
+                'Cases will appear here when consultations are upgraded to litigation cases.',
+                { text: 'View Consultations', icon: 'briefcase' }
+            );
             return;
         }
         
@@ -535,7 +880,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         html += '</div>';
-        container.innerHTML = html;
+        showContentWithTransition(containerId, html);
     }
     
     // ===============================
@@ -545,7 +890,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load data functions
     function loadConsultations() {
         console.log('Loading consultations...');
-        showLoading('consultations-container');
+        showSkeletonLoading('consultations-container');
+        
+        const consultationsTab = document.querySelector('[data-tab="consultations"]');
+        addTabLoadingIndicator(consultationsTab);
         
         fetch(admin_url + 'cases/consultations_list', {
             method: 'GET',
@@ -573,13 +921,16 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error loading consultations:', error);
-            showError('consultations-container', 'Failed to load consultations: ' + error.message);
+            showErrorState('consultations-container', 'Failed to load consultations: ' + error.message, 'loadConsultations()');
         });
     }
     
     function loadCases() {
         console.log('Loading cases...');
-        showLoading('cases-container');
+        showSkeletonLoading('cases-container');
+        
+        const casesTab = document.querySelector('[data-tab="cases"]');
+        addTabLoadingIndicator(casesTab);
         
         fetch(admin_url + 'cases/cases_list', {
             method: 'GET',
@@ -607,7 +958,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error loading cases:', error);
-            showError('cases-container', 'Failed to load cases: ' + error.message);
+            showErrorState('cases-container', 'Failed to load cases: ' + error.message, 'loadCases()');
         });
     }
     
@@ -728,6 +1079,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetContent = document.getElementById(targetTab + '-tab');
             if (targetContent) {
                 targetContent.style.display = 'block';
+            }
+            
+            // Load data for active tab if not already loaded
+            if (targetTab === 'consultations' && consultationsData.length === 0) {
+                loadConsultations();
+            } else if (targetTab === 'cases' && casesData.length === 0) {
+                loadCases();
             }
         });
     });
@@ -869,6 +1227,10 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Network error occurred');
         });
     };
+    
+    // Global retry functions
+    window.loadConsultations = loadConsultations;
+    window.loadCases = loadCases;
     
     // ===============================
     // EVENT LISTENERS
@@ -1100,12 +1462,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Refresh buttons
     const refreshConsultations = document.getElementById('refresh-consultations');
     if (refreshConsultations) {
-        refreshConsultations.addEventListener('click', loadConsultations);
+        refreshConsultations.addEventListener('click', function() {
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            
+            loadConsultations();
+            
+            setTimeout(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+            }, 2000);
+        });
     }
     
     const refreshCases = document.getElementById('refresh-cases');
     if (refreshCases) {
-        refreshCases.addEventListener('click', loadCases);
+        refreshCases.addEventListener('click', function() {
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            
+            loadCases();
+            
+            setTimeout(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+            }, 2000);
+        });
     }
     
     // Modal reset handlers
@@ -1126,22 +1508,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // INITIALIZATION
     // ===============================
     
-    // Debug: Check if modal elements exist
-    console.log('Modal elements check:', {
-        consultationModal: !!document.getElementById('consultationModal'),
-        modalTitle: !!document.getElementById('modal-title-text'),
-        submitBtn: !!document.getElementById('submit-btn-text'),
-        consultationForm: !!document.getElementById('consultationForm'),
-        consultationsContainer: !!document.getElementById('consultations-container'),
-        casesContainer: !!document.getElementById('cases-container')
-    });
-    
     // Load initial data
     console.log('Initializing data load...');
     loadConsultations();
     loadCases();
+    // Don't load cases initially - wait for tab click for better performance
     
-    console.log('Cases management JavaScript initialized successfully');
+    console.log('Cases management JavaScript initialized successfully with enhanced loading states');
 });
 </script>
 

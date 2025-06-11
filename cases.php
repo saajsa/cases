@@ -114,4 +114,3 @@ function cases_permissions() {
     ];
     register_staff_capabilities('cases', $capabilities, _l('Cases'));
 }
-
