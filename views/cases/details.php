@@ -626,79 +626,76 @@ body {
         <?php endif; ?>
 
         <!-- Hearing Documents Section -->
-        <?php if (!empty($hearing_documents)): ?>
-            <div class="section-header">
-                <h3 class="section-title">Hearing Documents</h3>
-            </div>
+<?php if (!empty($hearing_documents_by_hearing)): ?>
+    <div class="section-header">
+        <h3 class="section-title">Hearing Documents</h3>
+    </div>
 
-            <?php foreach ($data['hearings'] as $hearing): ?>
-                <?php if (isset($hearing_documents_by_hearing[$hearing['id']]) && !empty($hearing_documents_by_hearing[$hearing['id']])): ?>
-                    <div class="info-card">
-                        <div class="info-card-header">
-                            <h4 class="info-card-title">
-                                Documents for Hearing - <?php echo date('d M Y', strtotime($hearing['date'])); ?>
-                                <?php if (!empty($hearing['hearing_purpose'])): ?>
-                                    <small style="color: var(--cases-text-light); font-weight: normal;">
-                                        (<?php echo htmlspecialchars($hearing['hearing_purpose']); ?>)
-                                    </small>
-                                <?php endif; ?>
-                            </h4>
-                        </div>
-                        
-                        <table class="modern-table table">
-                            <thead>
-                                <tr>
-                                    <th>Document Name</th>
-                                    <th>Type</th>
-                                    <th>Category</th>
-                                    <th>Date Added</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($hearing_documents_by_hearing[$hearing['id']] as $doc): ?>
-                                    <tr>
-                                        <td>
-                                            <i class="fas fa-file text-muted file-icon"></i>
-                                            <?php echo htmlspecialchars($doc['file_name']); ?>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($doc['filetype']); ?></td>
-                                        <td>
-                                            <?php if (!empty($doc['tag'])): ?>
-                                                <?php 
-                                                $doc_tags = explode(',', $doc['tag']);
-                                                foreach ($doc_tags as $doc_tag): 
-                                                    $doc_tag = trim($doc_tag);
-                                                    if (!empty($doc_tag)):
-                                                ?>
-                                                    <span class="status-badge status-info" style="margin-right: 4px; margin-bottom: 2px; display: inline-block;"><?php echo htmlspecialchars($doc_tag); ?></span>
-                                                <?php 
-                                                    endif;
-                                                endforeach; 
-                                                ?>
-                                            <?php else: ?>
-                                                <span class="text-muted">Uncategorized</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo date('d M Y', strtotime($doc['dateadded'])); ?></td>
-                                        <td>
-                                            <a href="<?php echo admin_url('documents/download/' . $doc['id']); ?>" 
-                                               class="action-btn btn-success" title="Download">Download</a>
-                                            <a href="<?php echo admin_url('documents/view/' . $doc['id']); ?>" 
-                                               class="action-btn btn-info" target="_blank" title="View">View</a>
-                                            <?php if (has_permission('documents', '', 'delete')): ?>
-                                            <a href="<?php echo admin_url('documents/delete/' . $doc['id']); ?>" 
-                                               class="action-btn btn-danger _delete" title="Delete">Delete</a>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            <?php endforeach; ?>
+    <?php foreach ($hearings as $hearing): ?>
+        <?php if (!empty($hearing_documents_by_hearing[$hearing['id']])): ?>
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h4 class="info-card-title">
+                        Documents for Hearing – <?php echo date('d M Y', strtotime($hearing['date'])); ?>
+                        <?php if (!empty($hearing['hearing_purpose'])): ?>
+                            <small style="color: var(--cases-text-light); font-weight: normal;">
+                                (<?php echo htmlspecialchars($hearing['hearing_purpose']); ?>)
+                            </small>
+                        <?php endif; ?>
+                    </h4>
+                </div>
+
+                <table class="modern-table table">
+                    <thead>
+                        <tr>
+                            <th>Document Name</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Date Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($hearing_documents_by_hearing[$hearing['id']] as $doc): ?>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-file text-muted file-icon"></i>
+                                    <?php echo htmlspecialchars($doc['file_name']); ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($doc['filetype']); ?></td>
+                                <td>
+                                    <?php if (!empty($doc['tag'])): 
+                                        foreach (explode(',', $doc['tag']) as $t):
+                                            $t = trim($t);
+                                            if ($t): ?>
+                                                <span class="status-badge status-info" style="margin-right:4px; display:inline-block;">
+                                                    <?php echo htmlspecialchars($t); ?>
+                                                </span>
+                                    <?php       endif;
+                                        endforeach;
+                                    else: ?>
+                                        <span class="text-muted">Uncategorized</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo date('d M Y', strtotime($doc['dateadded'])); ?></td>
+                                <td>
+                                    <a href="<?php echo admin_url('documents/download/' . $doc['id']); ?>"
+                                       class="action-btn btn-success" title="Download">Download</a>
+                                    <a href="<?php echo admin_url('documents/view/' . $doc['id']); ?>"
+                                       class="action-btn btn-info" target="_blank" title="View">View</a>
+                                    <?php if (has_permission('documents', '', 'delete')): ?>
+                                        <a href="<?php echo admin_url('documents/delete/' . $doc['id']); ?>"
+                                           class="action-btn btn-danger _delete" title="Delete">Delete</a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         <?php endif; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
 
         <!-- Hearings Section -->
         <div class="section-header">

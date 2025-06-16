@@ -777,9 +777,9 @@ public function get_menu_stats()
             $this->db->join(db_prefix().'courts ct', 'ct.id = cr.court_id', 'left');
             $this->db->where('h.case_id', $case_id);
             $this->db->order_by('h.date', 'DESC');
-            
+
             $hearings_query = $this->db->get();
-            
+
             if (!$hearings_query) {
                 // Database error
                 $error = $this->db->error();
@@ -788,12 +788,12 @@ public function get_menu_stats()
             } else {
                 $data['hearings'] = $hearings_query->result_array();
             }
-            
+
             // Separate upcoming and past hearings
             $today = date('Y-m-d');
             $data['upcoming_hearings'] = array();
             $data['past_hearings'] = array();
-            
+
             if (!empty($data['hearings'])) {
                 foreach ($data['hearings'] as $hearing) {
                     if ($hearing['date'] >= $today) {
@@ -817,21 +817,23 @@ public function get_menu_stats()
             if (!empty($data['hearings'])) {
                 $hearing_ids = array_column($data['hearings'], 'id');
                 
-                // Get all documents related to these hearings
-                $this->db->where('rel_type', 'hearing');
-                $this->db->where_in('rel_id', $hearing_ids);
-                $this->db->order_by('dateadded', 'DESC');
-                $hearing_documents_raw = $this->db->get(db_prefix() . 'files')->result_array();
-                
-                $data['hearing_documents'] = $hearing_documents_raw;
-                
-                // Organize hearing documents by hearing ID for easier display
-                foreach ($hearing_documents_raw as $doc) {
-                    $hearing_id = $doc['rel_id'];
-                    if (!isset($data['hearing_documents_by_hearing'][$hearing_id])) {
-                        $data['hearing_documents_by_hearing'][$hearing_id] = array();
+                if (!empty($hearing_ids)) {
+                    // Get all documents related to these hearings
+                    $this->db->where('rel_type', 'hearing');
+                    $this->db->where_in('rel_id', $hearing_ids);
+                    $this->db->order_by('dateadded', 'DESC');
+                    $hearing_documents_raw = $this->db->get(db_prefix() . 'files')->result_array();
+                    
+                    $data['hearing_documents'] = $hearing_documents_raw;
+                    
+                    // Organize hearing documents by hearing ID for easier display
+                    foreach ($hearing_documents_raw as $doc) {
+                        $hearing_id = $doc['rel_id'];
+                        if (!isset($data['hearing_documents_by_hearing'][$hearing_id])) {
+                            $data['hearing_documents_by_hearing'][$hearing_id] = array();
+                        }
+                        $data['hearing_documents_by_hearing'][$hearing_id][] = $doc;
                     }
-                    $data['hearing_documents_by_hearing'][$hearing_id][] = $doc;
                 }
             }
 
