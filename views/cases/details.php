@@ -625,77 +625,113 @@ body {
             </div>
         <?php endif; ?>
 
-        <!-- Hearing Documents Section -->
-<?php if (!empty($hearing_documents_by_hearing)): ?>
-    <div class="section-header">
-        <h3 class="section-title">Hearing Documents</h3>
-    </div>
+<!-- Hearing Documents Selector + Table -->
+<div class="section-header">
+    <h3 class="section-title">Hearing Documents</h3>
+</div>
 
-    <?php foreach ($hearings as $hearing): ?>
-        <?php if (!empty($hearing_documents_by_hearing[$hearing['id']])): ?>
-            <div class="info-card">
-                <div class="info-card-header">
-                    <h4 class="info-card-title">
-                        Documents for Hearing – <?php echo date('d M Y', strtotime($hearing['date'])); ?>
-                        <?php if (!empty($hearing['hearing_purpose'])): ?>
-                            <small style="color: var(--cases-text-light); font-weight: normal;">
-                                (<?php echo htmlspecialchars($hearing['hearing_purpose']); ?>)
-                            </small>
-                        <?php endif; ?>
-                    </h4>
-                </div>
-
-                <table class="modern-table table">
-                    <thead>
-                        <tr>
-                            <th>Document Name</th>
-                            <th>Type</th>
-                            <th>Category</th>
-                            <th>Date Added</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($hearing_documents_by_hearing[$hearing['id']] as $doc): ?>
-                            <tr>
-                                <td>
-                                    <i class="fas fa-file text-muted file-icon"></i>
-                                    <?php echo htmlspecialchars($doc['file_name']); ?>
-                                </td>
-                                <td><?php echo htmlspecialchars($doc['filetype']); ?></td>
-                                <td>
-                                    <?php if (!empty($doc['tag'])): 
-                                        foreach (explode(',', $doc['tag']) as $t):
-                                            $t = trim($t);
-                                            if ($t): ?>
-                                                <span class="status-badge status-info" style="margin-right:4px; display:inline-block;">
-                                                    <?php echo htmlspecialchars($t); ?>
-                                                </span>
-                                    <?php       endif;
-                                        endforeach;
-                                    else: ?>
-                                        <span class="text-muted">Uncategorized</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo date('d M Y', strtotime($doc['dateadded'])); ?></td>
-                                <td>
-                                    <a href="<?php echo admin_url('documents/download/' . $doc['id']); ?>"
-                                       class="action-btn btn-success" title="Download">Download</a>
-                                    <a href="<?php echo admin_url('documents/view/' . $doc['id']); ?>"
-                                       class="action-btn btn-info" target="_blank" title="View">View</a>
-                                    <?php if (has_permission('documents', '', 'delete')): ?>
-                                        <a href="<?php echo admin_url('documents/delete/' . $doc['id']); ?>"
-                                           class="action-btn btn-danger _delete" title="Delete">Delete</a>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
+<select id="hearingSelector" class="form-select mb-4">
+    <option value="">— Select Hearing Date —</option>
+    <?php foreach ($hearings as $h): 
+        if (empty($hearing_documents_by_hearing[$h['id']])) continue;
+    ?>
+        <option value="<?php echo $h['id']; ?>">
+            <?php echo date('d M Y', strtotime($h['date'])); ?>
+            <?php if ($h['hearing_purpose']): ?>
+                (<?php echo htmlspecialchars($h['hearing_purpose']); ?>)
+            <?php endif; ?>
+        </option>
     <?php endforeach; ?>
-<?php endif; ?>
+</select>
+
+<table id="hearingDocsTable" class="modern-table table">
+    <thead>
+        <tr>
+            <th>Document Name</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Date Added</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="5" class="text-center text-muted">
+                Select a hearing above to view its documents.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1) preload docs-by-hearing
+    const docsByHearing = <?php echo json_encode($hearing_documents_by_hearing, JSON_UNESCAPED_SLASHES); ?>;
+    // 2) expose delete‐permission from PHP
+    const canDelete = <?php echo has_permission('documents', '', 'delete') ? 'true' : 'false'; ?>;
+
+    const selector = document.getElementById('hearingSelector');
+    const tbody    = document.querySelector('#hearingDocsTable tbody');
+
+    selector.addEventListener('change', function() {
+        const hearingId = this.value;
+        tbody.innerHTML = '';
+
+        const docs = docsByHearing[hearingId] || [];
+        if (!docs.length) {
+            tbody.innerHTML =
+              '<tr><td colspan="5" class="text-center text-muted">' +
+              'No documents for this hearing.' +
+              '</td></tr>';
+            return;
+        }
+
+        docs.forEach(function(doc) {
+            // build tags
+            let tagsHtml = '';
+            if (doc.tag) {
+                doc.tag.split(',').forEach(function(t) {
+                    t = t.trim();
+                    if (t) {
+                        tagsHtml +=
+                          '<span class="status-badge status-info" ' +
+                          'style="margin-right:4px;display:inline-block;">' +
+                          t +
+                          '</span>';
+                    }
+                });
+            } else {
+                tagsHtml = '<span class="text-muted">Uncategorized</span>';
+            }
+
+            // build actions
+            let actions  = 
+              '<a href="<?php echo admin_url('documents/download/'); ?>'+doc.id+'" '+
+              'class="action-btn btn-success">Download</a>'+
+              '<a href="<?php echo admin_url('documents/view/'); ?>'+doc.id+'" '+
+              'class="action-btn btn-info" target="_blank">View</a>';
+            if (canDelete) {
+                actions += 
+                  '<a href="<?php echo admin_url('documents/delete/'); ?>'+doc.id+'" '+
+                  'class="action-btn btn-danger _delete">Delete</a>';
+            }
+
+            // append row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><i class="fas fa-file file-icon"></i>${doc.file_name}</td>
+                <td>${doc.filetype}</td>
+                <td>${tagsHtml}</td>
+                <td>${new Date(doc.dateadded).toLocaleDateString()}</td>
+                <td>${actions}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+});
+</script>
+
+
 
         <!-- Hearings Section -->
         <div class="section-header">
