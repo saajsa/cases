@@ -809,28 +809,42 @@ public function get_menu_stats()
             $this->db->where('rel_type', 'case');
             $this->db->where('rel_id', $case_id);
             $data['case_documents'] = $this->db->get(db_prefix() . 'files')->result_array();
-            
+
             // Get hearing-level documents for this case
             $data['hearing_documents'] = array();
+            $data['hearing_documents_by_hearing'] = array();
+
             if (!empty($data['hearings'])) {
                 $hearing_ids = array_column($data['hearings'], 'id');
                 
                 // Get all documents related to these hearings
                 $this->db->where('rel_type', 'hearing');
                 $this->db->where_in('rel_id', $hearing_ids);
-                $data['hearing_documents'] = $this->db->get(db_prefix() . 'files')->result_array();
+                $this->db->order_by('dateadded', 'DESC');
+                $hearing_documents_raw = $this->db->get(db_prefix() . 'files')->result_array();
+                
+                $data['hearing_documents'] = $hearing_documents_raw;
+                
+                // Organize hearing documents by hearing ID for easier display
+                foreach ($hearing_documents_raw as $doc) {
+                    $hearing_id = $doc['rel_id'];
+                    if (!isset($data['hearing_documents_by_hearing'][$hearing_id])) {
+                        $data['hearing_documents_by_hearing'][$hearing_id] = array();
+                    }
+                    $data['hearing_documents_by_hearing'][$hearing_id][] = $doc;
+                }
             }
-            
+
             // Set title
             $data['title'] = 'Case Details - ' . ($data['case']['case_title'] ?? 'Unknown Case');
-            
+
             // Load view
             $this->load->view('cases/cases/details', $data);
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error in cases/details: ' . $e->getMessage());
-            show_error('An error occurred while loading case details. Please try again later.');
-        }
+
+            } catch (Exception $e) {
+                log_message('error', 'Error in cases/details: ' . $e->getMessage());
+                show_error('An error occurred while loading case details. Please try again later.');
+            }
     }
 
     /**
