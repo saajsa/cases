@@ -305,12 +305,6 @@
     }
 }
 
-/* Dark Mode Support (if needed) */
-@media (prefers-color-scheme: dark) {
-    .cases-module {
-        /* Dark mode variables would go here */
-    }
-}
 
 /* Print Styles */
 @media print {

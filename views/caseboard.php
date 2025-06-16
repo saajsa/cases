@@ -179,3 +179,4 @@ document.addEventListener('DOMContentLoaded', function() {
     initialize();
 });
 </script>
+<?php init_tail(); ?>
