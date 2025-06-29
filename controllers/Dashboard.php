@@ -12,6 +12,8 @@ class Dashboard extends AdminController
     {
         parent::__construct();
         $this->load->model('Cases_model');
+        $this->load->helper('cases/rate_limiter');
+        $this->load->helper('cases/security');
         
         // Set JSON header for AJAX requests
         if ($this->input->is_ajax_request()) {
@@ -47,6 +49,9 @@ class Dashboard extends AdminController
                 ]);
                 return;
             }
+
+            // Enforce rate limits
+            cases_enforce_rate_limit('get_stats', 30, 300); // 30 requests per 5 minutes
 
             $today = date('Y-m-d');
             $this_month_start = date('Y-m-01');
@@ -172,6 +177,9 @@ class Dashboard extends AdminController
                 ]);
                 return;
             }
+
+            // Enforce rate limits
+            cases_enforce_rate_limit('get_priority_items', 20, 300); // 20 requests per 5 minutes
 
             $today = date('Y-m-d');
             $tomorrow = date('Y-m-d', strtotime('+1 day'));

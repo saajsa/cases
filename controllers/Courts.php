@@ -22,15 +22,51 @@ class Courts extends AdminController
             access_denied();
         }
 
+        // Load security helper for CSRF protection
+        $this->load->helper('modules/cases/helpers/security_helper');
+        
+        // Verify CSRF token
+        if (!cases_verify_csrf_token()) {
+            cases_log_security_event('Invalid CSRF token in add_court', [], 'error');
+            set_alert('danger', 'Security token mismatch. Please try again.');
+            redirect(admin_url('cases/courts/manage_courts'));
+            return;
+        }
+
+        // Validate and sanitize input
+        $name = cases_sanitize_string($this->input->post('name', true), 255);
+        $hierarchy = cases_sanitize_string($this->input->post('hierarchy', true), 100);
+        $location = cases_sanitize_string($this->input->post('location', true), 255);
+        $status = $this->input->post('status', true);
+
+        if (empty($name)) {
+            set_alert('danger', 'Court name is required');
+            redirect(admin_url('cases/courts/manage_courts'));
+            return;
+        }
+
+        // Validate status
+        $allowed_statuses = ['active', 'inactive'];
+        if (!in_array($status, $allowed_statuses)) {
+            $status = 'active';
+        }
+
         $data = [
-            'name'      => $this->input->post('name', true),
-            'hierarchy' => $this->input->post('hierarchy', true),
-            'location'  => $this->input->post('location', true),
-            'status'    => $this->input->post('status', true)
+            'name'      => $name,
+            'hierarchy' => $hierarchy,
+            'location'  => $location,
+            'status'    => $status
         ];
 
-        $this->db->insert('tblcourts', $data);
-        set_alert('success', 'Court added');
+        try {
+            $this->db->insert('tblcourts', $data);
+            cases_log_security_event('Court added', ['court_name' => $name], 'info');
+            set_alert('success', 'Court added successfully');
+        } catch (Exception $e) {
+            log_message('error', 'Error adding court: ' . $e->getMessage());
+            set_alert('danger', 'Failed to add court. Please try again.');
+        }
+        
         redirect(admin_url('cases/courts/manage_courts'));
     }
 
@@ -41,17 +77,65 @@ class Courts extends AdminController
         }
 
         if ($this->input->post()) {
+            // Load security helper for CSRF protection
+            $this->load->helper('modules/cases/helpers/security_helper');
+            
+            // Verify CSRF token
+            if (!cases_verify_csrf_token()) {
+                cases_log_security_event('Invalid CSRF token in edit_court', ['court_id' => $id], 'error');
+                set_alert('danger', 'Security token mismatch. Please try again.');
+                redirect(admin_url('cases/courts/manage_courts'));
+                return;
+            }
+
+            // Validate ID parameter
+            $court_id = cases_validate_integer($id, 1);
+            if ($court_id === false) {
+                set_alert('danger', 'Invalid court ID');
+                redirect(admin_url('cases/courts/manage_courts'));
+                return;
+            }
+
+            // Validate and sanitize input
+            $name = cases_sanitize_string($this->input->post('name', true), 255);
+            $hierarchy = cases_sanitize_string($this->input->post('hierarchy', true), 100);
+            $location = cases_sanitize_string($this->input->post('location', true), 255);
+            $status = $this->input->post('status', true);
+
+            if (empty($name)) {
+                set_alert('danger', 'Court name is required');
+                redirect(admin_url('cases/courts/edit_court/' . $court_id));
+                return;
+            }
+
+            // Validate status
+            $allowed_statuses = ['active', 'inactive'];
+            if (!in_array($status, $allowed_statuses)) {
+                $status = 'active';
+            }
+
             $data = [
-                'name'      => $this->input->post('name', true),
-                'hierarchy' => $this->input->post('hierarchy', true),
-                'location'  => $this->input->post('location', true),
-                'status'    => $this->input->post('status', true)
+                'name'      => $name,
+                'hierarchy' => $hierarchy,
+                'location'  => $location,
+                'status'    => $status
             ];
 
-            $this->db->where('id', $id);
-            $this->db->update('tblcourts', $data);
+            try {
+                $this->db->where('id', $court_id);
+                $this->db->update('tblcourts', $data);
+                
+                if ($this->db->affected_rows() > 0) {
+                    cases_log_security_event('Court updated', ['court_id' => $court_id, 'court_name' => $name], 'info');
+                    set_alert('success', 'Court updated successfully');
+                } else {
+                    set_alert('warning', 'No changes were made');
+                }
+            } catch (Exception $e) {
+                log_message('error', 'Error updating court: ' . $e->getMessage());
+                set_alert('danger', 'Failed to update court. Please try again.');
+            }
             
-            set_alert('success', 'Court updated successfully');
             redirect(admin_url('cases/courts/manage_courts'));
         }
 

@@ -553,12 +553,73 @@ body {
         <!-- Documents Section -->
         <div class="section-header">
             <h3 class="section-title">Case Documents</h3>
+            <div class="document-actions" style="display: flex; gap: 10px; align-items: center;">
+                <button id="bulk-download-btn" class="action-btn btn-info" style="display: none;">
+                    <i class="fas fa-download"></i> Download Selected
+                </button>
+                <div class="dropdown" style="position: relative;">
+                    <button class="action-btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                        <i class="fas fa-plus"></i> Add Document
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#" onclick="showQuickUpload()">
+                            <i class="fas fa-upload"></i> Quick Upload
+                        </a>
+                        <a class="dropdown-item" href="<?php echo admin_url('cases/documents/upload'); ?>" 
+                           onclick="localStorage.setItem('document_upload_data', JSON.stringify({
+                             case_id: <?php echo $case['id']; ?>,
+                             customer_id: <?php echo $case['client_id']; ?>,
+                             doc_type: 'case'
+                           }));">
+                            <i class="fas fa-file-plus"></i> Advanced Upload
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Upload Modal -->
+        <div id="quickUploadModal" class="modal" style="display: none;">
+            <div class="modal-content" style="width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 5px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h4>Quick Document Upload</h4>
+                    <button onclick="closeQuickUpload()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                <form id="quickUploadForm" enctype="multipart/form-data">
+                    <input type="hidden" name="case_id" value="<?php echo $case['id']; ?>">
+                    <input type="hidden" name="customer_id" value="<?php echo $case['client_id']; ?>">
+                    <input type="hidden" name="doc_owner_type" value="case">
+                    
+                    <div class="form-group">
+                        <label>Document File</label>
+                        <div id="dropZone" class="drop-zone" style="border: 2px dashed #ccc; padding: 40px; text-align: center; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #ccc; margin-bottom: 10px;"></i>
+                            <p>Drag & drop files here or click to browse</p>
+                            <input type="file" id="fileInput" name="document" style="display: none;" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+                        </div>
+                        <div id="filePreview" style="margin-top: 10px;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Document Tag (Optional)</label>
+                        <input type="text" name="document_tag" class="form-control" placeholder="e.g., Contract, Evidence, Notice">
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" onclick="closeQuickUpload()" class="action-btn">Cancel</button>
+                        <button type="submit" class="action-btn btn-primary">Upload Document</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <?php if (!empty($case_documents)): ?>
             <table class="modern-table table">
                 <thead>
                     <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" id="selectAllDocs" onchange="toggleAllDocuments(this)">
+                        </th>
                         <th>Document Name</th>
                         <th>Type</th>
                         <th>Category</th>
@@ -569,6 +630,9 @@ body {
                 <tbody>
                     <?php foreach ($case_documents as $doc): ?>
                         <tr>
+                            <td>
+                                <input type="checkbox" class="doc-checkbox" value="<?php echo $doc['id']; ?>" onchange="updateBulkActions()">
+                            </td>
                             <td>
                                 <i class="fas fa-file text-muted file-icon"></i>
                                 <?php echo htmlspecialchars($doc['file_name']); ?>
@@ -593,12 +657,12 @@ body {
                             </td>
                             <td><?php echo date('d M Y', strtotime($doc['dateadded'])); ?></td>
                             <td>
-                                <a href="<?php echo admin_url('documents/download/' . $doc['id']); ?>" 
+                                <a href="<?php echo admin_url('cases/documents/download/' . $doc['id']); ?>" 
                                    class="action-btn btn-success" title="Download">Download</a>
-                                <a href="<?php echo admin_url('documents/view/' . $doc['id']); ?>" 
+                                <a href="<?php echo admin_url('cases/documents/view/' . $doc['id']); ?>" 
                                    class="action-btn btn-info" target="_blank" title="View">View</a>
-                                <?php if (has_permission('documents', '', 'delete')): ?>
-                                <a href="<?php echo admin_url('documents/delete/' . $doc['id']); ?>" 
+                                <?php if (has_permission('cases', '', 'delete')): ?>
+                                <a href="<?php echo admin_url('cases/documents/delete/' . $doc['id']); ?>" 
                                    class="action-btn btn-danger _delete" title="Delete">Delete</a>
                                 <?php endif; ?>
                             </td>
@@ -662,7 +726,37 @@ body {
         </tr>
     </tbody>
 </table>
+<style>
+    /* Make the hearing `<select>` look like your .action-btn / .info-card controls */
+#hearingSelector {
+  padding: 10px 20px;
+  border: 1px solid #d1d1d1;
+  border-radius: 1px;
+  font-size: 0.875rem;
+  color: #2c2c2c;
+  background: #ffffff;
+  transition: all 0.15s ease;
+  appearance: none; /* remove default arrow */
+  margin-bottom: 20px;
+}
 
+/* hover/focus states just like your .btn hover */
+#hearingSelector:hover,
+#hearingSelector:focus {
+  background: #f8f8f8;
+  border-color: #999999;
+  color: #1a1a1a;
+  outline: none;
+}
+
+/* small arrow icon on the right */
+#hearingSelector {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'10'%20height%3D'6'%20viewBox%3D'0%200%2010%206'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M0%200l5%206%205-6z'%20fill%3D'%23666666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+    </style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 1) preload docs-by-hearing
@@ -771,8 +865,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         default: $status_class = 'status-scheduled';
                                     }
                                     ?>
-                                    <span class="status-badge <?php echo $status_class; ?>">
-                                        <?php echo $hearing['status']; ?>
+                                    <span class="status-badge <?php echo htmlspecialchars($status_class, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <?php echo htmlspecialchars($hearing['status'], ENT_QUOTES, 'UTF-8'); ?>
                                     </span>
                                 </td>
                                 <td>
@@ -879,6 +973,166 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Initialize drag and drop
+    initializeDragAndDrop();
+});
+
+// Quick Upload Modal Functions
+function showQuickUpload() {
+    document.getElementById('quickUploadModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeQuickUpload() {
+    document.getElementById('quickUploadModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    document.getElementById('quickUploadForm').reset();
+    document.getElementById('filePreview').innerHTML = '';
+}
+
+// Drag and Drop Functionality
+function initializeDragAndDrop() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    
+    if (!dropZone || !fileInput) return;
+    
+    // Click to browse
+    dropZone.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+    });
+    
+    // Drag and drop events
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.style.borderColor = '#1a1a1a';
+        dropZone.style.backgroundColor = '#f8f8f8';
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.style.borderColor = '#ccc';
+        dropZone.style.backgroundColor = 'transparent';
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.style.borderColor = '#ccc';
+        dropZone.style.backgroundColor = 'transparent';
+        handleFiles(e.dataTransfer.files);
+    });
+    
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            filePreview.innerHTML = `
+                <div style="padding: 10px; background: #f0f0f0; border-radius: 3px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-file"></i>
+                    <span>${file.name}</span>
+                    <small style="color: #666;">(${(file.size / 1024 / 1024).toFixed(2)} MB)</small>
+                </div>
+            `;
+        }
+    }
+}
+
+// Quick Upload Form Submission
+document.getElementById('quickUploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Uploading...';
+    submitBtn.disabled = true;
+    
+    fetch('<?php echo admin_url('cases/documents/upload'); ?>', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Document uploaded successfully!');
+            closeQuickUpload();
+            window.location.reload();
+        } else {
+            alert('Error uploading document: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Upload error:', error);
+        alert('Error uploading document. Please try again.');
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// Bulk Actions for Documents
+function toggleAllDocuments(checkbox) {
+    const docCheckboxes = document.querySelectorAll('.doc-checkbox');
+    docCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateBulkActions();
+}
+
+function updateBulkActions() {
+    const checkedBoxes = document.querySelectorAll('.doc-checkbox:checked');
+    const bulkBtn = document.getElementById('bulk-download-btn');
+    
+    if (checkedBoxes.length > 0) {
+        bulkBtn.style.display = 'inline-block';
+        bulkBtn.textContent = `Download Selected (${checkedBoxes.length})`;
+    } else {
+        bulkBtn.style.display = 'none';
+    }
+}
+
+// Bulk Download
+document.getElementById('bulk-download-btn').addEventListener('click', function() {
+    const checkedBoxes = document.querySelectorAll('.doc-checkbox:checked');
+    const documentIds = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (documentIds.length > 0) {
+        // Create a form to submit the bulk download request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<?php echo admin_url('cases/documents/bulk_download'); ?>';
+        
+        documentIds.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'document_ids[]';
+            input.value = id;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+});
+
+// Close modal when clicking outside
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('quickUploadModal');
+    if (e.target === modal) {
+        closeQuickUpload();
+    }
 });
 </script>
 

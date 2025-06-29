@@ -43,6 +43,11 @@ echo cases_page_wrapper_start(
     justify-content: center;
     background: var(--cases-bg-primary);
     z-index: 10;
+    pointer-events: none; /* Allow clicks through when visible */
+}
+
+.cases-loading-container:not(.loading) .cases-loading-state {
+    display: none; /* Completely hide when not active */
 }
 
 .cases-loading-spinner {
@@ -481,9 +486,44 @@ $(document).ready(function() {
     function loadCases(){ /* ... */ }
     // Bind form submission once
     $('#consultationForm').off('submit').on('submit', function(e){ e.preventDefault(); /* handle create/update */ });
-    // Tab switching
-    $('[data-tab]').off('click').on('click', function(){ /* handle tab UI and load data */ });
-    // Other handlers: editConsultation, delete, upgrade etc., ensure off/on to avoid duplicates
+    // Tab switching with proper event delegation
+    $(document).on('click', '[data-tab]', function(){ 
+        const targetTab = $(this).data('tab');
+        $('[data-tab]').removeClass('active').css({
+            color: 'var(--cases-text-light)',
+            borderBottomColor: 'transparent',
+            background: 'none'
+        });
+        $(this).addClass('active').css({
+            color: 'var(--cases-primary)',
+            background: 'var(--cases-bg-primary)',
+            borderBottomColor: 'var(--cases-primary)'
+        });
+        
+        $('.tab-content').hide();
+        $(`#${targetTab}-tab`).show();
+        
+        if (targetTab === 'consultations' && consultationsData.length === 0) {
+            loadConsultations();
+        } else if (targetTab === 'cases' && casesData.length === 0) {
+            loadCases();
+        }
+    });
+    
+    // Delegated event handling for dynamic elements
+    $(document)
+        .on('click', '[data-action="edit"]', function() {
+            const id = $(this).data('id');
+            editConsultation(id);
+        })
+        .on('click', '[data-action="delete"]', function() {
+            const id = $(this).data('id');
+            deleteConsultation(id);
+        })
+        .on('click', '[data-action="upgrade"]', function() {
+            const id = $(this).data('id');
+            upgradeToLitigation(id);
+        });
     // Initial load
     loadConsultations();
     // Cases loaded on tab click
@@ -855,18 +895,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="cases-card-footer">
                         <div class="cases-card-actions">
-                            <button class="cases-action-btn cases-btn-default" onclick="viewNote(${consultation.id})">
+                            <button class="cases-action-btn cases-btn-default" data-action="view" data-id="${consultation.id}">
                                 View
                             </button>
-                            <button class="cases-action-btn cases-btn-primary" onclick="editConsultation(${consultation.id})">
+                            <button class="cases-action-btn cases-btn-primary" data-action="edit" data-id="${consultation.id}">
                                 Edit
                             </button>
                             ${consultation.phase === 'consultation' ? `
-                                <button class="cases-action-btn cases-btn-success" onclick="upgradeToLitigation(${consultation.id})">
+                                <button class="cases-action-btn cases-btn-success" data-action="upgrade" data-id="${consultation.id}">
                                     Upgrade
                                 </button>
                             ` : ''}
-                            <button class="cases-action-btn cases-btn-danger" onclick="deleteConsultation(${consultation.id})">
+                            <button class="cases-action-btn cases-btn-danger" data-action="delete" data-id="${consultation.id}">
                                 Delete
                             </button>
                         </div>

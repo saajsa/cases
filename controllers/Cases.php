@@ -12,6 +12,9 @@ class Cases extends AdminController
     parent::__construct();
     $this->load->model('Cases_model');
     $this->load->model('Appointments_model');
+    $this->load->helper('cases/security');
+    $this->load->helper('cases/cases_css');
+    $this->load->helper('cases/access_control');
     
     // Set JSON header for AJAX requests
     if ($this->input->is_ajax_request()) {
@@ -25,9 +28,13 @@ class Cases extends AdminController
             access_denied('cases');
         }
 
+        // Get only accessible cases for current user
+        $accessible_case_ids = cases_get_accessible_resources('case', 'view');
+        
         $data['title'] = _l('cases_management');
         $data['clients'] = $this->get_all_clients();
         $data['contacts'] = $this->get_all_contacts();
+        $data['accessible_case_ids'] = $accessible_case_ids;
 
         $this->load->view('cases/manage', $data);
     }
@@ -198,6 +205,10 @@ public function get_menu_stats()
             return;
         }
 
+        // Load rate limiter and enforce limits for AJAX endpoint
+        $this->load->helper('modules/cases/helpers/rate_limiter_helper');
+        cases_enforce_rate_limit('get_menu_stats', 60, 300); // 60 requests per 5 minutes
+
         $today = date('Y-m-d');
         
         // Count pending consultations with error handling
@@ -233,7 +244,11 @@ public function get_menu_stats()
     public function create_consultation()
 {
     try {
-        if (!has_permission('cases', '', 'create')) {
+        $consultation_id = $this->input->post('consultation_id', true);
+        
+        // Check permissions - create for new, edit for existing
+        $required_permission = $consultation_id ? 'edit' : 'create';
+        if (!has_permission('cases', '', $required_permission)) {
             http_response_code(403);
             echo json_encode([
                 'success' => false,
@@ -241,14 +256,20 @@ public function get_menu_stats()
             ]);
             return;
         }
+        
+        // If updating existing consultation, validate ownership
+        if ($consultation_id) {
+            cases_enforce_resource_access('consultation', $consultation_id, 'edit', ['ajax' => true]);
+        }
 
-        $consultation_id = $this->input->post('consultation_id', true);
-
+        $raw_note = $this->input->post('note', false);
+        $sanitized_note = cases_sanitize_string($raw_note, 5000, false); // Sanitize HTML to prevent XSS
+        
         $data = [
             'client_id' => $this->input->post('client_id', true),
             'contact_id' => $this->input->post('contact_id', true) ?: NULL,
             'tag' => $this->input->post('tag', true),
-            'note' => $this->input->post('note', false), // false to allow HTML
+            'note' => $sanitized_note,
             'staff_id' => get_staff_user_id(),
         ];
 
@@ -887,14 +908,32 @@ public function get_menu_stats()
         $cases = $this->db->get()->result_array();
         
         // Get hearing counts for each case
-        foreach ($cases as &$case) {
-            $this->db->where('case_id', $case['id']);
-            $case['hearing_count'] = $this->db->count_all_results(db_prefix().'hearings');
+        // Get hearing counts for all cases in one query (fixes N+1 problem)
+        if (!empty($cases)) {
+            $case_ids = array_column($cases, 'id');
+            
+            // Get hearing counts
+            $this->db->select('case_id, COUNT(*) as count');
+            $this->db->from(db_prefix().'hearings');
+            $this->db->where_in('case_id', $case_ids);
+            $this->db->group_by('case_id');
+            $hearing_counts = $this->db->get()->result_array();
+            $hearing_counts_map = array_column($hearing_counts, 'count', 'case_id');
             
             // Get document counts
+            $this->db->select('rel_id, COUNT(*) as count');
+            $this->db->from(db_prefix().'files');
             $this->db->where('rel_type', 'case');
-            $this->db->where('rel_id', $case['id']);
-            $case['document_count'] = $this->db->count_all_results(db_prefix().'files');
+            $this->db->where_in('rel_id', $case_ids);
+            $this->db->group_by('rel_id');
+            $document_counts = $this->db->get()->result_array();
+            $document_counts_map = array_column($document_counts, 'count', 'rel_id');
+            
+            // Assign counts to cases
+            foreach ($cases as &$case) {
+                $case['hearing_count'] = isset($hearing_counts_map[$case['id']]) ? $hearing_counts_map[$case['id']] : 0;
+                $case['document_count'] = isset($document_counts_map[$case['id']]) ? $document_counts_map[$case['id']] : 0;
+            }
         }
         
         $data['cases'] = $cases;

@@ -308,37 +308,47 @@ public function causelist()
         access_denied('cases');
     }
     
-    // Default to today's date
-    $date = $this->input->get('date') ? $this->input->get('date') : date('Y-m-d');
+    // Validate and sanitize date input
+    $date = $this->input->get('date');
+    if (!$date || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        $date = date('Y-m-d');
+    }
     
-    // DIRECT QUERY - looking for hearings ON this date (not next_date)
-    $sql = "SELECT 
-                h.id as hearing_id,
-                h.date,
-                h.time,
-                h.description,
-                h.status,
-                h.next_date,
-                h.hearing_purpose,
-                h.upcoming_purpose,
-                h.is_completed,
-                h.parent_hearing_id,
-                c.id as case_id,
-                c.case_title,
-                c.case_number,
-                cl.company as client_name,
-                ct.name as court_name,
-                cr.court_no,
-                cr.judge_name
-            FROM " . db_prefix() . "hearings h
-            LEFT JOIN " . db_prefix() . "cases c ON c.id = h.case_id
-            LEFT JOIN " . db_prefix() . "clients cl ON cl.userid = c.client_id
-            LEFT JOIN " . db_prefix() . "court_rooms cr ON cr.id = c.court_room_id
-            LEFT JOIN " . db_prefix() . "courts ct ON ct.id = cr.court_id
-            WHERE DATE(h.date) = ?
-            ORDER BY h.time ASC";
-            
-    $query = $this->db->query($sql, [$date]);
+    // Validate date format and range
+    $date_obj = DateTime::createFromFormat('Y-m-d', $date);
+    if (!$date_obj || $date_obj->format('Y-m-d') !== $date) {
+        $date = date('Y-m-d');
+    }
+    
+    // SECURE QUERY using Query Builder - looking for hearings ON this date
+    $this->db->select('
+        h.id as hearing_id,
+        h.date,
+        h.time,
+        h.description,
+        h.status,
+        h.next_date,
+        h.hearing_purpose,
+        h.upcoming_purpose,
+        h.is_completed,
+        h.parent_hearing_id,
+        c.id as case_id,
+        c.case_title,
+        c.case_number,
+        cl.company as client_name,
+        ct.name as court_name,
+        cr.court_no,
+        cr.judge_name
+    ');
+    $this->db->from(db_prefix() . 'hearings h');
+    $this->db->join(db_prefix() . 'cases c', 'c.id = h.case_id', 'left');
+    $this->db->join(db_prefix() . 'clients cl', 'cl.userid = c.client_id', 'left');
+    $this->db->join(db_prefix() . 'court_rooms cr', 'cr.id = c.court_room_id', 'left');
+    $this->db->join(db_prefix() . 'courts ct', 'ct.id = cr.court_id', 'left');
+    $this->db->where('DATE(h.date)', $date);
+    $this->db->order_by('h.time', 'ASC');
+    
+    $query = $this->db->get();
     
     // Initialize hearings array
     $data['hearings'] = [];
@@ -347,12 +357,11 @@ public function causelist()
         $data['hearings'] = $query->result_array();
     }
     
-    // Get available dates with hearings
-    $date_query = $this->db->query(
-        "SELECT DISTINCT DATE(date) as hearing_date 
-         FROM " . db_prefix() . "hearings 
-         ORDER BY date ASC"
-    );
+    // Get available dates with hearings using Query Builder
+    $this->db->select('DISTINCT DATE(date) as hearing_date');
+    $this->db->from(db_prefix() . 'hearings');
+    $this->db->order_by('date', 'ASC');
+    $date_query = $this->db->get();
     
     $data['upcoming_dates'] = $date_query->result_array();
     
@@ -392,6 +401,10 @@ public function get_causelist()
     if (!has_permission('cases', '', 'view')) {
         access_denied('cases');
     }
+    
+    // Load rate limiter and enforce limits for AJAX endpoint
+    $this->load->helper('modules/cases/helpers/rate_limiter_helper');
+    cases_enforce_rate_limit('get_causelist', 30, 300); // 30 requests per 5 minutes
     
     // Default to today's date
     $date = $this->input->get('date') ? $this->input->get('date') : date('Y-m-d');
@@ -526,46 +539,86 @@ public function quick_update($hearing_id)
     $case = $this->db->get(db_prefix() . 'cases')->row_array();
     
     if ($this->input->post()) {
+        // Load security helpers
+        $this->load->helper('modules/cases/helpers/security_helper');
+        $this->load->helper('modules/cases/helpers/validation_helper');
+        $this->load->helper('modules/cases/helpers/rate_limiter_helper');
+        
+        // Rate limiting for form submissions
+        cases_enforce_rate_limit('hearing_update', 10, 300); // 10 updates per 5 minutes
+        
+        // Verify CSRF token
+        if (!cases_verify_csrf_token()) {
+            cases_log_security_event('Invalid CSRF token in quick_update', ['hearing_id' => $hearing_id], 'error');
+            set_alert('danger', 'Security token mismatch. Please try again.');
+            redirect(admin_url('cases/hearings/quick_update/' . $hearing_id));
+            return;
+        }
+
+        // Validate hearing ID
+        $validated_hearing_id = cases_validate_integer($hearing_id, 1);
+        if ($validated_hearing_id === false) {
+            set_alert('danger', 'Invalid hearing ID');
+            redirect(admin_url('cases/hearings'));
+            return;
+        }
+
         $this->db->trans_begin(); // Start transaction
         
         try {
+            // Validate and sanitize input data
+            $update_data = [
+                'status' => $this->input->post('status', true),
+                'description' => $this->input->post('description', true),
+                'next_date' => $this->input->post('next_date', true),
+                'next_time' => $this->input->post('next_time', true),
+                'upcoming_purpose' => $this->input->post('upcoming_purpose', true)
+            ];
+            
+            $validation = cases_validate_hearing_data($update_data);
+            if (!$validation['valid']) {
+                set_alert('danger', 'Validation failed: ' . implode(', ', $validation['errors']));
+                redirect(admin_url('cases/hearings/quick_update/' . $validated_hearing_id));
+                return;
+            }
+            
+            $validated_data = $validation['data'];
+            
             // Update existing hearing status
             $current_update = [
-                'status'      => $this->input->post('status', true),
-                'description' => $this->input->post('description', true),
-                'is_completed' => ($this->input->post('status') == 'Completed') ? 1 : 0
+                'status'      => $validated_data['status'],
+                'description' => $validated_data['description'] ?? '',
+                'is_completed' => ($validated_data['status'] == 'Completed') ? 1 : 0
             ];
             
             $this->db->where('id', $hearing_id);
             $this->db->update(db_prefix() . 'hearings', $current_update);
             
             // Check if next hearing is being scheduled
-            $next_date = $this->input->post('next_date', true);
-            $next_time = $this->input->post('next_time', true);
-            $next_purpose = $this->input->post('upcoming_purpose', true);
-            
-            if (!empty($next_date)) {
+            if (!empty($validated_data['next_date'])) {
                 // Check if a next hearing already exists based on parent_hearing_id
-                $this->db->where('parent_hearing_id', $hearing_id);
+                $this->db->where('parent_hearing_id', $validated_hearing_id);
                 $existing_next = $this->db->get(db_prefix() . 'hearings')->row_array();
+                
+                $next_hearing_data = [
+                    'date' => $validated_data['next_date'],
+                    'time' => $validated_data['next_time'] ?? '10:00:00',
+                    'hearing_purpose' => $validated_data['upcoming_purpose'] ?? ''
+                ];
                 
                 if ($existing_next) {
                     // Update existing next hearing
                     $this->db->where('id', $existing_next['id']);
-                    $this->db->update(db_prefix() . 'hearings', [
-                        'date' => $next_date,
-                        'time' => $next_time ?: '10:00:00',
-                        'hearing_purpose' => $next_purpose
-                    ]);
+                    $this->db->update(db_prefix() . 'hearings', $next_hearing_data);
                 } else {
                     // Create new hearing record for the next date
                     $next_hearing = [
                         'case_id'         => $hearing['case_id'],
-                        'date'            => $next_date,
-                        'time'            => $next_time ?: '10:00:00',
-                        'hearing_purpose' => $next_purpose,
+                        'date'            => $validated_data['next_date'],
+                        'time'            => $validated_data['next_time'] ?? '10:00:00',
+                        'hearing_purpose' => $validated_data['upcoming_purpose'] ?? '',
                         'status'          => 'Scheduled',
-                        'parent_hearing_id' => $hearing_id,
+                        'parent_hearing_id' => $validated_hearing_id,
                         'created_at'      => date('Y-m-d H:i:s')
                     ];
                     
@@ -578,23 +631,38 @@ public function quick_update($hearing_id)
                 }
                 
                 // Update current hearing with next date reference
-                $this->db->where('id', $hearing_id);
-                $this->db->update(db_prefix() . 'hearings', ['next_date' => $next_date]);
+                $this->db->where('id', $validated_hearing_id);
+                $this->db->update(db_prefix() . 'hearings', ['next_date' => $validated_data['next_date']]);
             }
+            
+            // Log security event for successful update
+            cases_log_security_event('Hearing updated successfully', [
+                'hearing_id' => $validated_hearing_id,
+                'case_id' => $hearing['case_id'],
+                'updated_by' => get_staff_user_id(),
+                'status_change' => $validated_data['status']
+            ], 'info');
             
             if ($this->db->trans_status() === FALSE) {
                 $this->db->trans_rollback();
+                cases_log_security_event('Hearing update failed - transaction error', [
+                    'hearing_id' => $validated_hearing_id
+                ], 'error');
                 set_alert('danger', 'Failed to update hearing');
             } else {
                 $this->db->trans_commit();
                 set_alert('success', 'Hearing updated successfully');
             }
             
-                // FIXED REDIRECT - Go to main cases page
-                redirect(admin_url('cases'));
+            // FIXED REDIRECT - Go to main cases page
+            redirect(admin_url('cases'));
             
         } catch (Exception $e) {
             $this->db->trans_rollback();
+            cases_log_security_event('Hearing update failed - exception', [
+                'hearing_id' => $hearing_id,
+                'error' => $e->getMessage()
+            ], 'error');
             set_alert('danger', 'Error: ' . $e->getMessage());
             redirect(admin_url('cases/hearings/quick_update/' . $hearing_id));
         }

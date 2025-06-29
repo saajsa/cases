@@ -306,11 +306,299 @@
 }
 
 
+/* Statistics Cards */
+.cases-stat-card {
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cases-stat-card .cases-info-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--cases-spacing-md);
+}
+
+.cases-stat-icon {
+    font-size: 1.5rem;
+    color: var(--cases-primary);
+    opacity: 0.7;
+}
+
+.cases-stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--cases-primary);
+    margin-bottom: var(--cases-spacing-xs);
+    line-height: 1;
+}
+
+.cases-stat-change {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-muted);
+    margin-bottom: var(--cases-spacing-xs);
+}
+
+.cases-stat-label {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Activity Feed */
+.cases-activity-feed {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.cases-activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--cases-spacing-sm);
+    padding: var(--cases-spacing-sm) 0;
+    border-bottom: 1px solid var(--cases-border-light);
+}
+
+.cases-activity-item:last-child {
+    border-bottom: none;
+}
+
+.cases-activity-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--cases-bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cases-primary);
+    font-size: var(--cases-font-size-sm);
+}
+
+.cases-activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.cases-activity-title {
+    font-weight: 600;
+    color: var(--cases-text);
+    font-size: var(--cases-font-size-sm);
+    margin-bottom: 2px;
+}
+
+.cases-activity-description {
+    color: var(--cases-text-light);
+    font-size: var(--cases-font-size-xs);
+    margin-bottom: 2px;
+    line-height: 1.4;
+}
+
+.cases-activity-time {
+    color: var(--cases-text-muted);
+    font-size: var(--cases-font-size-xs);
+}
+
+/* Metrics List */
+.cases-metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cases-spacing-sm);
+}
+
+.cases-metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--cases-spacing-xs) 0;
+    border-bottom: 1px solid var(--cases-border-light);
+}
+
+.cases-metric-item:last-child {
+    border-bottom: none;
+}
+
+.cases-metric-label {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-light);
+    font-weight: 500;
+}
+
+.cases-metric-value {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text);
+    font-weight: 600;
+}
+
+/* Performance Chart Container */
+#performance-chart-container {
+    padding: var(--cases-spacing-md);
+    text-align: center;
+}
+
+#weekly-activity-chart {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Enhanced Card Layouts */
+.cases-card-subtitle {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-muted);
+    margin-bottom: var(--cases-spacing-xs);
+}
+
+.cases-card-footer {
+    display: flex;
+    gap: var(--cases-spacing-xs);
+    flex-wrap: wrap;
+}
+
+.cases-card-footer .cases-btn-sm {
+    flex: 1;
+    min-width: 80px;
+}
+
+/* News Feed Styles */
+.cases-news-feed {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cases-spacing-md);
+}
+
+.cases-news-item {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border-light);
+    border-left: 3px solid var(--cases-primary);
+    padding: var(--cases-spacing-md);
+    border-radius: var(--cases-radius);
+    transition: var(--cases-transition);
+}
+
+.cases-news-item:hover {
+    border-left-color: var(--cases-secondary);
+    box-shadow: var(--cases-shadow-sm);
+}
+
+.cases-news-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--cases-spacing-xs);
+    gap: var(--cases-spacing-sm);
+}
+
+.cases-news-title {
+    font-size: var(--cases-font-size-base);
+    font-weight: 600;
+    color: var(--cases-text);
+    margin: 0;
+    line-height: 1.4;
+    flex: 1;
+}
+
+.cases-news-time {
+    font-size: var(--cases-font-size-xs);
+    color: var(--cases-text-muted);
+    white-space: nowrap;
+    background: var(--cases-bg-tertiary);
+    padding: 2px 8px;
+    border-radius: var(--cases-radius);
+}
+
+.cases-news-summary {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-light);
+    line-height: 1.5;
+    margin-bottom: var(--cases-spacing-sm);
+    margin-top: 0;
+}
+
+.cases-news-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--cases-spacing-xs);
+}
+
+.cases-news-source {
+    font-size: var(--cases-font-size-xs);
+    color: var(--cases-text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cases-news-item .cases-btn-sm {
+    padding: 4px 12px;
+    font-size: var(--cases-font-size-xs);
+}
+
+/* Legal News Specific Styling */
+.cases-news-item[data-category="supreme-court"] {
+    border-left-color: var(--cases-danger);
+}
+
+.cases-news-item[data-category="high-court"] {
+    border-left-color: var(--cases-warning);
+}
+
+.cases-news-item[data-category="legal-news"] {
+    border-left-color: var(--cases-info);
+}
+
+/* Responsive Enhancements */
+@media (max-width: 1200px) {
+    .cases-stat-number {
+        font-size: 2rem;
+    }
+    
+    #main-dashboard-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .cases-stat-card {
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .cases-stat-icon {
+        font-size: 1.2rem;
+    }
+    
+    #main-dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .cases-activity-item {
+        padding: var(--cases-spacing-xs) 0;
+    }
+    
+    .cases-activity-icon {
+        width: 28px;
+        height: 28px;
+    }
+}
+
 /* Print Styles */
 @media print {
     .cases-filter-pills,
     .cases-section-actions,
-    .cases-card-actions {
+    .cases-card-actions,
+    #priority-alerts-section,
+    .cases-activity-feed,
+    #performance-chart-container {
         display: none;
     }
     
@@ -323,5 +611,10 @@
     .cases-section-with-actions {
         border: 1px solid #000;
         background: #f0f0f0;
+    }
+    
+    .cases-stat-card {
+        border: 1px solid #000;
+        background: #f9f9f9;
     }
 }

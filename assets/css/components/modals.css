@@ -224,7 +224,7 @@
 
 /* Print Styles */
 @media print {
-    .modal {
+    .modal:not(#consultationModal):not(#upgradeModal) {
         display: none !important;
     }
 }

@@ -514,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <?php init_tail(); ?>-control" 
-                value="<?php echo isset($hearing) ? $hearing['time'] : '10:00'; ?>" required>
+                value="<?php echo isset($hearing) ? htmlspecialchars($hearing['time'], ENT_QUOTES, 'UTF-8') : '10:00'; ?>" required>
         </div>
     </div>
     
@@ -538,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="cases-form-group">
             <label class="cases-form-label">Next Hearing Date</label>
             <input type="date" name="next_date" id="next_date" class="cases-form-control" 
-                value="<?php echo isset($hearing) && !empty($hearing['next_date']) ? $hearing['next_date'] : ''; ?>">
+                value="<?php echo isset($hearing) && !empty($hearing['next_date']) ? htmlspecialchars($hearing['next_date'], ENT_QUOTES, 'UTF-8') : ''; ?>">
         </div>
     </div>
     

@@ -6,7 +6,7 @@
             <div class="col-md-8 col-md-offset-2">
                 <div class="panel_s">
                     <div class="panel-body">
-                        <h4 class="no-margin"><?php echo $title; ?></h4>
+                        <h4 class="no-margin"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h4>
                         <hr class="hr-panel-heading" />
                         <?php echo form_open(admin_url('cases/courts/edit_room/'.$room['id'])); ?>
                         <div class="row">
@@ -16,22 +16,22 @@
                                     <select name="court_id" id="court_id" class="form-control selectpicker" data-live-search="true" required>
                                         <option value="">Select Court</option>
                                         <?php foreach($courts as $court){ ?>
-                                        <option value="<?php echo $court['id']; ?>" <?php if($court['id'] == $room['court_id']){echo 'selected';} ?>><?php echo $court['name']; ?></option>
+                                        <option value="<?php echo htmlspecialchars($court['id'], ENT_QUOTES, 'UTF-8'); ?>" <?php if($court['id'] == $room['court_id']){echo 'selected';} ?>><?php echo htmlspecialchars($court['name'], ENT_QUOTES, 'UTF-8'); ?></option>
                                         <?php } ?>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="court_no" class="control-label">Court Number</label>
-                                    <input type="text" id="court_no" name="court_no" class="form-control" value="<?php echo $room['court_no']; ?>" required>
+                                    <input type="text" id="court_no" name="court_no" class="form-control" value="<?php echo htmlspecialchars($room['court_no'], ENT_QUOTES, 'UTF-8'); ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="judge_name" class="control-label">Judge Name</label>
-                                    <input type="text" id="judge_name" name="judge_name" class="form-control" value="<?php echo $room['judge_name']; ?>">
+                                    <input type="text" id="judge_name" name="judge_name" class="form-control" value="<?php echo htmlspecialchars($room['judge_name'], ENT_QUOTES, 'UTF-8'); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="from_date" class="control-label">From Date</label>
                                     <div class="input-group date">
-                                        <input type="text" id="from_date" name="from_date" class="form-control datepicker" value="<?php echo $room['from_date']; ?>">
+                                        <input type="text" id="from_date" name="from_date" class="form-control datepicker" value="<?php echo htmlspecialchars($room['from_date'], ENT_QUOTES, 'UTF-8'); ?>">
                                         <div class="input-group-addon">
                                             <i class="fa fa-calendar calendar-icon"></i>
                                         </div>
@@ -42,7 +42,7 @@
                                 <div class="form-group">
                                     <label for="to_date" class="control-label">To Date</label>
                                     <div class="input-group date">
-                                        <input type="text" id="to_date" name="to_date" class="form-control datepicker" value="<?php echo $room['to_date']; ?>">
+                                        <input type="text" id="to_date" name="to_date" class="form-control datepicker" value="<?php echo htmlspecialchars($room['to_date'], ENT_QUOTES, 'UTF-8'); ?>">
                                         <div class="input-group-addon">
                                             <i class="fa fa-calendar calendar-icon"></i>
                                         </div>
@@ -50,11 +50,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="type" class="control-label">Type</label>
-                                    <input type="text" id="type" name="type" class="form-control" value="<?php echo $room['type']; ?>">
+                                    <input type="text" id="type" name="type" class="form-control" value="<?php echo htmlspecialchars($room['type'], ENT_QUOTES, 'UTF-8'); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="bench_type" class="control-label">Bench Type</label>
-                                    <input type="text" id="bench_type" name="bench_type" class="form-control" value="<?php echo $room['bench_type']; ?>">
+                                    <input type="text" id="bench_type" name="bench_type" class="form-control" value="<?php echo htmlspecialchars($room['bench_type'], ENT_QUOTES, 'UTF-8'); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="status" class="control-label">Status</label>

@@ -80,6 +80,30 @@ function cases_module_init_menu_items() {
         'position' => 3,
     ]);
 
+    // Submenu: Document Management
+    $CI->app_menu->add_sidebar_children_item('cases', [
+        'slug'     => 'document_manager',
+        'name'     => _l('document_manager'),
+        'href'     => admin_url('cases/documents'),
+        'position' => 4,
+    ]);
+
+    // Submenu: Upload Documents
+    $CI->app_menu->add_sidebar_children_item('cases', [
+        'slug'     => 'upload_documents',
+        'name'     => _l('upload_document'),
+        'href'     => admin_url('cases/documents/upload'),
+        'position' => 5,
+    ]);
+
+    // Submenu: Search Documents
+    $CI->app_menu->add_sidebar_children_item('cases', [
+        'slug'     => 'search_documents',
+        'name'     => _l('search_documents'),
+        'href'     => admin_url('cases/documents/search'),
+        'position' => 6,
+    ]);
+
     // Admin only items
     if (is_admin()) {
         // Submenu: Courts
@@ -87,7 +111,7 @@ function cases_module_init_menu_items() {
             'slug'     => 'courts',
             'name'     => 'Courts',
             'href'     => admin_url('cases/courts/manage_courts'),
-            'position' => 4,
+            'position' => 7,
         ]);
         
         // Submenu: Court Rooms
@@ -95,7 +119,7 @@ function cases_module_init_menu_items() {
             'slug'     => 'court_rooms',
             'name'     => 'Court Rooms',
             'href'     => admin_url('cases/courts/manage_rooms'),
-            'position' => 5,
+            'position' => 8,
         ]);
     }
 }
@@ -112,5 +136,5 @@ function cases_permissions() {
             'delete' => _l('permission_delete'),
         ]
     ];
-    register_staff_capabilities('cases', $capabilities, _l('Cases'));
+    register_staff_capabilities('cases', $capabilities, _l('Legal Practice & Documents'));
 }

@@ -33,7 +33,7 @@ if (!function_exists('load_cases_css')) {
         
         // Load view-specific styles
         if ($view) {
-            $view_file = $css_base_url . 'views/' . $view . '.css';
+            $view_file = base_url('modules/cases/assets/views/' . $view . '.css');
             $css_links[] = '<link rel="stylesheet" href="' . $view_file . '?v=' . time() . '">';
         }
         
@@ -120,6 +120,7 @@ if (!function_exists('cases_page_wrapper_end')) {
         return '</div></div></div>';
     }
 }
+
 
 if (!function_exists('cases_section_start')) {
     /**

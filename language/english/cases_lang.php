@@ -494,3 +494,101 @@ $lang['help_text_cases'] = 'Track active litigation and case progression';
 $lang['help_text_hearings'] = 'Schedule and manage court appearances';
 $lang['help_text_documents'] = 'Organize and manage case-related documents';
 $lang['help_text_reports'] = 'Generate insights and analytics on your practice';
+
+// ========================================================================
+// DOCUMENT MANAGEMENT - Integrated from Documents Module
+// ========================================================================
+
+// Document Manager Core
+$lang['document_manager'] = 'Document Manager';
+$lang['upload_document'] = 'Upload Document';
+$lang['search_documents'] = 'Search Documents';
+$lang['edit_document'] = 'Edit Document';
+$lang['recent_document_activity'] = 'Recent Document Activity';
+$lang['no_recent_activity'] = 'No recent document activity found.';
+
+// Document Actions & Operations
+$lang['select_file'] = 'Select File';
+$lang['upload'] = 'Upload';
+$lang['search'] = 'Search';
+$lang['view'] = 'View';
+$lang['download'] = 'Download';
+$lang['delete'] = 'Delete';
+$lang['edit'] = 'Edit';
+$lang['save_changes'] = 'Update';
+
+// Document Properties & Metadata
+$lang['file_name'] = 'File Name';
+$lang['file_type'] = 'File Type';
+$lang['date_added'] = 'Date Added';
+$lang['document_tag'] = 'Document Tag';
+$lang['enter_document_tag'] = 'Enter tag (e.g., Contract, Invoice, Receipt)';
+$lang['no_tag'] = 'No Tag';
+
+// Document Ownership & Relationships
+$lang['document_belongs_to'] = 'Document Belongs To';
+$lang['document_owner'] = 'Document Owner';
+$lang['belongs_to'] = 'Belongs To';
+$lang['document_type'] = 'Document Type';
+
+// Document Type Options
+$lang['document_type_client'] = 'Client';
+$lang['document_type_contact'] = 'Contact';
+$lang['document_type_invoice'] = 'Invoice';
+$lang['document_type_case'] = 'Case';
+$lang['document_type_hearing'] = 'Hearing';
+$lang['document_type_consultation'] = 'Consultation';
+$lang['document_type_other'] = 'Other';
+
+// Selection Options
+$lang['select_customer'] = 'Select Customer';
+$lang['select_contact'] = 'Select Contact';
+$lang['select_invoice'] = 'Select Invoice';
+$lang['select_case'] = 'Select Case';
+$lang['select_hearing'] = 'Select Hearing';
+$lang['select_consultation'] = 'Select Consultation';
+
+// Document Type Selection Labels
+$lang['document_type_select'] = 'Select Document Type';
+$lang['document_type_select_client'] = 'Select Client';
+$lang['document_type_select_contact'] = 'Select Contact';
+$lang['document_type_select_invoice'] = 'Select Invoice';
+$lang['document_type_select_case'] = 'Select Case';
+$lang['document_type_select_hearing'] = 'Select Hearing';
+$lang['document_type_select_consultation'] = 'Select Consultation';
+$lang['document_type_select_customer'] = 'Select Customer';
+$lang['document_type_select_other'] = 'Select Other';
+
+// Search & Filtering
+$lang['search_by'] = 'Search By';
+$lang['search_term'] = 'Search Term';
+$lang['search_results'] = 'Search Results';
+$lang['filter_by_type'] = 'Filter by Type';
+$lang['selection_criteria'] = 'Selection Criteria';
+$lang['no_results_found'] = 'No results found.';
+$lang['back_to_search'] = 'Back to Search';
+
+// Document Management Operations
+$lang['replace_file'] = 'Replace File';
+$lang['leave_blank_to_keep_existing'] = 'Leave blank to keep existing file';
+
+// Document Success Messages
+$lang['document_uploaded_successfully'] = 'Document uploaded successfully.';
+$lang['document_updated_successfully'] = 'Document updated successfully.';
+$lang['document_deleted_successfully'] = 'Document deleted successfully.';
+
+// Document Error Messages
+$lang['document_not_found'] = 'The document you are trying to access does not exist.';
+$lang['validation_select_customer'] = 'Please select a customer.';
+$lang['validation_select_file'] = 'Please select a document to upload.';
+$lang['validation_upload_failed'] = 'Failed to upload document.';
+$lang['no_file_selected'] = 'No file selected for upload.';
+
+// Document Form Labels
+$lang['customer'] = 'Customer';
+$lang['invoice'] = 'Invoice';
+$lang['contact'] = 'Contact';
+$lang['related_id'] = 'Related ID';
+$lang['enter_client_or_invoice_id'] = 'Enter Client or Invoice ID';
+$lang['actions'] = 'Actions';
+$lang['confirm_action_prompt'] = 'Are you sure you want to perform this action?';
