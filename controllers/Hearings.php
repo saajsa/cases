@@ -357,9 +357,10 @@ public function causelist()
         $data['hearings'] = $query->result_array();
     }
     
-    // Get available dates with hearings using Query Builder
+    // Get available dates with hearings using Query Builder (excluding past dates)
     $this->db->select('DISTINCT DATE(date) as hearing_date');
     $this->db->from(db_prefix() . 'hearings');
+    $this->db->where('DATE(date) >=', date('Y-m-d')); // Only include today and future dates
     $this->db->order_by('date', 'ASC');
     $date_query = $this->db->get();
     

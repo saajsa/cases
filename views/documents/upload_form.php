@@ -1,365 +1,454 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
-
-<!-- Mobile-friendly styles -->
-<style>
-  /* Core UI improvements */
-  .panel_s {
-    border: 0;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-  }
-  .panel_s > .panel-body {
-    padding: 1.5rem;
-  }
-  
-  /* Document loader */
-  .document-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.95);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  .document-loader-spinner {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #0d6efd;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 15px;
-  }
-  .document-loader-text {
-    font-size: 18px;
-    color: #333;
-    font-weight: 500;
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Form elements */
-  .form-group {
-    margin-bottom: 20px;
-  }
-  .form-label {
-    font-weight: 600;
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #333;
-  }
-  .form-control {
-    border-radius: 6px;
-    padding: 10px 12px;
-    border: 1px solid #dce0e6;
-    width: 100%;
-    transition: border-color 0.15s ease-in-out;
-  }
-  .form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
-  }
-  
-  /* File upload zone */
-  .file-upload-zone {
-    border: 2px dashed #dce0e6;
-    border-radius: 6px;
-    padding: 25px;
-    text-align: center;
-    margin-bottom: 20px;
-    background-color: #f8f9fa;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .file-upload-zone:hover {
-    border-color: #0d6efd;
-    background-color: #f1f7ff;
-  }
-  .file-upload-icon {
-    font-size: 40px;
-    color: #6c757d;
-    margin-bottom: 10px;
-  }
-  .file-upload-text {
-    color: #495057;
-    font-size: 15px;
-    font-weight: 500;
-  }
-  .file-upload-zone input[type="file"] {
-    position: absolute;
-    width: 0;
-    height: 0;
-    opacity: 0;
-  }
-  .file-name-display {
-    margin-top: 10px;
-    font-weight: 500;
-    color: #0d6efd;
-    display: none;
-  }
-  
-  /* Radio options with icons */
-  .doc-type-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .doc-type-option {
-    flex: 1 0 150px;
-    padding: 15px;
-    border: 1px solid #dce0e6;
-    border-radius: 6px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .doc-type-option:hover {
-    background-color: #f8f9fa;
-  }
-  .doc-type-option.active {
-    border-color: #0d6efd;
-    background-color: #f1f7ff;
-  }
-  .doc-type-icon {
-    font-size: 24px;
-    margin-bottom: 8px;
-    color: #6c757d;
-  }
-  .doc-type-option.active .doc-type-icon {
-    color: #0d6efd;
-  }
-  .doc-type-option input[type="radio"] {
-    position: absolute;
-    width: 0;
-    height: 0;
-    opacity: 0;
-  }
-  .doc-type-label {
-    display: block;
-    font-weight: 500;
-    font-size: 14px;
-  }
-  
-  /* Submit button */
-  .btn-submit {
-    background-color: #0d6efd;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    width: 100%;
-  }
-  .btn-submit:hover {
-    background-color: #0b5ed7;
-  }
-  
-  /* Responsive adjustments */
-  @media (min-width: 768px) {
-    .btn-submit {
-      width: auto;
-    }
-    .doc-type-option {
-      flex: 0 0 140px;
-    }
-  }
-</style>
+<?php 
+init_head();
+echo load_cases_css(['cards', 'buttons', 'forms', 'status', 'modals', 'tables', 'wizard']);
+echo cases_page_wrapper_start(
+    'Document Upload',
+    'Upload and manage legal documents',
+    [
+        [
+            'text' => 'Search Documents',
+            'href' => admin_url('cases/documents/search'),
+            'class' => 'cases-btn',
+            'icon' => 'fas fa-search'
+        ],
+        [
+            'text' => 'Document Manager',
+            'href' => admin_url('cases/documents'),
+            'class' => 'cases-btn',
+            'icon' => 'fas fa-folder'
+        ]
+    ]
+);
+?>
 
 <!-- Loader overlay -->
-<div id="document-loader" class="document-loader" style="display: none;">
-  <div class="document-loader-spinner"></div>
-  <div class="document-loader-text">Loading document details...</div>
-</div>
-
-<div id="wrapper">
-  <div class="content">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="panel_s">
-            <div class="panel-body">
-              <!-- Page header and tabs -->
-              <div class="page-title-actions mb-4">
-                <ul class="nav nav-tabs border-0">
-                  <li class="nav-item">
-                    <a class="nav-link <?php echo $this->uri->segment(3) == 'upload' ? 'active' : ''; ?>" href="<?php echo admin_url('cases/documents/upload'); ?>">
-                      <i class="fa fa-upload mr-1"></i> <?php echo _l('upload_document'); ?>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link <?php echo $this->uri->segment(3) == 'search' ? 'active' : ''; ?>" href="<?php echo admin_url('cases/documents/search'); ?>">
-                      <i class="fa fa-search mr-1"></i> <?php echo _l('search_documents'); ?>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Form start -->
-              <?php echo form_open_multipart(admin_url('cases/documents/upload'), ['id' => 'document-upload-form']); ?>
-                
-                <!-- Step 1: File Upload -->
-                <div class="file-upload-zone" id="file-drop-zone">
-                  <div class="file-upload-icon">
-                    <i class="fa fa-file-upload"></i>
-                  </div>
-                  <div class="file-upload-text">
-                    <?php echo _l('drop_files_here_or_click_to_upload'); ?>
-                  </div>
-                  <input type="file" name="document" id="document" class="form-control">
-                  <div class="file-name-display" id="file-name-display"></div>
-                </div>
-                
-                <!-- Step 2: Customer Selection -->
-                <div class="form-group">
-                  <label class="form-label"><?php echo _l('select_customer'); ?></label>
-                  <select name="customer_id" id="customer_id" class="form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_customer'); ?></option>
-                    <?php foreach($customers as $customer) { ?>
-                      <option value="<?php echo htmlspecialchars($customer->userid); ?>">
-                        <?php echo htmlspecialchars($customer->company); ?>
-                      </option>
-                    <?php } ?>
-                  </select>
-                </div>
-                
-                <!-- Step 3: Document Type Selection -->
-                <div class="form-group">
-                  <label class="form-label"><?php echo _l('document_belongs_to'); ?></label>
-                  <div class="doc-type-options">
-                    <div class="doc-type-option" data-type="invoice">
-                      <div class="doc-type-icon"><i class="fa fa-file-invoice"></i></div>
-                      <label class="doc-type-label"><?php echo _l('invoice'); ?></label>
-                      <input type="radio" name="doc_owner_type" value="invoice" checked>
-                    </div>
-                    <div class="doc-type-option" data-type="customer">
-                      <div class="doc-type-icon"><i class="fa fa-building"></i></div>
-                      <label class="doc-type-label"><?php echo _l('customer'); ?></label>
-                      <input type="radio" name="doc_owner_type" value="customer">
-                    </div>
-                    <div class="doc-type-option" data-type="contact">
-                      <div class="doc-type-icon"><i class="fa fa-user"></i></div>
-                      <label class="doc-type-label"><?php echo _l('contact'); ?></label>
-                      <input type="radio" name="doc_owner_type" value="contact">
-                    </div>
-                    <div class="doc-type-option" data-type="consultation">
-                      <div class="doc-type-icon"><i class="fa fa-comments"></i></div>
-                      <label class="doc-type-label"><?php echo _l('consultation'); ?></label>
-                      <input type="radio" name="doc_owner_type" value="consultation">
-                    </div>
-                    <div class="doc-type-option" data-type="case">
-                      <div class="doc-type-icon"><i class="fa fa-briefcase"></i></div>
-                      <label class="doc-type-label"><?php echo _l('case'); ?></label>
-                      <input type="radio" name="doc_owner_type" value="case">
-                    </div>
-                    <div class="doc-type-option" data-type="hearing">
-                      <div class="doc-type-icon"><i class="fa fa-gavel"></i></div>
-                      <label class="doc-type-label"><?php echo _l('hearing'); ?></label>
-                      <input type="radio" name="doc_owner_type" value="hearing">
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Step 4: Related Entity Selection -->
-                <!-- Invoice -->
-                <div class="form-group entity-select" id="invoice_div">
-                  <label class="form-label"><?php echo _l('select_invoice'); ?></label>
-                  <select name="invoice_id" id="invoice_id" class="form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_invoice'); ?></option>
-                  </select>
-                </div>
-
-                <!-- Contact -->
-                <div class="form-group entity-select" id="contact_div" style="display:none;">
-                  <label class="form-label"><?php echo _l('select_contact'); ?></label>
-                  <select name="contact_id" id="contact_id" class="form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_contact'); ?></option>
-                  </select>
-                </div>
-
-                <!-- Consultation -->
-                <div class="form-group entity-select" id="consultation_div" style="display:none;">
-                  <label class="form-label"><?php echo _l('select_consultation'); ?></label>
-                  <select name="consultation_id" id="consultation_id" class="form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_consultation'); ?></option>
-                  </select>
-                </div>
-
-                <!-- Case -->
-                <div class="form-group entity-select" id="case_div" style="display:none;">
-                  <label class="form-label"><?php echo _l('select_case'); ?></label>
-                  <select name="case_id" id="case_id" class="form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_case'); ?></option>
-                  </select>
-                </div>
-
-                <!-- Hearing -->
-                <div class="form-group entity-select" id="hearing_div" style="display:none;">
-                  <label class="form-label"><?php echo _l('select_hearing'); ?></label>
-                  <select name="hearing_id" id="hearing_id" class="form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_hearing'); ?></option>
-                  </select>
-                </div>
-                
-                <!-- Step 5: Document Tag -->
-                <div class="form-group">
-                  <label class="form-label"><?php echo _l('document_tag'); ?></label>
-                  <input type="text" name="document_tag" id="document_tag" class="form-control" placeholder="<?php echo _l('enter_document_tag'); ?>">
-                </div>
-
-                <!-- Submit Button -->
-                <div class="form-group text-center text-md-left">
-                  <button type="submit" class="btn-submit">
-                    <i class="fa fa-upload mr-2"></i> <?php echo _l('upload'); ?>
-                  </button>
-                </div>
-              <?php echo form_close(); ?>
-            </div>
-          </div>
-        </div>
-      </div>
+<div id="document-loader" class="cases-loading-overlay" style="display: none;">
+    <div class="cases-loading-content">
+        <div class="cases-loading-spinner"></div>
+        <div class="cases-loading-text">Loading document details...</div>
     </div>
-  </div>
 </div>
 
-<!-- Enhanced JavaScript -->
+<!-- Upload Wizard Container -->
+<div class="cases-upload-wizard">
+    
+    <!-- Progress Steps -->
+    <div class="cases-upload-steps">
+        <div class="cases-upload-step active" data-step="1">
+            <div class="cases-step-number">1</div>
+            <div class="cases-step-label">Select File</div>
+        </div>
+        <div class="cases-upload-step" data-step="2">
+            <div class="cases-step-number">2</div>
+            <div class="cases-step-label">Choose Client</div>
+        </div>
+        <div class="cases-upload-step" data-step="3">
+            <div class="cases-step-number">3</div>
+            <div class="cases-step-label">Link Document</div>
+        </div>
+        <div class="cases-upload-step" data-step="4">
+            <div class="cases-step-number">4</div>
+            <div class="cases-step-label">Review & Upload</div>
+        </div>
+    </div>
+
+    <?php echo form_open_multipart(admin_url('cases/documents/upload'), ['id' => 'document-upload-form']); ?>
+
+    <!-- Step 1: File Selection -->
+    <div class="cases-upload-content active" data-step="1">
+        <div class="cases-upload-step-header">
+            <h3><i class="fas fa-file-upload"></i> Select Document to Upload</h3>
+            <p>Choose the file you want to upload to the document management system</p>
+        </div>
+
+        <div class="cases-file-upload-zone" id="file-drop-zone">
+            <div class="cases-file-upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="cases-file-upload-text">
+                <strong>Drop your file here or click to browse</strong>
+                <small>Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG (Max 10MB)</small>
+            </div>
+            <input type="file" name="document" id="document" class="cases-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+            <div class="cases-file-preview" id="file-preview" style="display:none;">
+                <div class="cases-file-info">
+                    <div class="cases-file-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <div class="cases-file-details">
+                        <div class="cases-file-name" id="file-name"></div>
+                        <div class="cases-file-size" id="file-size"></div>
+                        <div class="cases-file-actions">
+                            <button type="button" class="cases-btn-link" id="change-file">
+                                <i class="fas fa-edit"></i> Change File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cases-upload-actions">
+            <button type="button" class="cases-btn cases-btn-primary" id="next-step-1" disabled>
+                Next: Choose Client <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 2: Client Selection -->
+    <div class="cases-upload-content" data-step="2">
+        <div class="cases-upload-step-header">
+            <h3><i class="fas fa-users"></i> Select Client</h3>
+            <p>Choose which client this document belongs to</p>
+        </div>
+
+        <div class="cases-form-group">
+            <div class="cases-search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="customer_search" class="cases-form-control" placeholder="Start typing to search for a client..." autocomplete="off">
+                <input type="hidden" name="customer_id" id="customer_id">
+                <div class="cases-search-results" id="search-results" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="cases-selected-client" id="selected-client" style="display:none;">
+            <div class="cases-client-card">
+                <div class="cases-client-info">
+                    <div class="cases-client-name" id="client-name"></div>
+                    <div class="cases-client-details" id="client-details"></div>
+                </div>
+                <button type="button" class="cases-btn-link" id="change-client">
+                    <i class="fas fa-edit"></i> Change
+                </button>
+            </div>
+        </div>
+
+        <div class="cases-upload-actions">
+            <button type="button" class="cases-btn cases-btn-secondary" id="prev-step-2">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="cases-btn cases-btn-primary" id="next-step-2" disabled>
+                Next: Link Document <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 3: Document Association -->
+    <div class="cases-upload-content" data-step="3">
+        <div class="cases-upload-step-header">
+            <h3><i class="fas fa-link"></i> Link Document</h3>
+            <p>Choose what this document relates to</p>
+        </div>
+
+        <!-- Quick Actions for Common Scenarios -->
+        <div class="cases-quick-actions">
+            <button type="button" class="cases-quick-action" data-type="general">
+                <i class="fas fa-folder"></i>
+                <span>General Client Document</span>
+                <small>Not related to any specific case or invoice</small>
+            </button>
+            <button type="button" class="cases-quick-action" data-type="case">
+                <i class="fas fa-gavel"></i>
+                <span>Litigation</span>
+                <small>Associate with legal case or hearing</small>
+            </button>
+            <button type="button" class="cases-quick-action" data-type="invoice">
+                <i class="fas fa-file-invoice"></i>
+                <span>Link to Invoice</span>
+                <small>Billing or payment related document</small>
+            </button>
+            <button type="button" class="cases-quick-action" data-type="consultation">
+                <i class="fas fa-comments"></i>
+                <span>Consultation</span>
+                <small>Client consultation document</small>
+            </button>
+        </div>
+
+        <!-- Document Type Selection (Hidden initially) -->
+        <div class="cases-document-types" id="document-types" style="display:none;">
+            <label class="cases-form-label">What type of document is this?</label>
+            <div class="cases-doc-type-grid">
+                <div class="cases-doc-type-option" data-type="invoice">
+                    <div class="cases-doc-type-icon"><i class="fas fa-file-invoice"></i></div>
+                    <label class="cases-doc-type-label"><?php echo _l('invoice'); ?></label>
+                    <input type="radio" name="doc_owner_type" value="invoice">
+                </div>
+                <div class="cases-doc-type-option" data-type="customer">
+                    <div class="cases-doc-type-icon"><i class="fas fa-building"></i></div>
+                    <label class="cases-doc-type-label"><?php echo _l('customer'); ?></label>
+                    <input type="radio" name="doc_owner_type" value="customer">
+                </div>
+                <div class="cases-doc-type-option" data-type="consultation">
+                    <div class="cases-doc-type-icon"><i class="fas fa-comments"></i></div>
+                    <label class="cases-doc-type-label"><?php echo _l('consultation'); ?></label>
+                    <input type="radio" name="doc_owner_type" value="consultation">
+                </div>
+                <div class="cases-doc-type-option" data-type="case">
+                    <div class="cases-doc-type-icon"><i class="fas fa-briefcase"></i></div>
+                    <label class="cases-doc-type-label"><?php echo _l('case'); ?></label>
+                    <input type="radio" name="doc_owner_type" value="case">
+                </div>
+                <div class="cases-doc-type-option" data-type="hearing">
+                    <div class="cases-doc-type-icon"><i class="fas fa-gavel"></i></div>
+                    <label class="cases-doc-type-label"><?php echo _l('hearing'); ?></label>
+                    <input type="radio" name="doc_owner_type" value="hearing">
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Entity Selection -->
+        <div class="cases-related-entities" id="related-entities" style="display:none;">
+            <!-- Invoice -->
+            <div class="cases-form-group entity-select" id="invoice_div" style="display:none;">
+                <label class="cases-form-label"><?php echo _l('select_invoice'); ?></label>
+                <select name="invoice_id" id="invoice_id" class="cases-form-control selectpicker" data-live-search="true">
+                    <option value=""><?php echo _l('select_invoice'); ?></option>
+                </select>
+            </div>
+
+            <!-- Consultation -->
+            <div class="cases-form-group entity-select" id="consultation_div" style="display:none;">
+                <label class="cases-form-label"><?php echo _l('select_consultation'); ?></label>
+                <select name="consultation_id" id="consultation_id" class="cases-form-control selectpicker" data-live-search="true">
+                    <option value=""><?php echo _l('select_consultation'); ?></option>
+                </select>
+            </div>
+
+            <!-- Case -->
+            <div class="cases-form-group entity-select" id="case_div" style="display:none;">
+                <label class="cases-form-label"><?php echo _l('select_case'); ?></label>
+                <select name="case_id" id="case_id" class="cases-form-control selectpicker" data-live-search="true">
+                    <option value=""><?php echo _l('select_case'); ?></option>
+                </select>
+            </div>
+
+            <!-- Hearing -->
+            <div class="cases-form-group entity-select" id="hearing_div" style="display:none;">
+                <label class="cases-form-label"><?php echo _l('select_hearing'); ?></label>
+                <select name="hearing_id" id="hearing_id" class="cases-form-control selectpicker" data-live-search="true">
+                    <option value=""><?php echo _l('select_hearing'); ?></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="cases-upload-actions">
+            <button type="button" class="cases-btn cases-btn-secondary" id="prev-step-3">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="cases-btn cases-btn-primary" id="next-step-3" disabled>
+                Next: Review & Upload <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 4: Review and Upload -->
+    <div class="cases-upload-content" data-step="4">
+        <div class="cases-upload-step-header">
+            <h3><i class="fas fa-check-circle"></i> Review & Upload</h3>
+            <p>Please review the information below and upload your document</p>
+        </div>
+
+        <div class="cases-upload-summary">
+            <div class="cases-summary-section">
+                <h4><i class="fas fa-file"></i> Document Details</h4>
+                <div class="cases-summary-item">
+                    <label>File:</label>
+                    <span id="summary-file">-</span>
+                </div>
+                <div class="cases-summary-item">
+                    <label>Size:</label>
+                    <span id="summary-size">-</span>
+                </div>
+            </div>
+
+            <div class="cases-summary-section">
+                <h4><i class="fas fa-user"></i> Client Information</h4>
+                <div class="cases-summary-item">
+                    <label>Client:</label>
+                    <span id="summary-client">-</span>
+                </div>
+            </div>
+
+            <div class="cases-summary-section">
+                <h4><i class="fas fa-link"></i> Document Association</h4>
+                <div class="cases-summary-item">
+                    <label>Type:</label>
+                    <span id="summary-type">-</span>
+                </div>
+                <div class="cases-summary-item" id="summary-relation-item" style="display:none;">
+                    <label>Related to:</label>
+                    <span id="summary-relation">-</span>
+                </div>
+            </div>
+
+            <div class="cases-summary-section">
+                <h4><i class="fas fa-tag"></i> Additional Information</h4>
+                <div class="cases-form-group">
+                    <label class="cases-form-label">Document Tag (Optional)</label>
+                    <input type="text" name="document_tag" id="document_tag" class="cases-form-control" placeholder="Add a tag to help categorize this document...">
+                    <small class="cases-form-help">Examples: "Contract", "Evidence", "Correspondence", etc.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="cases-upload-actions">
+            <button type="button" class="cases-btn cases-btn-secondary" id="prev-step-4">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="submit" class="cases-btn cases-btn-success" id="upload-document">
+                <i class="fas fa-cloud-upload-alt"></i> Upload Document
+            </button>
+        </div>
+    </div>
+
+    <?php echo form_close(); ?>
+</div>
+
+<?php echo cases_section_end(); ?>
+<?php echo cases_page_wrapper_end(); ?>
+
 <script>
-(function() {
-  // CSRF tokens from backend (CodeIgniter)
+document.addEventListener('DOMContentLoaded', function() {
+  // CSRF tokens and configuration
   const csrfName = '<?php echo $this->security->get_csrf_token_name(); ?>';
   let csrfHash = '<?php echo $this->security->get_csrf_hash(); ?>';
   const admin_url = "<?php echo admin_url(); ?>";
   
-  // Elements
+  // Wizard state management
+  let currentStep = 1;
+  let selectedFile = null;
+  let selectedClient = null;
+  let selectedDocType = null;
+  let selectedEntity = null;
+  
+  // Initialize selectpicker
+  if ($.fn.selectpicker) {
+    $('.selectpicker').selectpicker();
+  }
+  
+  // ==========================================
+  // WIZARD NAVIGATION FUNCTIONS
+  // ==========================================
+  
+  function showStep(stepNumber, direction = 'forward') {
+    const previousStep = currentStep;
+    
+    // Update step indicators
+    document.querySelectorAll('.cases-upload-step').forEach((step, index) => {
+      if (index + 1 <= stepNumber) {
+        step.classList.add('active');
+      } else {
+        step.classList.remove('active');
+      }
+    });
+    
+    // Animate content sections
+    document.querySelectorAll('.cases-upload-content').forEach((content, index) => {
+      const contentStep = index + 1;
+      
+      if (contentStep === stepNumber) {
+        // Show new step
+        content.style.display = 'block';
+        setTimeout(() => {
+          content.classList.add('active');
+        }, 10);
+      } else if (contentStep === previousStep) {
+        // Hide previous step with animation
+        content.classList.remove('active');
+        if (direction === 'forward') {
+          content.classList.add('slide-out-left');
+        } else {
+          content.classList.add('slide-out-right');
+        }
+        
+        setTimeout(() => {
+          content.style.display = 'none';
+          content.classList.remove('slide-out-left', 'slide-out-right');
+        }, 300);
+      } else {
+        // Hide other steps
+        content.classList.remove('active');
+        content.style.display = 'none';
+      }
+    });
+    
+    currentStep = stepNumber;
+  }
+  
+  function enableNextButton(stepNumber) {
+    const nextBtn = document.getElementById(`next-step-${stepNumber}`);
+    if (nextBtn) {
+      nextBtn.disabled = false;
+    }
+  }
+  
+  function disableNextButton(stepNumber) {
+    const nextBtn = document.getElementById(`next-step-${stepNumber}`);
+    if (nextBtn) {
+      nextBtn.disabled = true;
+    }
+  }
+  
+  // ==========================================
+  // STEP 1: FILE SELECTION
+  // ==========================================
+  
   const fileInput = document.getElementById('document');
   const fileDropZone = document.getElementById('file-drop-zone');
-  const fileNameDisplay = document.getElementById('file-name-display');
-  const docTypeOptions = document.querySelectorAll('.doc-type-option');
+  const filePreview = document.getElementById('file-preview');
   
   // File upload handling
   fileDropZone.addEventListener('click', function() {
     fileInput.click();
   });
   
-  fileInput.addEventListener('change', function() {
-    if (this.files && this.files[0]) {
-      fileNameDisplay.textContent = this.files[0].name;
-      fileNameDisplay.style.display = 'block';
-      fileDropZone.style.borderColor = '#0d6efd';
+  fileInput.addEventListener('change', handleFileSelection);
+  
+  function handleFileSelection() {
+    const file = fileInput.files[0];
+    if (file) {
+      selectedFile = file;
+      showFilePreview(file);
+      enableNextButton(1);
     }
+  }
+  
+  function showFilePreview(file) {
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-size').textContent = formatFileSize(file.size);
+    
+    // Update file icon based on type
+    const fileIcon = document.querySelector('.cases-file-icon i');
+    if (file.type.includes('pdf')) {
+      fileIcon.className = 'fas fa-file-pdf';
+    } else if (file.type.includes('image')) {
+      fileIcon.className = 'fas fa-file-image';
+    } else if (file.type.includes('word')) {
+      fileIcon.className = 'fas fa-file-word';
+    } else {
+      fileIcon.className = 'fas fa-file';
+    }
+    
+    fileDropZone.style.display = 'none';
+    filePreview.style.display = 'block';
+  }
+  
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+  
+  // Change file button
+  document.getElementById('change-file').addEventListener('click', function() {
+    filePreview.style.display = 'none';
+    fileDropZone.style.display = 'block';
+    selectedFile = null;
+    fileInput.value = '';
+    disableNextButton(1);
   });
   
   // Drag & drop functionality
@@ -373,60 +462,366 @@
   }
   
   ['dragenter', 'dragover'].forEach(eventName => {
-    fileDropZone.addEventListener(eventName, highlight, false);
+    fileDropZone.addEventListener(eventName, function() {
+      fileDropZone.classList.add('cases-file-drag-over');
+    }, false);
   });
   
   ['dragleave', 'drop'].forEach(eventName => {
-    fileDropZone.addEventListener(eventName, unhighlight, false);
+    fileDropZone.addEventListener(eventName, function() {
+      fileDropZone.classList.remove('cases-file-drag-over');
+    }, false);
   });
-  
-  function highlight() {
-    fileDropZone.style.borderColor = '#0d6efd';
-    fileDropZone.style.backgroundColor = '#f1f7ff';
-  }
-  
-  function unhighlight() {
-    fileDropZone.style.borderColor = '#dce0e6';
-    fileDropZone.style.backgroundColor = '#f8f9fa';
-  }
   
   fileDropZone.addEventListener('drop', handleDrop, false);
   
   function handleDrop(e) {
     const dt = e.dataTransfer;
     const files = dt.files;
-    fileInput.files = files;
-    
-    if (files && files[0]) {
-      fileNameDisplay.textContent = files[0].name;
-      fileNameDisplay.style.display = 'block';
+    if (files.length > 0) {
+      fileInput.files = files;
+      handleFileSelection();
     }
   }
   
+  // ==========================================
+  // STEP 2: CLIENT SELECTION
+  // ==========================================
+  
+  const customerSearch = document.getElementById('customer_search');
+  const customerIdHidden = document.getElementById('customer_id');
+  const searchResults = document.getElementById('search-results');
+  const selectedClientDiv = document.getElementById('selected-client');
+  let searchTimeout;
+  let clients = <?php echo json_encode($customers); ?>;
+  
+  customerSearch.addEventListener('input', function() {
+    const query = this.value.trim();
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+      hideSearchResults();
+      return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+      searchClients(query);
+    }, 300);
+  });
+  
+  customerSearch.addEventListener('blur', function() {
+    // Delay hiding to allow clicking on results
+    setTimeout(() => {
+      hideSearchResults();
+    }, 200);
+  });
+  
+  function searchClients(query) {
+    const results = clients.filter(client => 
+      client.company.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    showSearchResults(results);
+  }
+  
+  function showSearchResults(results) {
+    searchResults.innerHTML = '';
+    
+    if (results.length === 0) {
+      searchResults.innerHTML = '<div class="cases-search-no-results">No clients found</div>';
+    } else {
+      results.forEach(client => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'cases-search-result';
+        resultDiv.innerHTML = `
+          <div class="cases-search-result-name">${client.company}</div>
+          <div class="cases-search-result-details">Client ID: ${client.userid}</div>
+        `;
+        
+        resultDiv.addEventListener('click', function() {
+          selectClient(client);
+        });
+        
+        searchResults.appendChild(resultDiv);
+      });
+    }
+    
+    searchResults.style.display = 'block';
+  }
+  
+  function hideSearchResults() {
+    searchResults.style.display = 'none';
+  }
+  
+  function selectClient(client) {
+    selectedClient = {
+      id: client.userid,
+      name: client.company
+    };
+    
+    customerSearch.value = client.company;
+    customerIdHidden.value = client.userid;
+    hideSearchResults();
+    showSelectedClient(client.company);
+    enableNextButton(2);
+    
+    // Load related data for step 3
+    loadClientRelatedData(client.userid);
+  }
+  
+  function showSelectedClient(clientName) {
+    document.getElementById('client-name').textContent = clientName;
+    document.getElementById('client-details').textContent = 'Client selected';
+    customerSearch.style.display = 'none';
+    selectedClientDiv.style.display = 'block';
+  }
+  
+  function hideSelectedClient() {
+    customerSearch.style.display = 'block';
+    selectedClientDiv.style.display = 'none';
+  }
+  
+  document.getElementById('change-client').addEventListener('click', function() {
+    hideSelectedClient();
+    customerSearch.value = '';
+    customerIdHidden.value = '';
+    selectedClient = null;
+    disableNextButton(2);
+  });
+  
+  // ==========================================
+  // STEP 3: DOCUMENT ASSOCIATION
+  // ==========================================
+  
+  const quickActions = document.querySelectorAll('.cases-quick-action');
+  const documentTypes = document.getElementById('document-types');
+  const relatedEntities = document.getElementById('related-entities');
+  
+  // Quick action handlers
+  quickActions.forEach(action => {
+    action.addEventListener('click', function() {
+      const type = this.dataset.type;
+      
+      // Remove active state from all quick actions
+      quickActions.forEach(qa => qa.classList.remove('active'));
+      this.classList.add('active');
+      
+      if (type === 'general') {
+        // General client document - no specific association needed
+        selectedDocType = 'customer';
+        const customerRadio = document.querySelector('input[name="doc_owner_type"][value="customer"]');
+        if (customerRadio) customerRadio.checked = true;
+        
+        documentTypes.style.display = 'none';
+        relatedEntities.style.display = 'none';
+        enableNextButton(3);
+        
+      } else if (type === 'case') {
+        // Show litigation-related options  
+        selectedDocType = 'case';
+        showDocumentTypeSelection(['case', 'hearing']);
+        
+      } else if (type === 'invoice') {
+        // Show invoice-related options
+        selectedDocType = 'invoice';
+        showDocumentTypeSelection(['invoice', 'customer']);
+        
+      } else if (type === 'consultation') {
+        // Direct consultation selection
+        selectedDocType = 'consultation';
+        const consultationRadio = document.querySelector('input[name="doc_owner_type"][value="consultation"]');
+        if (consultationRadio) consultationRadio.checked = true;
+        
+        documentTypes.style.display = 'none';
+        relatedEntities.style.display = 'block';
+        document.getElementById('consultation_div').style.display = 'block';
+        disableNextButton(3);
+      }
+    });
+  });
+  
+  function showDocumentTypeSelection(allowedTypes) {
+    documentTypes.style.display = 'block';
+    
+    // Hide all doc type options first
+    document.querySelectorAll('.cases-doc-type-option').forEach(option => {
+      option.style.display = 'none';
+    });
+    
+    // Show only allowed types
+    allowedTypes.forEach(type => {
+      const option = document.querySelector(`.cases-doc-type-option[data-type="${type}"]`);
+      if (option) {
+        option.style.display = 'block';
+      }
+    });
+  }
+  
   // Document type selection handling
-  docTypeOptions.forEach(option => {
+  document.querySelectorAll('.cases-doc-type-option').forEach(option => {
     const radio = option.querySelector('input[type="radio"]');
     
     option.addEventListener('click', function() {
+      if (this.style.display === 'none') return; // Skip hidden options
+      
       // Update UI
-      docTypeOptions.forEach(opt => opt.classList.remove('active'));
+      document.querySelectorAll('.cases-doc-type-option').forEach(opt => opt.classList.remove('active'));
       this.classList.add('active');
       
       // Select the radio
       radio.checked = true;
+      selectedDocType = radio.value;
       
-      // Trigger change event
-      const event = new Event('change');
-      radio.dispatchEvent(event);
+      // Show related entity selection if needed
+      showRelatedEntitySelection(selectedDocType);
+    });
+  });
+  
+  function showRelatedEntitySelection(docType) {
+    // Hide all entity selects first
+    document.querySelectorAll('.entity-select').forEach(select => {
+      select.style.display = 'none';
     });
     
-    // Initialize active state
-    if (radio.checked) {
-      option.classList.add('active');
+    if (docType === 'customer') {
+      // No additional selection needed
+      relatedEntities.style.display = 'none';
+      enableNextButton(3);
+    } else {
+      relatedEntities.style.display = 'block';
+      
+      if (docType === 'invoice') {
+        document.getElementById('invoice_div').style.display = 'block';
+      } else if (docType === 'consultation') {
+        document.getElementById('consultation_div').style.display = 'block';
+      } else if (docType === 'case') {
+        document.getElementById('case_div').style.display = 'block';
+      } else if (docType === 'hearing') {
+        document.getElementById('case_div').style.display = 'block';
+        document.getElementById('hearing_div').style.display = 'block';
+      }
+      
+      // Enable next button only after entity is selected
+      disableNextButton(3);
+    }
+  }
+  
+  // Entity selection handlers
+  ['invoice_id', 'consultation_id', 'case_id', 'hearing_id'].forEach(selectId => {
+    const select = document.getElementById(selectId);
+    if (select) {
+      select.addEventListener('change', function() {
+        if (this.value) {
+          selectedEntity = {
+            type: selectId.replace('_id', ''),
+            id: this.value,
+            name: this.options[this.selectedIndex].text
+          };
+          enableNextButton(3);
+          
+          // If case is selected and we need hearing, load hearings
+          if (selectId === 'case_id' && selectedDocType === 'hearing') {
+            updateHearingDropdown(this.value);
+          }
+        } else {
+          selectedEntity = null;
+          disableNextButton(3);
+        }
+      });
     }
   });
   
-  // API calls
+  // ==========================================
+  // STEP 4: REVIEW AND UPLOAD
+  // ==========================================
+  
+  function updateSummary() {
+    // File details
+    document.getElementById('summary-file').textContent = selectedFile ? selectedFile.name : '-';
+    document.getElementById('summary-size').textContent = selectedFile ? formatFileSize(selectedFile.size) : '-';
+    
+    // Client info
+    document.getElementById('summary-client').textContent = selectedClient ? selectedClient.name : '-';
+    
+    // Document type
+    let typeText = '-';
+    if (selectedDocType) {
+      const typeLabels = {
+        'customer': 'General Client Document',
+        'invoice': 'Invoice Document',
+        'contact': 'Contact Document',
+        'consultation': 'Consultation Document',
+        'case': 'Case Document',
+        'hearing': 'Hearing Document'
+      };
+      typeText = typeLabels[selectedDocType] || selectedDocType;
+    }
+    document.getElementById('summary-type').textContent = typeText;
+    
+    // Related entity
+    const relationItem = document.getElementById('summary-relation-item');
+    if (selectedEntity) {
+      document.getElementById('summary-relation').textContent = selectedEntity.name;
+      relationItem.style.display = 'block';
+    } else {
+      relationItem.style.display = 'none';
+    }
+  }
+  
+  // ==========================================
+  // NAVIGATION BUTTON HANDLERS
+  // ==========================================
+  
+  // Next buttons
+  document.getElementById('next-step-1').addEventListener('click', () => showStep(2, 'forward'));
+  document.getElementById('next-step-2').addEventListener('click', () => showStep(3, 'forward'));
+  document.getElementById('next-step-3').addEventListener('click', () => {
+    updateSummary();
+    showStep(4, 'forward');
+  });
+  
+  // Previous buttons
+  document.getElementById('prev-step-2').addEventListener('click', () => showStep(1, 'backward'));
+  document.getElementById('prev-step-3').addEventListener('click', () => showStep(2, 'backward'));
+  document.getElementById('prev-step-4').addEventListener('click', () => showStep(3, 'backward'));
+  
+  // ==========================================
+  // API FUNCTIONS
+  // ==========================================
+  
+  function loadClientRelatedData(customerId) {
+    if (!customerId) return;
+    
+    // Load all related data for this client
+    const requests = [
+      { url: 'get_invoices_by_customer', targetId: 'invoice_id' },
+      { url: 'get_contacts_by_customer', targetId: 'contact_id' },
+      { url: 'get_consultations_by_client', targetId: 'consultation_id' },
+      { url: 'get_cases_by_client', targetId: 'case_id' }
+    ];
+    
+    requests.forEach(request => {
+      fetchAndUpdate(
+        admin_url + 'cases/documents/' + request.url,
+        { customer_id: customerId },
+        request.targetId,
+        'Select option...'
+      );
+    });
+  }
+  
+  function updateHearingDropdown(caseId) {
+    if (caseId) {
+      fetchAndUpdate(
+        admin_url + 'cases/documents/get_hearings_by_case',
+        { case_id: caseId },
+        'hearing_id',
+        '<?php echo _l('select_hearing'); ?>'
+      );
+    }
+  }
+  
   function fetchAndUpdate(url, params, targetId, defaultOptionText) {
     params[csrfName] = csrfHash;
 
@@ -441,236 +836,106 @@
       return response.text();
     })
     .then(data => {
-      document.getElementById(targetId).innerHTML = data;
-      // Refresh selectpicker if it's initialized
-      if ($.fn.selectpicker) {
-        $('#' + targetId).selectpicker('refresh');
+      const select = document.getElementById(targetId);
+      if (select) {
+        select.innerHTML = data;
+        if ($.fn.selectpicker) {
+          $(select).selectpicker('refresh');
+        }
       }
     })
     .catch(() => {
-      document.getElementById(targetId).innerHTML = `<option value="">${defaultOptionText}</option>`;
-      if ($.fn.selectpicker) {
-        $('#' + targetId).selectpicker('refresh');
-      }
-    });
-  }
-
-  function updateInvoiceDropdown(customerId) {
-    if (customerId) {
-      fetchAndUpdate(admin_url + 'documents/get_invoices_by_customer', {customer_id: customerId}, 'invoice_id', '<?php echo _l('select_invoice'); ?>');
-    } else {
-      document.getElementById('invoice_id').innerHTML = '<option value=""><?php echo _l('select_invoice'); ?></option>';
-      if ($.fn.selectpicker) {
-        $('#invoice_id').selectpicker('refresh');
-      }
-    }
-  }
-  function updateContactDropdown(customerId) {
-    if (customerId) {
-      fetchAndUpdate(admin_url + 'documents/get_contacts_by_customer', {customer_id: customerId}, 'contact_id', '<?php echo _l('select_contact'); ?>');
-    } else {
-      document.getElementById('contact_id').innerHTML = '<option value=""><?php echo _l('select_contact'); ?></option>';
-      if ($.fn.selectpicker) {
-        $('#contact_id').selectpicker('refresh');
-      }
-    }
-  }
-  function updateConsultationDropdown(customerId) {
-    if (customerId) {
-      fetchAndUpdate(admin_url + 'documents/get_consultations_by_client', {customer_id: customerId}, 'consultation_id', '<?php echo _l('select_consultation'); ?>');
-    } else {
-      document.getElementById('consultation_id').innerHTML = '<option value=""><?php echo _l('select_consultation'); ?></option>';
-      if ($.fn.selectpicker) {
-        $('#consultation_id').selectpicker('refresh');
-      }
-    }
-  }
-  function updateCaseDropdown(customerId) {
-    if (customerId) {
-      fetchAndUpdate(admin_url + 'documents/get_cases_by_client', {customer_id: customerId}, 'case_id', '<?php echo _l('select_case'); ?>');
-    } else {
-      document.getElementById('case_id').innerHTML = '<option value=""><?php echo _l('select_case'); ?></option>';
-      if ($.fn.selectpicker) {
-        $('#case_id').selectpicker('refresh');
-      }
-    }
-  }
-  function updateHearingDropdown(caseId) {
-    if (caseId) {
-      fetchAndUpdate(admin_url + 'documents/get_hearings_by_case', {case_id: caseId}, 'hearing_id', '<?php echo _l('select_hearing'); ?>');
-    } else {
-      document.getElementById('hearing_id').innerHTML = '<option value=""><?php echo _l('select_hearing'); ?></option>';
-      if ($.fn.selectpicker) {
-        $('#hearing_id').selectpicker('refresh');
-      }
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const customerSelect = document.getElementById('customer_id');
-    const docTypeRadios = document.getElementsByName('doc_owner_type');
-    const caseSelect = document.getElementById('case_id');
-    const entitySelects = document.querySelectorAll('.entity-select');
-
-    customerSelect.addEventListener('change', function () {
-      const customerId = this.value;
-      const selectedType = document.querySelector('input[name="doc_owner_type"]:checked').value;
-
-      if (selectedType === 'invoice') {
-        updateInvoiceDropdown(customerId);
-      } else if (selectedType === 'contact') {
-        updateContactDropdown(customerId);
-      } else if (selectedType === 'consultation') {
-        updateConsultationDropdown(customerId);
-      } else if (selectedType === 'case' || selectedType === 'hearing') {
-        updateCaseDropdown(customerId);
-      }
-    });
-
-    docTypeRadios.forEach(radio => {
-      radio.addEventListener('change', function () {
-        const selectedType = this.value;
-        const customerId = customerSelect.value;
-
-        // Hide all entity selection divs
-        entitySelects.forEach(select => {
-          select.style.display = 'none';
-        });
-
-        if (selectedType === 'invoice') {
-          document.getElementById('invoice_div').style.display = 'block';
-          updateInvoiceDropdown(customerId);
-        } else if (selectedType === 'contact') {
-          document.getElementById('contact_div').style.display = 'block';
-          updateContactDropdown(customerId);
-        } else if (selectedType === 'consultation') {
-          document.getElementById('consultation_div').style.display = 'block';
-          updateConsultationDropdown(customerId);
-        } else if (selectedType === 'case') {
-          document.getElementById('case_div').style.display = 'block';
-          updateCaseDropdown(customerId);
-        } else if (selectedType === 'hearing') {
-          document.getElementById('case_div').style.display = 'block';
-          document.getElementById('hearing_div').style.display = 'block';
-          updateCaseDropdown(customerId);
+      const select = document.getElementById(targetId);
+      if (select) {
+        select.innerHTML = `<option value="">${defaultOptionText}</option>`;
+        if ($.fn.selectpicker) {
+          $(select).selectpicker('refresh');
         }
-      });
+      }
     });
-
-    if (caseSelect) {
-      caseSelect.addEventListener('change', function () {
-        if (document.querySelector('input[name="doc_owner_type"]:checked').value === 'hearing') {
-          updateHearingDropdown(this.value);
-        }
-      });
-    }
+  }
+  
+  // ==========================================
+  // FORM SUBMISSION
+  // ==========================================
+  
+  document.getElementById('document-upload-form').addEventListener('submit', function(e) {
+    e.preventDefault();
     
-    // Initialize selectpicker for enhanced dropdowns
-    if ($.fn.selectpicker) {
-      $('.selectpicker').selectpicker();
-    }
+    const submitBtn = document.getElementById('upload-document');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    submitBtn.disabled = true;
+    
+    // Submit the form
+    const formData = new FormData(this);
+    formData.append(csrfName, csrfHash);
+    
+    fetch(this.action, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Show success message
+        alert('Document uploaded successfully!');
+        
+        // Redirect or reset form
+        window.location.href = admin_url + 'cases/documents';
+      } else {
+        alert('Upload failed: ' + (data.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Upload error:', error);
+      alert('Network error occurred during upload');
+    })
+    .finally(() => {
+      // Restore button
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    });
   });
   
-  // Handle localStorage data
-  document.addEventListener('DOMContentLoaded', function() {
-    try {
-      const uploadData = JSON.parse(localStorage.getItem('document_upload_data'));
-      if (uploadData) {
-        console.log('Found upload data:', uploadData);
-        
-        // Show the loader
-        const loader = document.getElementById('document-loader');
-        if (loader) {
-          loader.style.display = 'flex';
-        }
-        
-        // Clear the storage immediately to prevent reuse
-        localStorage.removeItem('document_upload_data');
-        
-        // Pre-select customer
-        if (uploadData.customer_id) {
-          const customerSelect = document.getElementById('customer_id');
-          if (customerSelect) {
-            customerSelect.value = uploadData.customer_id;
-            // Trigger change event to load dependent dropdowns
-            customerSelect.dispatchEvent(new Event('change'));
-            // Update selectpicker
-            if ($.fn.selectpicker) {
-              $(customerSelect).selectpicker('refresh');
-            }
-          }
-        }
-        
-        // Pre-select document type after a short delay
-        setTimeout(function() {
-          // Pre-select document type
-          if (uploadData.doc_type) {
-            // Find the radio option
-            const docTypeRadio = document.querySelector('input[name="doc_owner_type"][value="' + uploadData.doc_type + '"]');
-            if (docTypeRadio) {
-              docTypeRadio.checked = true;
-              
-              // Update the visual state
-              docTypeOptions.forEach(opt => opt.classList.remove('active'));
-              const activeOption = document.querySelector(`.doc-type-option[data-type="${uploadData.doc_type}"]`);
-              if (activeOption) {
-                activeOption.classList.add('active');
-              }
-              
-              // Trigger change event to show relevant fields
-              docTypeRadio.dispatchEvent(new Event('change'));
-            }
+  // ==========================================
+  // INITIALIZATION
+  // ==========================================
+  
+  // Initialize first step
+  showStep(1);
+  
+  // Handle pre-population from localStorage (if coming from other pages)
+  try {
+    const uploadData = JSON.parse(localStorage.getItem('document_upload_data'));
+    if (uploadData) {
+      localStorage.removeItem('document_upload_data');
+      
+      // Pre-populate data based on localStorage
+      if (uploadData.customer_id) {
+        setTimeout(() => {
+          customerSelect.value = uploadData.customer_id;
+          customerSelect.dispatchEvent(new Event('change'));
+          if ($.fn.selectpicker) {
+            $(customerSelect).selectpicker('refresh');
           }
           
-          // Wait for dropdowns to be populated
-          setTimeout(function() {
-            // Pre-select case
-            if (uploadData.case_id) {
-              const caseSelect = document.getElementById('case_id');
-              if (caseSelect) {
-                caseSelect.value = uploadData.case_id;
-                caseSelect.dispatchEvent(new Event('change'));
-                // Update selectpicker
-                if ($.fn.selectpicker) {
-                  $(caseSelect).selectpicker('refresh');
-                }
-              }
-            }
-            
-            // Wait for hearing dropdown to populate
-            setTimeout(function() {
-              // Pre-select hearing
-              if (uploadData.hearing_id) {
-                const hearingSelect = document.getElementById('hearing_id');
-                if (hearingSelect) {
-                  hearingSelect.value = uploadData.hearing_id;
-                  // Update selectpicker
-                  if ($.fn.selectpicker) {
-                    $(hearingSelect).selectpicker('refresh');
-                  }
-                }
-              }
-              
-              // Hide the loader after everything is done
-              setTimeout(function() {
-                if (loader) {
-                  loader.style.display = 'none';
-                }
-              }, 500);
-            }, 1000);
-          }, 1000);
+          // Auto-advance to step 2 if we have client data
+          if (uploadData.customer_id) {
+            showStep(2);
+          }
         }, 500);
       }
-    } catch (e) {
-      console.error('Error processing upload data:', e);
-      // Hide loader in case of error
-      const loader = document.getElementById('document-loader');
-      if (loader) {
-        loader.style.display = 'none';
-      }
     }
-  });
-})();
+  } catch (e) {
+    console.error('Error processing upload data:', e);
+  }
+});
 </script>
 
 <?php init_tail(); ?>

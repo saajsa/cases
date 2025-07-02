@@ -145,6 +145,9 @@ class Dashboard extends AdminController
             // === REVENUE DATA (if available) ===
             $stats = array_merge($stats, $this->calculateRevenue($this_month_start, $last_month_start, $last_month_end));
             
+            // === DOCUMENT STATISTICS ===
+            $stats['document_stats'] = $this->calculateDocumentStats($this_week_start);
+            
             // === ADDITIONAL METRICS ===
             $stats = array_merge($stats, $this->calculateAdditionalMetrics());
             
@@ -543,6 +546,45 @@ class Dashboard extends AdminController
         }
 
         return $revenue_stats;
+    }
+
+    /**
+     * Calculate document statistics
+     */
+    private function calculateDocumentStats($this_week_start)
+    {
+        $doc_stats = [
+            'total_documents' => 0,
+            'documents_this_week' => 0,
+            'case_documents' => 0,
+            'hearing_documents' => 0
+        ];
+
+        if (!$this->db->table_exists(db_prefix() . 'files')) {
+            return $doc_stats;
+        }
+
+        try {
+            // Total documents
+            $doc_stats['total_documents'] = $this->db->count_all_results(db_prefix() . 'files');
+            
+            // Documents uploaded this week
+            $this->db->where('dateadded >=', $this_week_start);
+            $doc_stats['documents_this_week'] = $this->db->count_all_results(db_prefix() . 'files');
+            
+            // Case documents
+            $this->db->where('rel_type', 'case');
+            $doc_stats['case_documents'] = $this->db->count_all_results(db_prefix() . 'files');
+            
+            // Hearing documents
+            $this->db->where('rel_type', 'hearing');
+            $doc_stats['hearing_documents'] = $this->db->count_all_results(db_prefix() . 'files');
+
+        } catch (Exception $e) {
+            log_message('error', 'Error calculating document stats: ' . $e->getMessage());
+        }
+
+        return $doc_stats;
     }
 
     /**

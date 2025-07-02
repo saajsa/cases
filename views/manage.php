@@ -37,7 +37,7 @@ echo cases_page_wrapper_start(
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
+    display: none; /* Hidden by default */
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -46,8 +46,8 @@ echo cases_page_wrapper_start(
     pointer-events: none; /* Allow clicks through when visible */
 }
 
-.cases-loading-container:not(.loading) .cases-loading-state {
-    display: none; /* Completely hide when not active */
+.cases-loading-container.loading .cases-loading-state {
+    display: flex; /* Only show when container has loading class */
 }
 
 .cases-loading-spinner {
@@ -321,7 +321,7 @@ echo cases_page_wrapper_start(
     </div>
 
     <!-- Consultations Container -->
-    <div id="consultations-container" class="cases-loading-container">
+    <div id="consultations-container" class="cases-loading-container loading">
         <div class="cases-loading-state">
             <div class="cases-loading-spinner"></div>
             <p class="cases-loading-text">Loading consultations...</p>
@@ -348,7 +348,7 @@ echo cases_page_wrapper_start(
     </div>
 
     <!-- Cases Container -->
-    <div id="cases-container" class="cases-loading-container">
+    <div id="cases-container" class="cases-loading-container loading">
         <div class="cases-loading-state">
             <div class="cases-loading-spinner"></div>
             <p class="cases-loading-text">Loading cases...</p>
@@ -628,6 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let casesData = [];
     let csrfTokenName = '<?php echo $this->security->get_csrf_token_name(); ?>';
     let csrfTokenHash = '<?php echo $this->security->get_csrf_hash(); ?>';
+    const admin_url = '<?php echo admin_url(); ?>';
     
     // ===============================
     // ENHANCED LOADING FUNCTIONS
@@ -636,6 +637,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSkeletonLoading(containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
+        
+        // Remove loading state properly
+        container.classList.remove('cases-loading-container', 'loading');
         
         container.innerHTML = `
             <div class="cases-grid cases-grid-responsive">
@@ -660,10 +664,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById(containerId);
         if (!container) return;
         
-        // Check if already has loading container structure
-        if (!container.classList.contains('cases-loading-container')) {
-            container.classList.add('cases-loading-container');
-        }
+        // Add loading container class and loading state
+        container.classList.add('cases-loading-container', 'loading');
         
         container.innerHTML = `
             <div class="cases-loading-state">
@@ -677,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById(containerId);
         if (!container) return;
         
-        container.classList.remove('cases-loading-container');
+        container.classList.remove('cases-loading-container', 'loading');
         
         let retryButton = '';
         if (retryCallback) {
@@ -702,7 +704,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById(containerId);
         if (!container) return;
         
-        container.classList.remove('cases-loading-container');
+        container.classList.remove('cases-loading-container', 'loading');
         
         let button = '';
         if (actionButton) {
@@ -729,7 +731,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById(containerId);
         if (!container) return;
         
-        container.classList.remove('cases-loading-container');
+        container.classList.remove('cases-loading-container', 'loading');
         container.innerHTML = `<div class="cases-content-transition">${content}</div>`;
         
         // Trigger transition after a brief delay
@@ -1602,6 +1604,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===============================
     // INITIALIZATION
     // ===============================
+    
+    // Clear any leftover loading states on page load
+    document.querySelectorAll('.cases-loading-container').forEach(container => {
+        if (container.id !== 'consultations-container' && container.id !== 'cases-container') {
+            container.classList.remove('loading');
+        }
+    });
+    
+    // Clear any leftover modal backdrops that might be blocking clicks
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.remove();
+    });
+    
+    // Ensure modals are properly hidden
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    });
     
     // Load initial data
     console.log('Initializing data load...');

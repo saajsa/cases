@@ -10,11 +10,33 @@ class Cases extends AdminController
     public function __construct()
 {
     parent::__construct();
-    $this->load->model('Cases_model');
-    $this->load->model('Appointments_model');
-    $this->load->helper('cases/security');
-    $this->load->helper('cases/cases_css');
-    $this->load->helper('cases/access_control');
+    
+    try {
+        $this->load->model('Cases_model');
+        
+        // Load optional models with error handling
+        if (file_exists(APPPATH . 'models/Appointments_model.php')) {
+            $this->load->model('Appointments_model');
+        }
+        
+        // Load helpers with error handling
+        $helpers_to_load = [
+            'cases/security',
+            'cases/cases_css',
+            'cases/access_control'
+        ];
+        
+        foreach ($helpers_to_load as $helper) {
+            try {
+                $this->load->helper($helper);
+            } catch (Exception $e) {
+                log_message('warning', 'Could not load helper ' . $helper . ': ' . $e->getMessage());
+            }
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error in Cases controller constructor: ' . $e->getMessage());
+    }
     
     // Set JSON header for AJAX requests
     if ($this->input->is_ajax_request()) {
@@ -28,13 +50,31 @@ class Cases extends AdminController
             access_denied('cases');
         }
 
-        // Get only accessible cases for current user
-        $accessible_case_ids = cases_get_accessible_resources('case', 'view');
-        
         $data['title'] = _l('cases_management');
-        $data['clients'] = $this->get_all_clients();
-        $data['contacts'] = $this->get_all_contacts();
-        $data['accessible_case_ids'] = $accessible_case_ids;
+        
+        try {
+            // Get clients with error handling
+            $data['clients'] = $this->get_all_clients();
+            
+            // Get contacts with error handling
+            $data['contacts'] = $this->get_all_contacts();
+            
+            // Get accessible cases if access control helper is available
+            if (function_exists('cases_get_accessible_resources')) {
+                $accessible_case_ids = cases_get_accessible_resources('case', 'view');
+                $data['accessible_case_ids'] = $accessible_case_ids;
+            } else {
+                // Fallback for basic functionality
+                $data['accessible_case_ids'] = [];
+                log_message('warning', 'Access control helper not available, using fallback');
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Error in cases index: ' . $e->getMessage());
+            // Set fallback data
+            $data['clients'] = [];
+            $data['contacts'] = [];
+            $data['accessible_case_ids'] = [];
+        }
 
         $this->load->view('cases/manage', $data);
     }
@@ -60,6 +100,11 @@ class Cases extends AdminController
             $this->load->model('Cases_model');
         }
         
+        // Test database connection first
+        if (!$this->db->table_exists('case_consultations')) {
+            throw new Exception('Required table case_consultations does not exist');
+        }
+        
         $result = $this->Cases_model->get_consultations_with_names();
         
         // Ensure we have valid data
@@ -74,7 +119,11 @@ class Cases extends AdminController
             'success' => true,
             'data' => $result,
             'count' => count($result),
-            'message' => count($result) . ' consultations loaded'
+            'message' => count($result) . ' consultations loaded',
+            'debug' => [
+                'table_exists' => $this->db->table_exists('case_consultations'),
+                'db_prefix' => db_prefix()
+            ]
         ]);
         
     } catch (Exception $e) {
@@ -84,7 +133,11 @@ class Cases extends AdminController
             'success' => false,
             'message' => 'Server error occurred',
             'data' => [],
-            'error' => ENVIRONMENT === 'development' ? $e->getMessage() : 'Internal server error'
+            'error' => ENVIRONMENT === 'development' ? $e->getMessage() : 'Internal server error',
+            'debug' => [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]
         ]);
     }
     exit;
@@ -110,6 +163,14 @@ class Cases extends AdminController
             $this->load->model('Cases_model');
         }
         
+        // Test required tables exist
+        $required_tables = ['cases', 'clients'];
+        foreach ($required_tables as $table) {
+            if (!$this->db->table_exists($table)) {
+                throw new Exception("Required table {$table} does not exist");
+            }
+        }
+        
         $result = $this->Cases_model->get_all_cases_with_details();
         
         // Ensure we have valid data
@@ -124,7 +185,13 @@ class Cases extends AdminController
             'success' => true,
             'data' => $result,
             'count' => count($result),
-            'message' => count($result) . ' cases loaded'
+            'message' => count($result) . ' cases loaded',
+            'debug' => [
+                'tables_exist' => array_map(function($table) {
+                    return $this->db->table_exists($table);
+                }, $required_tables),
+                'db_prefix' => db_prefix()
+            ]
         ]);
         
     } catch (Exception $e) {
@@ -134,7 +201,11 @@ class Cases extends AdminController
             'success' => false,
             'message' => 'Server error occurred',
             'data' => [],
-            'error' => ENVIRONMENT === 'development' ? $e->getMessage() : 'Internal server error'
+            'error' => ENVIRONMENT === 'development' ? $e->getMessage() : 'Internal server error',
+            'debug' => [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]
         ]);
     }
     exit;

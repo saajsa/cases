@@ -166,24 +166,6 @@ echo cases_page_wrapper_start(
     
     <!-- Right Column: Calendar and Performance Chart -->
     <div>
-        <!-- Mini Calendar -->
-        <div class="cases-info-card cases-mb-md">
-            <div class="cases-info-card-header">
-                <h4 class="cases-info-card-title">Calendar</h4>
-            </div>
-            <div class="cases-flex cases-flex-between cases-flex-center cases-mb-md">
-                <button class="cases-btn cases-btn-sm" id="prev-month">‹</button>
-                <h5 id="calendar-month" class="cases-m-0">Loading...</h5>
-                <button class="cases-btn cases-btn-sm" id="next-month">›</button>
-            </div>
-            <div id="calendar-grid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; font-size:var(--cases-font-size-sm);"></div>
-            <div class="cases-mt-sm cases-font-size-xs cases-text-muted">
-                <span style="color: var(--cases-warning);">●</span> Hearings
-                <span style="color: var(--cases-primary); margin-left: 10px;">●</span> Consultations
-            </div>
-        </div>
-        
-        
         <!-- Additional Metrics -->
         <div class="cases-info-card">
             <div class="cases-info-card-header">
@@ -191,8 +173,8 @@ echo cases_page_wrapper_start(
             </div>
             <div class="cases-metrics-list">
                 <div class="cases-metric-item">
-                    <span class="cases-metric-label">Overdue Hearings:</span>
-                    <span class="cases-metric-value" id="overdue-hearings">-</span>
+                    <span class="cases-metric-label">Active Cases:</span>
+                    <span class="cases-metric-value" id="active-cases-metric">-</span>
                 </div>
                 <div class="cases-metric-item">
                     <span class="cases-metric-label">Active Clients:</span>
@@ -257,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('total-consultations').textContent = formatNumber(stats.total_consultations);
                 document.getElementById('today-hearings').textContent = formatNumber(stats.today_hearings);
                 document.getElementById('success-rate').textContent = stats.success_rate + '%';
-                document.getElementById('overdue-hearings').textContent = formatNumber(stats.overdue_hearings);
+                document.getElementById('active-cases-metric').textContent = formatNumber(stats.total_cases);
                 document.getElementById('active-clients').textContent = formatNumber(stats.active_clients);
                 document.getElementById('monthly-revenue').textContent = formatCurrency(stats.revenue_this_month);
                 document.getElementById('outstanding-amount').textContent = formatCurrency(stats.outstanding_amount);
@@ -340,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="fas fa-file-alt"></i>
                         </div>
                         <div class="cases-activity-content">
-                            <div class="cases-activity-title">${htmlEscape(activity.message)}</div>
+                            <div class="cases-activity-title">${activity.message}</div>
                             <div class="cases-activity-meta">
                                 <span class="cases-activity-user">${htmlEscape(staffName)}</span>
                                 <span class="cases-activity-time">${htmlEscape(timeAgo)}</span>
@@ -361,10 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     
     
-    // Calendar
-    let currentDate=new Date();
-    function initializeCalendar(){ renderCalendar(currentDate); document.getElementById('prev-month').addEventListener('click',()=>{currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(currentDate);}); document.getElementById('next-month').addEventListener('click',()=>{currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(currentDate);}); }
-    function renderCalendar(date){ const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December']; const mElem=document.getElementById('calendar-month'); if(mElem) mElem.textContent=monthNames[date.getMonth()]+' '+date.getFullYear(); const grid=document.getElementById('calendar-grid'); if(!grid) return; grid.innerHTML=''; const days=['S','M','T','W','T','F','S']; days.forEach(d=>{const e=document.createElement('div'); e.textContent=d; e.style.cssText='padding:4px;text-align:center;font-weight:600;color:var(--cases-text-muted);font-size:var(--cases-font-size-xs);background:var(--cases-bg-tertiary);'; grid.appendChild(e);}); const firstDay=new Date(date.getFullYear(),date.getMonth(),1).getDay(); const daysCount=new Date(date.getFullYear(),date.getMonth()+1,0).getDate(); for(let i=0;i<firstDay;i++){const e=document.createElement('div');e.style.cssText='padding:4px;';grid.appendChild(e);} const today=new Date(); for(let d=1;d<=daysCount;d++){ const e=document.createElement('div'); e.textContent=d; e.style.cssText='padding:4px;text-align:center;cursor:pointer;border-radius:3px;transition:background-color 0.15s;'; if(date.getFullYear()===today.getFullYear()&&date.getMonth()===today.getMonth()&&d===today.getDate()){e.style.backgroundColor='var(--cases-primary)';e.style.color='#fff';} e.addEventListener('mouseover',()=>e.style.backgroundColor=e.style.backgroundColor||'var(--cases-bg-secondary)'); e.addEventListener('mouseout',()=>{if(!(date.getFullYear()===today.getFullYear()&&date.getMonth()===today.getMonth()&&d===today.getDate())) e.style.backgroundColor='transparent';}); e.addEventListener('click',()=>{ const sel=new Date(date.getFullYear(),date.getMonth(),d); const ds=sel.toISOString().split('T')[0]; window.location.href=adminBase+'cases/hearings/causelist?date='+ds;}); grid.appendChild(e);} }
     
     // Event Handlers
     document.getElementById('dismiss-priority')?.addEventListener('click', function(e) {
@@ -391,7 +369,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loadDashboardStats();
         loadPriorityItems();
         loadDocumentActivity();
-        initializeCalendar();
         adjustLayout();
     }
     

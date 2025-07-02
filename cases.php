@@ -81,12 +81,12 @@ function cases_module_init_menu_items() {
     ]);
 
     // Submenu: Document Management
-    $CI->app_menu->add_sidebar_children_item('cases', [
-        'slug'     => 'document_manager',
-        'name'     => _l('document_manager'),
-        'href'     => admin_url('cases/documents'),
-        'position' => 4,
-    ]);
+  //  $CI->app_menu->add_sidebar_children_item('cases', [
+   //     'slug'     => 'document_manager',
+    //    'name'     => _l('document_manager'),
+    //    'href'     => admin_url('cases/documents'),
+    //    'position' => 4,
+    // ]);
 
     // Submenu: Upload Documents
     $CI->app_menu->add_sidebar_children_item('cases', [
@@ -104,6 +104,31 @@ function cases_module_init_menu_items() {
         'position' => 6,
     ]);
 
+    // Phase 5: Advanced Document Features
+    // Submenu: Smart Upload
+  //  $CI->app_menu->add_sidebar_children_item('cases', [
+   //     'slug'     => 'smart_upload_documents',
+     //   'name'     => _l('smart_document_upload'),
+     //   'href'     => admin_url('cases/documents/smart_upload'),
+     //   'position' => 7,
+    //]);
+
+    // Submenu: Advanced Search
+   // $CI->app_menu->add_sidebar_children_item('cases', [
+     //   'slug'     => 'advanced_search_documents',
+       // 'name'     => _l('advanced_document_search'),
+       // 'href'     => admin_url('cases/documents/advanced_search'),
+        // 'position' => 8,
+    //]);
+
+    // Submenu: Document Analytics
+    //$CI->app_menu->add_sidebar_children_item('cases', [
+      //  'slug'     => 'document_analytics',
+        //'name'     => _l('document_analytics_report'),
+       // 'href'     => admin_url('cases/documents/analytics_report'),
+       // 'position' => 9,
+    //]);
+
     // Admin only items
     if (is_admin()) {
         // Submenu: Courts
@@ -111,7 +136,7 @@ function cases_module_init_menu_items() {
             'slug'     => 'courts',
             'name'     => 'Courts',
             'href'     => admin_url('cases/courts/manage_courts'),
-            'position' => 7,
+            'position' => 10,
         ]);
         
         // Submenu: Court Rooms
@@ -119,13 +144,16 @@ function cases_module_init_menu_items() {
             'slug'     => 'court_rooms',
             'name'     => 'Court Rooms',
             'href'     => admin_url('cases/courts/manage_rooms'),
-            'position' => 8,
+            'position' => 11,
         ]);
     }
 }
 
 // Register module-specific permissions
 hooks()->add_action('admin_init', 'cases_permissions');
+
+// Add client area menu for cases
+hooks()->add_action('clients_init', 'cases_client_area_init');
 
 function cases_permissions() {
     $capabilities = [
@@ -137,4 +165,32 @@ function cases_permissions() {
         ]
     ];
     register_staff_capabilities('cases', $capabilities, _l('Legal Practice & Documents'));
+}
+
+function cases_client_area_init() {
+    if (is_client_logged_in()) {
+        // Main dashboard menu item
+        add_theme_menu_item('my_legal_dashboard', [
+            'name'     => 'Legal Dashboard',
+            'href'     => site_url('cases/Client'),
+            'icon'     => 'fa fa-tachometer',
+            'position' => 50,
+        ]);
+        
+        // Sub-menu for Cases & Hearings  
+        add_theme_menu_item('my_cases_hearings', [
+            'name'     => 'Cases & Hearings',
+            'href'     => site_url('cases/Client'),
+            'icon'     => 'fa fa-balance-scale',
+            'position' => 51,
+        ]);
+        
+        // Sub-menu for Consultations
+        add_theme_menu_item('my_consultations', [
+            'name'     => 'Consultations',
+            'href'     => site_url('cases/Client/consultations'),
+            'icon'     => 'fa fa-comments',
+            'position' => 52,
+        ]);
+    }
 }

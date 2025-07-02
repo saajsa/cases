@@ -22,7 +22,7 @@ if (!function_exists('load_cases_css')) {
         $css_links[] = '<link rel="stylesheet" href="' . $css_base_url . 'cases-framework.css?v=' . time() . '">';
         
         // Load specific components
-        $available_components = ['buttons', 'cards', 'forms', 'tables', 'modals', 'status'];
+        $available_components = ['buttons', 'cards', 'forms', 'tables', 'modals', 'status', 'wizard'];
         
         foreach ($available_components as $component) {
             if (in_array('all', $components) || in_array($component, $components)) {

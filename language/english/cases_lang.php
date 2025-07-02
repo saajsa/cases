@@ -592,3 +592,155 @@ $lang['related_id'] = 'Related ID';
 $lang['enter_client_or_invoice_id'] = 'Enter Client or Invoice ID';
 $lang['actions'] = 'Actions';
 $lang['confirm_action_prompt'] = 'Are you sure you want to perform this action?';
+
+// ===============================
+// PHASE 5: FEATURE ENHANCEMENT LANGUAGE KEYS
+// ===============================
+
+// Contextual Document Linking
+$lang['contextual_suggestions'] = 'Contextual Suggestions';
+$lang['smart_linking'] = 'Smart Linking';
+$lang['suggested_links'] = 'Suggested Links';
+$lang['create_link'] = 'Create Link';
+$lang['contextual_link_created'] = 'Contextual link created successfully';
+$lang['high_confidence_suggestion'] = 'High Confidence Suggestion';
+$lang['medium_confidence_suggestion'] = 'Medium Confidence Suggestion';
+$lang['auto_linked'] = 'Auto-linked';
+$lang['manual_link'] = 'Manual Link';
+$lang['link_confidence'] = 'Link Confidence';
+$lang['suggested_reason'] = 'Suggested Reason';
+
+// Advanced Search Integration
+$lang['advanced_document_search'] = 'Advanced Document Search';
+$lang['advanced_search_results'] = 'Advanced Search Results';
+$lang['search_criteria'] = 'Search Criteria';
+$lang['relevance_score'] = 'Relevance Score';
+$lang['search_suggestions'] = 'Search Suggestions';
+$lang['search_autocomplete'] = 'Search Autocomplete';
+$lang['search_filters'] = 'Search Filters';
+$lang['multi_criteria_search'] = 'Multi-Criteria Search';
+$lang['case_status_filter'] = 'Case Status Filter';
+$lang['hearing_status_filter'] = 'Hearing Status Filter';
+$lang['file_type_filter'] = 'File Type Filter';
+$lang['date_range_filter'] = 'Date Range Filter';
+$lang['search_results_found'] = 'Search results found';
+$lang['no_results_found'] = 'No results found for your search criteria';
+
+// Smart Document Upload
+$lang['smart_document_upload'] = 'Smart Document Upload';
+$lang['smart_upload'] = 'Smart Upload';
+$lang['auto_categorization'] = 'Auto-Categorization';
+$lang['document_analysis'] = 'Document Analysis';
+$lang['smart_suggestions'] = 'Smart Suggestions';
+$lang['categorization_confidence'] = 'Categorization Confidence';
+$lang['analysis_reasoning'] = 'Analysis Reasoning';
+$lang['auto_categorized'] = 'Auto-Categorized';
+$lang['smart_categorization_enabled'] = 'Smart categorization enabled';
+$lang['upload_with_smart_analysis'] = 'Upload with Smart Analysis';
+
+// Workflow Enhancements
+$lang['workflow_enhancements'] = 'Workflow Enhancements';
+$lang['document_workflow'] = 'Document Workflow';
+$lang['smart_workflow'] = 'Smart Workflow';
+$lang['automated_processes'] = 'Automated Processes';
+$lang['workflow_suggestions'] = 'Workflow Suggestions';
+$lang['process_optimization'] = 'Process Optimization';
+$lang['intelligent_routing'] = 'Intelligent Routing';
+$lang['workflow_automation'] = 'Workflow Automation';
+
+// Document Analytics & Reporting
+$lang['document_analytics_report'] = 'Document Analytics Report';
+$lang['document_analytics'] = 'Document Analytics';
+$lang['analytics_dashboard'] = 'Analytics Dashboard';
+$lang['upload_trends'] = 'Upload Trends';
+$lang['document_type_distribution'] = 'Document Type Distribution';
+$lang['client_document_statistics'] = 'Client Document Statistics';
+$lang['case_document_completion'] = 'Case Document Completion';
+$lang['file_type_analytics'] = 'File Type Analytics';
+$lang['activity_patterns'] = 'Activity Patterns';
+$lang['usage_statistics'] = 'Usage Statistics';
+$lang['performance_metrics'] = 'Performance Metrics';
+$lang['monthly_trends'] = 'Monthly Trends';
+$lang['daily_activity_patterns'] = 'Daily Activity Patterns';
+$lang['hourly_activity_patterns'] = 'Hourly Activity Patterns';
+$lang['document_insights'] = 'Document Insights';
+$lang['analytics_summary'] = 'Analytics Summary';
+
+// Enhanced Features
+$lang['enhanced_features'] = 'Enhanced Features';
+$lang['feature_enhancement'] = 'Feature Enhancement';
+$lang['advanced_capabilities'] = 'Advanced Capabilities';
+$lang['intelligent_features'] = 'Intelligent Features';
+$lang['smart_features'] = 'Smart Features';
+$lang['ai_powered'] = 'AI-Powered';
+$lang['machine_learning'] = 'Machine Learning';
+$lang['predictive_analytics'] = 'Predictive Analytics';
+$lang['intelligent_insights'] = 'Intelligent Insights';
+
+// Integration Status
+$lang['phase_5_features'] = 'Phase 5 Features';
+$lang['feature_integration_complete'] = 'Feature integration complete';
+$lang['enhanced_functionality'] = 'Enhanced Functionality';
+$lang['integration_successful'] = 'Integration successful';
+$lang['features_activated'] = 'Features activated';
+$lang['system_enhanced'] = 'System enhanced with new capabilities';
+
+// ========================================================================
+// CLIENT AREA SPECIFIC LANGUAGE KEYS
+// ========================================================================
+
+// Client Area Navigation
+$lang['my_cases'] = 'My Cases';
+$lang['my_legal_cases'] = 'My Legal Cases';
+$lang['case_documents'] = 'Case Documents';
+$lang['case_hearings'] = 'Case Hearings';
+
+// Client Dashboard
+$lang['my_cases_overview'] = 'My Cases Overview';
+$lang['total_cases'] = 'Total Cases';
+$lang['active_cases'] = 'Active Cases';
+$lang['pending_hearings'] = 'Pending Hearings';
+$lang['recent_documents'] = 'Recent Documents';
+
+// Case Details for Clients
+$lang['case_information'] = 'Case Information';
+$lang['case_timeline'] = 'Case Timeline';
+$lang['case_progress'] = 'Case Progress';
+$lang['next_hearing_details'] = 'Next Hearing Details';
+$lang['case_summary'] = 'Case Summary';
+
+// Document Access for Clients
+$lang['download_document'] = 'Download Document';
+$lang['view_document'] = 'View Document';
+$lang['document_uploaded_on'] = 'Uploaded on';
+$lang['document_size'] = 'File Size';
+$lang['no_documents_available'] = 'No documents available for this case';
+
+// Hearing Information for Clients
+$lang['hearing_details'] = 'Hearing Details';
+$lang['hearing_schedule'] = 'Hearing Schedule';
+$lang['past_hearings'] = 'Past Hearings';
+$lang['upcoming_hearings'] = 'Upcoming Hearings';
+$lang['no_hearings_scheduled'] = 'No hearings scheduled';
+
+// Client Messages
+$lang['case_access_denied'] = 'You do not have access to this case';
+$lang['document_access_denied'] = 'You do not have access to this document';
+$lang['no_cases_assigned'] = 'No cases have been assigned to your account';
+$lang['contact_lawyer_for_details'] = 'Please contact your lawyer for more details';
+
+// Client Actions
+$lang['back_to_cases'] = 'Back to My Cases';
+$lang['view_case_details'] = 'View Case Details';
+$lang['print_case_summary'] = 'Print Case Summary';
+
+// Status Labels for Clients
+$lang['case_status_active'] = 'Active';
+$lang['case_status_pending'] = 'Pending';
+$lang['case_status_closed'] = 'Closed';
+$lang['case_status_on_hold'] = 'On Hold';
+
+// Client Help Text
+$lang['client_cases_help'] = 'Here you can view all cases assigned to your account, download related documents, and track hearing schedules.';
+$lang['client_documents_help'] = 'Download and view all documents related to your cases. Contact your lawyer if you need additional documents.';
+$lang['client_hearings_help'] = 'View upcoming and past court hearings for your cases. Make sure to attend all scheduled hearings.';

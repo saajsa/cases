@@ -268,47 +268,152 @@ class Cases_model extends App_Model
 
 public function get_all_cases_with_details()
 {
-    $this->db->select('
-        ' . db_prefix() . 'cases.id,
-        ' . db_prefix() . 'cases.consultation_id,
-        ' . db_prefix() . 'cases.case_title,
-        ' . db_prefix() . 'cases.case_number,
-        ' . db_prefix() . 'cases.date_filed,
-        ' . db_prefix() . 'cases.date_created,
-        ' . db_prefix() . 'clients.company as client_name,
-        CONCAT(' . db_prefix() . 'contacts.firstname, " ", ' . db_prefix() . 'contacts.lastname) as contact_name,
-        tblcourts.name as court_name,
-        tblcourt_rooms.court_no,
-        tblcourt_rooms.judge_name,
-        CONCAT("Court ", tblcourt_rooms.court_no, " - Hon\'ble ", tblcourt_rooms.judge_name) as court_room_info,
-        CONCAT(tblcourts.name, " - Court ", tblcourt_rooms.court_no) as court_display,
-        CONCAT("CONS-", ' . db_prefix() . 'cases.consultation_id) as consultation_reference
-    ');
-    $this->db->from(db_prefix() . 'cases');
-    $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'cases.client_id', 'left');
-    $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.id = ' . db_prefix() . 'cases.contact_id', 'left');
-    $this->db->join('tblcourt_rooms', 'tblcourt_rooms.id = ' . db_prefix() . 'cases.court_room_id', 'left');
-    $this->db->join('tblcourts', 'tblcourts.id = tblcourt_rooms.court_id', 'left');
-    $this->db->join(db_prefix() . 'case_consultations', db_prefix() . 'case_consultations.id = ' . db_prefix() . 'cases.consultation_id', 'left');
-    $this->db->order_by(db_prefix() . 'cases.id', 'desc');
-    
-    $result = $this->db->get()->result_array();
-    
-    // Process results to handle any null values or formatting issues
-    foreach ($result as &$row) {
-        // Make sure to handle cases where court information might be missing
-        if (empty($row['court_display'])) {
-            $row['court_display'] = 'Court not specified';
+    try {
+        $this->db->select('
+            c.id,
+            c.consultation_id,
+            c.case_title,
+            c.case_number,
+            c.date_filed,
+            c.date_created,
+            cl.company as client_name,
+            CONCAT(COALESCE(co.firstname, ""), " ", COALESCE(co.lastname, "")) as contact_name,
+            ct.name as court_name,
+            cr.court_no,
+            cr.judge_name,
+            CONCAT("Court ", COALESCE(cr.court_no, "N/A"), " - Hon\'ble ", COALESCE(cr.judge_name, "TBD")) as court_room_info,
+            CONCAT(COALESCE(ct.name, "Court"), " - Court ", COALESCE(cr.court_no, "N/A")) as court_display,
+            CONCAT("CONS-", COALESCE(c.consultation_id, "N/A")) as consultation_reference
+        ');
+        $this->db->from(db_prefix() . 'cases c');
+        $this->db->join(db_prefix() . 'clients cl', 'cl.userid = c.client_id', 'left');
+        $this->db->join(db_prefix() . 'contacts co', 'co.id = c.contact_id', 'left');
+        $this->db->join(db_prefix() . 'court_rooms cr', 'cr.id = c.court_room_id', 'left');
+        $this->db->join(db_prefix() . 'courts ct', 'ct.id = cr.court_id', 'left');
+        $this->db->join(db_prefix() . 'case_consultations cc', 'cc.id = c.consultation_id', 'left');
+        $this->db->order_by('c.id', 'desc');
+        
+        $query = $this->db->get();
+        
+        if (!$query) {
+            log_message('error', 'Database error in get_all_cases_with_details: ' . print_r($this->db->error(), true));
+            return [];
         }
         
-        // Ensure consultation reference is formatted
-        if (empty($row['consultation_reference'])) {
-            $row['consultation_reference'] = 'CONS-' . $row['consultation_id'];
+        $result = $query->result_array();
+        
+        // Process results to handle any null values or formatting issues
+        if (!empty($result)) {
+            foreach ($result as &$row) {
+                // Make sure to handle cases where court information might be missing
+                if (empty($row['court_display']) || $row['court_display'] === 'Court - Court N/A') {
+                    $row['court_display'] = 'Court not specified';
+                }
+                
+                // Ensure consultation reference is formatted
+                if (empty($row['consultation_reference']) || $row['consultation_reference'] === 'CONS-N/A') {
+                    $row['consultation_reference'] = 'CONS-' . ($row['consultation_id'] ?: 'N/A');
+                }
+                
+                // Clean up contact name
+                $row['contact_name'] = trim($row['contact_name']);
+                if ($row['contact_name'] === ' ') {
+                    $row['contact_name'] = '';
+                }
+            }
+        }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error in get_all_cases_with_details: ' . $e->getMessage());
+        return [];
+    }
+}
+
+    /**
+     * Get cases for a specific client with enhanced details including next hearing date
+     * @param int $client_id
+     * @return array
+     */
+    public function get_client_cases_with_details($client_id)
+    {
+        try {
+            $this->db->select('
+                c.id,
+                c.consultation_id,
+                c.case_title,
+                c.case_number,
+                c.date_filed,
+                c.date_created,
+                c.client_id,
+                c.court_room_id,
+                cl.company as client_name,
+                CONCAT(COALESCE(co.firstname, ""), " ", COALESCE(co.lastname, "")) as contact_name,
+                ct.name as court_name,
+                cr.court_no,
+                cr.judge_name,
+                CASE 
+                    WHEN cr.court_no IS NOT NULL AND cr.judge_name IS NOT NULL 
+                    THEN CONCAT("Court ", cr.court_no, " - Hon\'ble ", cr.judge_name)
+                    WHEN ct.name IS NOT NULL 
+                    THEN ct.name
+                    ELSE "Court not specified"
+                END as court_display,
+                (SELECT MIN(h.hearing_date) 
+                 FROM ' . db_prefix() . 'hearings h 
+                 WHERE h.case_id = c.id 
+                 AND h.hearing_date >= CURDATE()
+                 AND (h.status IS NULL OR h.status != "cancelled")
+                 ORDER BY h.hearing_date ASC 
+                 LIMIT 1) as next_hearing_date
+            ');
+            $this->db->from(db_prefix() . 'cases c');
+            $this->db->join(db_prefix() . 'clients cl', 'cl.userid = c.client_id', 'left');
+            $this->db->join(db_prefix() . 'contacts co', 'co.id = c.contact_id', 'left');
+            $this->db->join(db_prefix() . 'court_rooms cr', 'cr.id = c.court_room_id', 'left');
+            $this->db->join(db_prefix() . 'courts ct', 'ct.id = cr.court_id', 'left');
+            $this->db->where('c.client_id', $client_id);
+            $this->db->order_by('c.id', 'desc');
+            
+            $query = $this->db->get();
+            
+            if (!$query) {
+                log_message('error', 'Database error in get_client_cases_with_details: ' . print_r($this->db->error(), true));
+                return [];
+            }
+            
+            $result = $query->result_array();
+            
+            // Add document and hearing counts for each case
+            foreach ($result as &$case) {
+                $case['document_count'] = $this->get_case_documents_count($case['id']);
+                $case['hearing_count'] = $this->get_case_hearing_count($case['id']);
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in get_client_cases_with_details: ' . $e->getMessage());
+            return [];
         }
     }
     
-    return $result;
-}
+    /**
+     * Get hearing count for a specific case
+     * @param int $case_id
+     * @return int
+     */
+    public function get_case_hearing_count($case_id)
+    {
+        try {
+            $this->db->where('case_id', $case_id);
+            return $this->db->count_all_results(db_prefix() . 'hearings');
+        } catch (Exception $e) {
+            log_message('error', 'Error getting hearing count: ' . $e->getMessage());
+            return 0;
+        }
+    }
 
     // ========================================================================
     // DOCUMENT MANAGEMENT METHODS - Integrated from Documents Module
@@ -677,6 +782,497 @@ public function get_all_cases_with_details()
         $this->db->order_by('con.date_added', 'DESC');
         
         return $this->db->get()->result();
+    }
+
+    // ===============================
+    // PHASE 5: CONTEXTUAL DOCUMENT LINKING
+    // ===============================
+
+    /**
+     * Get contextual document suggestions based on case details
+     * @param int $case_id Case ID
+     * @param string $document_type Type of document being uploaded
+     * @return array Suggested relationships
+     */
+    public function get_contextual_document_suggestions($case_id, $document_type = null)
+    {
+        $suggestions = [];
+        
+        try {
+            // Get case details with related entities
+            $this->db->select('c.*, cl.company as client_name, cl.userid as client_id');
+            $this->db->from(db_prefix() . 'cases c');
+            $this->db->join(db_prefix() . 'clients cl', 'cl.userid = c.client_id', 'left');
+            $this->db->where('c.id', $case_id);
+            $case = $this->db->get()->row();
+            
+            if (!$case) {
+                return $suggestions;
+            }
+            
+            // Get related hearings
+            $this->db->select('id, date, time, hearing_purpose, status');
+            $this->db->from(db_prefix() . 'hearings');
+            $this->db->where('case_id', $case_id);
+            $this->db->where('status !=', 'Cancelled');
+            $this->db->order_by('date', 'DESC');
+            $hearings = $this->db->get()->result();
+            
+            // Get related consultations
+            $this->db->select('id, tag, date_added, phase');
+            $this->db->from(db_prefix() . 'case_consultations');
+            $this->db->where('client_id', $case->client_id);
+            $this->db->order_by('date_added', 'DESC');
+            $consultations = $this->db->get()->result();
+            
+            // Build suggestions based on document type
+            $suggestions = [
+                'case' => [
+                    'id' => $case->id,
+                    'title' => $case->case_title,
+                    'number' => $case->case_number,
+                    'client' => $case->client_name,
+                    'suggested' => true,
+                    'reason' => 'Current case context'
+                ],
+                'hearings' => [],
+                'consultations' => [],
+                'smart_suggestions' => []
+            ];
+            
+            // Add hearing suggestions
+            foreach ($hearings as $hearing) {
+                $suggestions['hearings'][] = [
+                    'id' => $hearing->id,
+                    'date' => $hearing->date,
+                    'time' => $hearing->time,
+                    'purpose' => $hearing->hearing_purpose,
+                    'status' => $hearing->status,
+                    'suggested' => $hearing->status === 'Scheduled',
+                    'reason' => $hearing->status === 'Scheduled' ? 'Upcoming hearing' : 'Related hearing'
+                ];
+            }
+            
+            // Add consultation suggestions
+            foreach ($consultations as $consultation) {
+                $suggestions['consultations'][] = [
+                    'id' => $consultation->id,
+                    'tag' => $consultation->tag,
+                    'date' => $consultation->date_added,
+                    'phase' => $consultation->phase,
+                    'suggested' => $consultation->phase === 'litigation',
+                    'reason' => $consultation->phase === 'litigation' ? 'Litigation consultation' : 'Related consultation'
+                ];
+            }
+            
+            // Smart suggestions based on document type
+            if ($document_type) {
+                $suggestions['smart_suggestions'] = $this->get_smart_document_suggestions($case_id, $document_type, $hearings, $consultations);
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting contextual suggestions: ' . $e->getMessage());
+        }
+        
+        return $suggestions;
+    }
+
+    /**
+     * Get smart document suggestions based on document type and case context
+     */
+    private function get_smart_document_suggestions($case_id, $document_type, $hearings, $consultations)
+    {
+        $suggestions = [];
+        
+        // Determine file type from filename/extension
+        $doc_type_lower = strtolower($document_type);
+        
+        // Smart suggestions based on file type
+        if (strpos($doc_type_lower, 'order') !== false || strpos($doc_type_lower, 'judgment') !== false) {
+            // Court orders/judgments should link to recent hearings
+            $recent_hearing = reset($hearings);
+            if ($recent_hearing) {
+                $suggestions[] = [
+                    'type' => 'hearing',
+                    'id' => $recent_hearing->id,
+                    'title' => 'Link to recent hearing (' . date('d-M-Y', strtotime($recent_hearing->date)) . ')',
+                    'confidence' => 90,
+                    'reason' => 'Court orders typically relate to recent hearings'
+                ];
+            }
+        }
+        
+        if (strpos($doc_type_lower, 'petition') !== false || strpos($doc_type_lower, 'application') !== false) {
+            // Petitions should link to litigation consultations
+            foreach ($consultations as $consultation) {
+                if ($consultation->phase === 'litigation') {
+                    $suggestions[] = [
+                        'type' => 'consultation',
+                        'id' => $consultation->id,
+                        'title' => 'Link to litigation consultation (' . $consultation->tag . ')',
+                        'confidence' => 85,
+                        'reason' => 'Petitions often result from litigation consultations'
+                    ];
+                    break;
+                }
+            }
+        }
+        
+        if (strpos($doc_type_lower, 'evidence') !== false || strpos($doc_type_lower, 'exhibit') !== false) {
+            // Evidence should link to upcoming hearings
+            foreach ($hearings as $hearing) {
+                if ($hearing->status === 'Scheduled' && strtotime($hearing->date) > time()) {
+                    $suggestions[] = [
+                        'type' => 'hearing',
+                        'id' => $hearing->id,
+                        'title' => 'Link to upcoming hearing (' . date('d-M-Y', strtotime($hearing->date)) . ')',
+                        'confidence' => 95,
+                        'reason' => 'Evidence documents are prepared for upcoming hearings'
+                    ];
+                    break;
+                }
+            }
+        }
+        
+        return $suggestions;
+    }
+
+    /**
+     * Create contextual document links between related entities
+     */
+    public function create_document_link($document_id, $link_type, $link_id, $metadata = [])
+    {
+        try {
+            // Validate link exists and is accessible
+            if (!$this->validate_document_link($document_id, $link_type, $link_id)) {
+                return false;
+            }
+            
+            // Create link record
+            $link_data = [
+                'document_id' => $document_id,
+                'link_type' => $link_type,
+                'link_id' => $link_id,
+                'created_by' => get_staff_user_id(),
+                'created_at' => date('Y-m-d H:i:s'),
+                'metadata' => json_encode($metadata)
+            ];
+            
+            // Check if document_links table exists, create if not
+            if (!$this->db->table_exists(db_prefix() . 'document_links')) {
+                $this->create_document_links_table();
+            }
+            
+            $this->db->insert(db_prefix() . 'document_links', $link_data);
+            $link_id = $this->db->insert_id();
+            
+            // Log the link creation
+            $this->log_document_activity([
+                'staff_id' => get_staff_user_id(),
+                'document_id' => $document_id,
+                'rel_id' => $link_id,
+                'rel_type' => 'document_link',
+                'message' => "Created contextual link to {$link_type} #{$link_id}"
+            ]);
+            
+            return $link_id;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error creating document link: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validate that a document link is valid and accessible
+     */
+    private function validate_document_link($document_id, $link_type, $link_id)
+    {
+        // Validate document exists
+        $this->db->where('id', $document_id);
+        if ($this->db->count_all_results(db_prefix() . 'files') === 0) {
+            return false;
+        }
+        
+        // Validate link target exists based on type
+        switch ($link_type) {
+            case 'case':
+                $this->db->where('id', $link_id);
+                return $this->db->count_all_results(db_prefix() . 'cases') > 0;
+                
+            case 'hearing':
+                $this->db->where('id', $link_id);
+                return $this->db->count_all_results(db_prefix() . 'hearings') > 0;
+                
+            case 'consultation':
+                $this->db->where('id', $link_id);
+                return $this->db->count_all_results(db_prefix() . 'case_consultations') > 0;
+                
+            case 'client':
+                $this->db->where('userid', $link_id);
+                return $this->db->count_all_results(db_prefix() . 'clients') > 0;
+                
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Create document_links table if it doesn't exist
+     */
+    private function create_document_links_table()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS " . db_prefix() . "document_links (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            document_id int(11) NOT NULL,
+            link_type varchar(50) NOT NULL,
+            link_id int(11) NOT NULL,
+            created_by int(11) NOT NULL,
+            created_at datetime NOT NULL,
+            metadata text NULL,
+            PRIMARY KEY (id),
+            KEY document_id (document_id),
+            KEY link_type_id (link_type, link_id),
+            KEY created_by (created_by)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        
+        $this->db->query($sql);
+    }
+
+    /**
+     * Get contextual links for a document
+     */
+    public function get_document_links($document_id)
+    {
+        if (!$this->db->table_exists(db_prefix() . 'document_links')) {
+            return [];
+        }
+        
+        $this->db->select('dl.*, 
+                          CASE dl.link_type
+                            WHEN "case" THEN c.case_title
+                            WHEN "hearing" THEN CONCAT("Hearing: ", DATE_FORMAT(h.date, "%d-%m-%Y"))
+                            WHEN "consultation" THEN CONCAT("Consultation: ", con.tag)
+                            WHEN "client" THEN cl.company
+                            ELSE dl.link_type
+                          END as link_title');
+        $this->db->from(db_prefix() . 'document_links dl');
+        $this->db->join(db_prefix() . 'cases c', 'c.id = dl.link_id AND dl.link_type = "case"', 'left');
+        $this->db->join(db_prefix() . 'hearings h', 'h.id = dl.link_id AND dl.link_type = "hearing"', 'left');
+        $this->db->join(db_prefix() . 'case_consultations con', 'con.id = dl.link_id AND dl.link_type = "consultation"', 'left');
+        $this->db->join(db_prefix() . 'clients cl', 'cl.userid = dl.link_id AND dl.link_type = "client"', 'left');
+        $this->db->where('dl.document_id', $document_id);
+        $this->db->order_by('dl.created_at', 'DESC');
+        
+        return $this->db->get()->result();
+    }
+
+    // ===============================
+    // PHASE 5: ADVANCED SEARCH INTEGRATION
+    // ===============================
+
+    /**
+     * Advanced multi-criteria document search with relevance scoring
+     */
+    public function advanced_document_search($criteria)
+    {
+        try {
+            $this->db->select('f.*, 
+                              CASE f.rel_type
+                                WHEN "case" THEN c.case_title
+                                WHEN "hearing" THEN CONCAT("Hearing: ", DATE_FORMAT(h.date, "%d-%m-%Y"), " - ", h.hearing_purpose)
+                                WHEN "consultation" THEN CONCAT("Consultation: ", con.tag)
+                                WHEN "client" THEN cl.company
+                                WHEN "invoice" THEN CONCAT("Invoice: ", inv.formatted_number)
+                                ELSE f.rel_type
+                              END as context_info,
+                              cl.company as client_name,
+                              c.case_number,
+                              0 as relevance_score');
+                              
+            $this->db->from(db_prefix() . 'files f');
+            $this->db->join(db_prefix() . 'cases c', 'c.id = f.rel_id AND f.rel_type = "case"', 'left');
+            $this->db->join(db_prefix() . 'hearings h', 'h.id = f.rel_id AND f.rel_type = "hearing"', 'left');
+            $this->db->join(db_prefix() . 'case_consultations con', 'con.id = f.rel_id AND f.rel_type = "consultation"', 'left');
+            $this->db->join(db_prefix() . 'clients cl', 'cl.userid = f.rel_id AND f.rel_type = "client" OR cl.userid = c.client_id', 'left');
+            $this->db->join(db_prefix() . 'invoices inv', 'inv.id = f.rel_id AND f.rel_type = "invoice"', 'left');
+            
+            // Apply search criteria
+            $where_conditions = [];
+            
+            // Text search
+            if (!empty($criteria['search_text'])) {
+                $search_text = $this->db->escape_like_str($criteria['search_text']);
+                $this->db->group_start();
+                $this->db->like('f.file_name', $search_text);
+                $this->db->or_like('f.tag', $search_text);
+                $this->db->or_like('c.case_title', $search_text);
+                $this->db->or_like('c.case_number', $search_text);
+                $this->db->or_like('cl.company', $search_text);
+                $this->db->or_like('h.hearing_purpose', $search_text);
+                $this->db->or_like('con.tag', $search_text);
+                $this->db->group_end();
+            }
+            
+            // Client filter
+            if (!empty($criteria['client_id'])) {
+                $this->db->group_start();
+                $this->db->where('c.client_id', $criteria['client_id']);
+                $this->db->or_where('f.rel_type = "client" AND f.rel_id', $criteria['client_id']);
+                $this->db->or_where('con.client_id', $criteria['client_id']);
+                $this->db->group_end();
+            }
+            
+            // Document type filter
+            if (!empty($criteria['document_type'])) {
+                $this->db->where('f.rel_type', $criteria['document_type']);
+            }
+            
+            // File type filter
+            if (!empty($criteria['file_type'])) {
+                $this->db->like('f.filetype', $criteria['file_type']);
+            }
+            
+            // Date range filter
+            if (!empty($criteria['date_from'])) {
+                $this->db->where('DATE(f.dateadded) >=', $criteria['date_from']);
+            }
+            if (!empty($criteria['date_to'])) {
+                $this->db->where('DATE(f.dateadded) <=', $criteria['date_to']);
+            }
+            
+            // Case status filter
+            if (!empty($criteria['case_status'])) {
+                $this->db->where('c.status', $criteria['case_status']);
+            }
+            
+            // Hearing status filter
+            if (!empty($criteria['hearing_status'])) {
+                $this->db->where('h.status', $criteria['hearing_status']);
+            }
+            
+            $this->db->order_by('f.dateadded', 'DESC');
+            
+            // Apply limit
+            $limit = !empty($criteria['limit']) ? (int)$criteria['limit'] : 50;
+            $this->db->limit($limit);
+            
+            $results = $this->db->get()->result();
+            
+            // Calculate relevance scores
+            if (!empty($criteria['search_text'])) {
+                $results = $this->calculate_search_relevance($results, $criteria['search_text']);
+            }
+            
+            return $results;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in advanced document search: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Calculate relevance scores for search results
+     */
+    private function calculate_search_relevance($results, $search_text)
+    {
+        $search_terms = explode(' ', strtolower($search_text));
+        
+        foreach ($results as &$result) {
+            $score = 0;
+            $searchable_content = strtolower(
+                $result->file_name . ' ' . 
+                $result->tag . ' ' . 
+                $result->context_info . ' ' .
+                $result->client_name . ' ' .
+                $result->case_number
+            );
+            
+            foreach ($search_terms as $term) {
+                $term = trim($term);
+                if (empty($term)) continue;
+                
+                // Exact matches in filename get highest score
+                if (strpos(strtolower($result->file_name), $term) !== false) {
+                    $score += 10;
+                }
+                
+                // Matches in tags get high score
+                if (strpos(strtolower($result->tag), $term) !== false) {
+                    $score += 8;
+                }
+                
+                // Matches in case info get medium score
+                if (strpos(strtolower($result->context_info), $term) !== false) {
+                    $score += 5;
+                }
+                
+                // Matches in client name get medium score
+                if (strpos(strtolower($result->client_name), $term) !== false) {
+                    $score += 5;
+                }
+                
+                // General content matches get low score
+                if (strpos($searchable_content, $term) !== false) {
+                    $score += 1;
+                }
+            }
+            
+            $result->relevance_score = $score;
+        }
+        
+        // Sort by relevance score (highest first)
+        usort($results, function($a, $b) {
+            return $b->relevance_score - $a->relevance_score;
+        });
+        
+        return $results;
+    }
+
+    /**
+     * Get search suggestions based on partial input
+     */
+    public function get_search_suggestions($partial_text, $limit = 10)
+    {
+        $suggestions = [];
+        
+        if (strlen($partial_text) < 2) {
+            return $suggestions;
+        }
+        
+        try {
+            $search_text = $this->db->escape_like_str($partial_text);
+            
+            // Get suggestions from different sources
+            $sources = [
+                'clients' => "SELECT DISTINCT company as suggestion, 'Client' as type FROM " . db_prefix() . "clients WHERE company LIKE '%{$search_text}%'",
+                'cases' => "SELECT DISTINCT case_title as suggestion, 'Case' as type FROM " . db_prefix() . "cases WHERE case_title LIKE '%{$search_text}%' OR case_number LIKE '%{$search_text}%'",
+                'files' => "SELECT DISTINCT tag as suggestion, 'Document Tag' as type FROM " . db_prefix() . "files WHERE tag LIKE '%{$search_text}%' AND tag != ''",
+                'hearings' => "SELECT DISTINCT hearing_purpose as suggestion, 'Hearing' as type FROM " . db_prefix() . "hearings WHERE hearing_purpose LIKE '%{$search_text}%'"
+            ];
+            
+            foreach ($sources as $source => $query) {
+                $results = $this->db->query($query . " LIMIT " . $limit)->result();
+                foreach ($results as $result) {
+                    if (!empty($result->suggestion)) {
+                        $suggestions[] = [
+                            'text' => $result->suggestion,
+                            'type' => $result->type,
+                            'source' => $source
+                        ];
+                    }
+                }
+            }
+            
+            // Remove duplicates and limit results
+            $suggestions = array_unique($suggestions, SORT_REGULAR);
+            return array_slice($suggestions, 0, $limit);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting search suggestions: ' . $e->getMessage());
+            return [];
+        }
     }
 
 }

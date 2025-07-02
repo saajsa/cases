@@ -1,10 +1,28 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
-<div id="wrapper">
-  <div class="content">
-    <div class="panel_s">
-      <div class="panel-body">
-        <h4 class="no-mtop"><?php echo _l('search_results'); ?></h4>
+<?php 
+init_head();
+echo load_cases_css(['cards', 'buttons', 'forms', 'status', 'modals', 'tables', 'wizard']);
+echo cases_page_wrapper_start(
+    'Search Results',
+    'Document search results',
+    [
+        [
+            'text' => 'New Search',
+            'href' => admin_url('cases/documents/search'),
+            'class' => 'cases-btn cases-btn-primary',
+            'icon' => 'fas fa-search'
+        ],
+        [
+            'text' => 'Upload Document',
+            'href' => admin_url('cases/documents/upload'),
+            'class' => 'cases-btn',
+            'icon' => 'fas fa-upload'
+        ]
+    ]
+);
+?>
+
+<?php echo cases_section_start('Search Results'); ?>
 
 <?php if (!empty($results)):
 
@@ -27,7 +45,7 @@
                            ->result();
           foreach ($rows as $r) {
               $labels['consultation'][$r->id] =
-                 '<span class="text-warning">Consultation: '.htmlspecialchars($r->tag).
+                 '<span class="cases-status-badge cases-status-warning">Consultation: '.htmlspecialchars($r->tag).
                  ' ('.date('d-m-Y', strtotime($r->date_added)).')</span>';
           }
       }
@@ -40,7 +58,7 @@
                            ->result();
           foreach ($rows as $r) {
               $labels['case'][$r->id] =
-                 '<span class="text-success">Case: '.htmlspecialchars($r->case_title).
+                 '<span class="cases-status-badge cases-status-success">Case: '.htmlspecialchars($r->case_title).
                  ' ('.htmlspecialchars($r->case_number).')</span>';
           }
       }
@@ -55,74 +73,93 @@
                            ->get()->result();
           foreach ($rows as $r) {
               $labels['hearing'][$r->id] =
-                 '<span class="text-info">Hearing: '.date('d-m-Y', strtotime($r->date)).
+                 '<span class="cases-status-badge cases-status-info">Hearing: '.date('d-m-Y', strtotime($r->date)).
                  ' - '.htmlspecialchars($r->hearing_purpose).
                  ' ('.htmlspecialchars($r->case_title).')</span>';
           }
       }
 ?>
 
-        <div class="table-responsive">
-          <table class="table dt-table">
+        <div class="cases-table-container">
+          <table class="cases-table cases-table-hover">
             <thead>
               <tr>
-                <th><?php echo _l('file_name'); ?></th>
-                <th><?php echo _l('file_type'); ?></th>
-                <th><?php echo _l('document_tag'); ?></th>
-                <th><?php echo _l('belongs_to'); ?></th>
-                <th><?php echo _l('date_added'); ?></th>
-                <th><?php echo _l('actions'); ?></th>
+                <th><i class="fas fa-file"></i> <?php echo _l('file_name'); ?></th>
+                <th><i class="fas fa-file-alt"></i> <?php echo _l('file_type'); ?></th>
+                <th><i class="fas fa-tag"></i> <?php echo _l('document_tag'); ?></th>
+                <th><i class="fas fa-link"></i> <?php echo _l('belongs_to'); ?></th>
+                <th><i class="fas fa-calendar"></i> <?php echo _l('date_added'); ?></th>
+                <th><i class="fas fa-cogs"></i> <?php echo _l('actions'); ?></th>
               </tr>
             </thead>
             <tbody>
 <?php foreach ($results as $file): ?>
               <tr>
-                <td><?= htmlspecialchars($file->file_name) ?></td>
-                <td><?= htmlspecialchars($file->filetype) ?></td>
+                <td>
+                  <div class="cases-file-info">
+                    <i class="fas fa-file-pdf cases-file-icon"></i>
+                    <span class="cases-file-name"><?= htmlspecialchars($file->file_name) ?></span>
+                  </div>
+                </td>
+                <td>
+                  <span class="cases-status-badge cases-status-info"><?= htmlspecialchars($file->filetype) ?></span>
+                </td>
 
                 <!-- Tag -->
                 <td>
                   <?= $file->tag
-                         ? '<span class="label label-info">'.htmlspecialchars($file->tag).'</span>'
-                         : '<span class="text-muted">'._l('no_tag').'</span>'; ?>
+                         ? '<span class="cases-status-badge cases-status-primary">'.htmlspecialchars($file->tag).'</span>'
+                         : '<span class="cases-text-muted cases-no-tag">'._l('no_tag').'</span>'; ?>
                 </td>
 
                 <!-- Belongs To -->
                 <td>
 <?php
       if (!empty($file->contact_id)) {
-          echo '<span class="text-primary">'._l('contact').' #'.$file->contact_id.'</span>';
+          echo '<span class="cases-status-badge cases-status-info">'._l('contact').' #'.$file->contact_id.'</span>';
       } elseif (isset($labels[$file->rel_type][$file->rel_id])) {
           echo $labels[$file->rel_type][$file->rel_id];
       } elseif ($file->rel_type === 'client') {
-          echo '<span class="text-primary">'._l('client').' #'.$file->rel_id.'</span>';
+          echo '<span class="cases-status-badge cases-status-primary">'._l('client').' #'.$file->rel_id.'</span>';
       } elseif ($file->rel_type === 'invoice') {
-          echo '<span class="text-danger">'._l('invoice').' #'.$file->rel_id.'</span>';
+          echo '<span class="cases-status-badge cases-status-danger">'._l('invoice').' #'.$file->rel_id.'</span>';
       } else {
-          echo '<span class="text-muted">Unknown</span>';
+          echo '<span class="cases-text-muted">Unknown</span>';
       }
 ?>
                 </td>
 
                 <!-- Date -->
-                <td><?= _d($file->dateadded) ?></td>
+                <td>
+                  <span class="cases-date"><?= _d($file->dateadded) ?></span>
+                </td>
 
                 <!-- Actions -->
-                <td class="actions">
-                  <a href="<?= admin_url('cases/documents/edit/'.$file->id) ?>" class="btn btn-default btn-sm">
-                    <i class="fa fa-pencil"></i> <?= _l('edit') ?>
-                  </a>
-                  <a href="<?= admin_url('cases/documents/view/'.$file->id) ?>" target="_blank" class="btn btn-default btn-sm">
-                    <i class="fa fa-eye"></i> <?= _l('view') ?>
-                  </a>
-                  <a href="<?= admin_url('cases/documents/download/'.$file->id) ?>" class="btn btn-default btn-sm">
-                    <i class="fa fa-download"></i> <?= _l('download') ?>
-                  </a>
-                  <a href="<?= admin_url('cases/documents/delete/'.$file->id) ?>"
-                     onclick="return confirm('<?= _l('confirm_action_prompt') ?>');"
-                     class="btn btn-default btn-sm">
-                    <i class="fa fa-trash"></i> <?= _l('delete') ?>
-                  </a>
+                <td class="cases-table-actions">
+                  <div class="cases-action-buttons">
+                    <a href="<?= admin_url('cases/documents/edit/'.$file->id) ?>" 
+                       class="cases-action-btn cases-btn-primary" 
+                       title="<?= _l('edit') ?>">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="<?= admin_url('cases/documents/view/'.$file->id) ?>" 
+                       target="_blank" 
+                       class="cases-action-btn cases-btn-info" 
+                       title="<?= _l('view') ?>">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="<?= admin_url('cases/documents/download/'.$file->id) ?>" 
+                       class="cases-action-btn cases-btn-success" 
+                       title="<?= _l('download') ?>">
+                      <i class="fas fa-download"></i>
+                    </a>
+                    <a href="<?= admin_url('cases/documents/delete/'.$file->id) ?>"
+                       onclick="return confirm('<?= _l('confirm_action_prompt') ?>');"
+                       class="cases-action-btn cases-btn-danger" 
+                       title="<?= _l('delete') ?>">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
                 </td>
               </tr>
 <?php endforeach; ?>
@@ -131,14 +168,20 @@
         </div>
 
 <?php else: ?>
-        <p class="text-muted"><?= _l('no_results_found') ?></p>
+        <?php echo cases_empty_state(
+            'No Documents Found',
+            'No documents match your search criteria. Try adjusting your filters.',
+            [
+                'icon' => 'fas fa-search',
+                'action' => [
+                    'text' => 'New Search',
+                    'href' => admin_url('cases/documents/search'),
+                    'type' => 'primary'
+                ]
+            ]
+        ); ?>
 <?php endif; ?>
 
-        <a href="<?= admin_url('cases/documents/search') ?>" class="btn btn-default">
-          <?= _l('back_to_search') ?>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
+<?php echo cases_section_end(); ?>
+<?php echo cases_page_wrapper_end(); ?>
 <?php init_tail(); ?>
