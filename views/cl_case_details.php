@@ -137,6 +137,42 @@
     line-height: 1.5;
 }
 
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 10px;
+}
+
+.status-badge.scheduled {
+    background-color: #3498db;
+    color: white;
+}
+
+.status-badge.completed {
+    background-color: #27ae60;
+    color: white;
+}
+
+.status-badge.adjourned {
+    background-color: #f39c12;
+    color: white;
+}
+
+.status-badge.cancelled {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.status-badge.postponed {
+    background-color: #9b59b6;
+    color: white;
+}
+
 .timeline-documents {
     margin-top: 15px;
     padding: 15px;
@@ -346,7 +382,14 @@
                         <div class="timeline-item">
                             <div class="timeline-marker"></div>
                             <div class="timeline-date"><?php echo date('M d, Y', strtotime($event['date'])); ?></div>
-                            <div class="timeline-title"><?php echo htmlspecialchars($event['title']); ?></div>
+                            <div class="timeline-title">
+                                <?php echo htmlspecialchars($event['title']); ?>
+                                <?php if (isset($event['status']) && isset($event['type']) && $event['type'] == 'hearing'): ?>
+                                    <span class="status-badge <?php echo strtolower($event['status']); ?>">
+                                        <?php echo ucfirst($event['status']); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                             <div class="timeline-description"><?php echo htmlspecialchars($event['description']); ?></div>
                             
                             <?php if (isset($event['documents']) && !empty($event['documents'])): ?>

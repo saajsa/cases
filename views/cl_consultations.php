@@ -8,6 +8,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+
 .consultations-header {
     background: #fff;
     padding: 30px;
@@ -38,7 +39,7 @@
 
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
     gap: 15px;
     align-items: end;
 }
@@ -109,7 +110,26 @@
 
 .consultations-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 20px;
+}
+
+@media (min-width: 992px) {
+    .consultations-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 991px) {
+    .consultations-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .consultations-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .consultation-card {
@@ -153,9 +173,27 @@
 }
 
 .consultation-type {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin: 0;
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+    background: #9b59b6;
+    border-radius: 12px;
+    margin: 5px 0 0 0;
+}
+
+.consultation-type.general {
+    background: #95a5a6;
+}
+
+.consultation-type.consultation {
+    background: #3498db;
+}
+
+.consultation-type.litigation {
+    background: #e74c3c;
 }
 
 .consultation-status {
@@ -366,6 +404,7 @@
     
     .filters-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
     
     .consultation-header-row {
@@ -478,7 +517,9 @@
                     <div class="consultation-header-row">
                         <div>
                             <h3 class="consultation-title"><?php echo htmlspecialchars($consultation['subject'] ?? 'Consultation'); ?></h3>
-                            <p class="consultation-type"><?php echo htmlspecialchars($consultation['consultation_type'] ?? 'General Consultation'); ?></p>
+                            <span class="consultation-type <?php echo strtolower($consultation['consultation_type'] ?? 'general'); ?>">
+                                <?php echo htmlspecialchars($consultation['consultation_type'] ?? 'General'); ?>
+                            </span>
                         </div>
                         <div class="consultation-status status-<?php echo strtolower(str_replace(' ', '-', $consultation['status'] ?? 'pending')); ?>">
                             <?php echo htmlspecialchars($consultation['status'] ?? 'Pending'); ?>
@@ -509,7 +550,7 @@
                     <?php if (isset($consultation['summary']) && !empty($consultation['summary'])): ?>
                         <div class="consultation-description">
                             <h6>Summary</h6>
-                            <p><?php echo htmlspecialchars(substr($consultation['summary'], 0, 120)); ?><?php echo strlen($consultation['summary']) > 120 ? '...' : ''; ?></p>
+                            <p><?php echo htmlspecialchars(strip_tags(substr($consultation['summary'], 0, 120))); ?><?php echo strlen(strip_tags($consultation['summary'])) > 120 ? '...' : ''; ?></p>
                         </div>
                     <?php endif; ?>
 

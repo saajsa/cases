@@ -1,14 +1,14 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 
 <style>
-.documents-container {
+.case-documents-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.documents-header {
+.case-documents-header {
     background: #fff;
     padding: 30px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -16,17 +16,38 @@
     border-left: 4px solid #3498db;
 }
 
-.documents-header h1 {
+.case-documents-header h1 {
     margin: 0 0 10px 0;
     color: #2c3e50;
     font-size: 28px;
     font-weight: 600;
 }
 
-.documents-header p {
+.case-documents-header p {
     margin: 0;
     color: #7f8c8d;
     font-size: 16px;
+}
+
+.case-info-bar {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    margin-bottom: 30px;
+    border-left: 3px solid #3498db;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.case-info-text {
+    color: #2c3e50;
+    font-size: 14px;
+    margin: 0;
+}
+
+.case-actions {
+    display: flex;
+    gap: 10px;
 }
 
 .filters-section {
@@ -84,6 +105,7 @@
 
 .documents-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 20px;
 }
 
@@ -93,20 +115,12 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid #f39c12;
 }
 
 .document-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.document-card.client-owned {
-    border-left-color: #27ae60;
-}
-
-.document-card.case-owned {
-    border-left-color: #f39c12;
 }
 
 .document-header-row {
@@ -136,13 +150,6 @@
     font-weight: 600;
     text-transform: uppercase;
     color: white;
-}
-
-.type-client {
-    background: #27ae60;
-}
-
-.type-case {
     background: #f39c12;
 }
 
@@ -207,6 +214,37 @@
     color: white;
 }
 
+.btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #2c3e50;
+    display: inline-block;
+}
+
+.btn:hover {
+    background: #f8f9fa;
+    text-decoration: none;
+    color: #2c3e50;
+}
+
+.btn.primary {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.btn.primary:hover {
+    background: #2980b9;
+    border-color: #2980b9;
+    color: white;
+}
+
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -257,7 +295,7 @@
     margin: 0;
 }
 
-/* Modal z-index fixes */
+/* Modal styling - same as other views */
 .modal-backdrop {
     z-index: 1040 !important;
 }
@@ -287,7 +325,6 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-/* Modal header styling */
 #documentPreviewModal .modal-header {
     background: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
@@ -349,64 +386,16 @@
     border-bottom-right-radius: 4px;
 }
 
-#documentPreviewModal .modal-footer .btn {
-    margin-left: 10px;
-}
-
-/* Responsive modal */
 @media (max-width: 768px) {
-    .modal-dialog {
-        margin: 10px;
-        max-width: calc(100% - 20px);
-        width: auto;
-    }
-    
-    #documentPreviewModal .modal-header {
-        padding: 12px 15px;
-    }
-    
-    #documentPreviewModal .modal-title {
-        font-size: 16px;
-        padding-right: 40px;
-    }
-    
-    #documentPreviewModal .modal-header .close {
-        right: 12px;
-        top: 12px;
-        font-size: 20px;
-    }
-    
-    #documentPreviewModal .modal-body {
-        padding: 15px;
-        max-height: 60vh;
-    }
-    
-    #documentPreviewModal .modal-footer {
-        padding: 12px 15px;
-    }
-}
-
-@media (max-width: 480px) {
-    .modal-dialog {
-        margin: 5px;
-        max-width: calc(100% - 10px);
-    }
-    
-    #documentPreviewModal .modal-title {
-        font-size: 14px;
-    }
-    
-    #documentPreviewModal .modal-body {
-        max-height: 50vh;
-    }
-}
-
-@media (max-width: 768px) {
-    .documents-container {
+    .case-documents-container {
         padding: 15px;
     }
     
     .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .documents-grid {
         grid-template-columns: 1fr;
     }
     
@@ -422,19 +411,48 @@
     .document-actions {
         flex-direction: column;
     }
+    
+    .case-info-bar {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .case-actions {
+        align-self: stretch;
+        justify-content: space-between;
+    }
 }
 </style>
 
-<div class="documents-container">
+<div class="case-documents-container">
     <!-- Back Navigation -->
-    <a href="<?php echo site_url('cases/Cl_cases'); ?>" class="back-link">
-        <i class="fa fa-arrow-left"></i> Back to Dashboard
+    <a href="<?php echo site_url('cases/Cl_cases/case_details/' . $case['id']); ?>" class="back-link">
+        <i class="fa fa-arrow-left"></i> Back to Case Details
     </a>
 
     <!-- Page Header -->
-    <div class="documents-header">
-        <h1><i class="fa fa-files-o"></i> My Documents</h1>
-        <p>View and manage all your personal and contact documents</p>
+    <div class="case-documents-header">
+        <h1><i class="fa fa-files-o"></i> Case Documents</h1>
+        <p>View and manage documents for this case</p>
+    </div>
+
+    <!-- Case Info Bar -->
+    <div class="case-info-bar">
+        <div>
+            <p class="case-info-text">
+                <strong>Case:</strong> <?php echo htmlspecialchars($case['case_title']); ?> 
+                <span style="color: #7f8c8d;">(#<?php echo htmlspecialchars($case['case_number']); ?>)</span>
+            </p>
+        </div>
+        <div class="case-actions">
+            <a href="<?php echo site_url('cases/Cl_cases/case_details/' . $case['id']); ?>" class="btn">
+                <i class="fa fa-eye"></i> View Case
+            </a>
+            <a href="<?php echo site_url('cases/Cl_cases/my_documents'); ?>" class="btn primary">
+                <i class="fa fa-files-o"></i> All Documents
+            </a>
+        </div>
     </div>
 
     <!-- Filters Section -->
@@ -445,14 +463,6 @@
                 <input type="text" class="filter-input" id="searchInput" placeholder="Search by name or tag...">
             </div>
             <div class="filter-group">
-                <label class="filter-label">Document Type</label>
-                <select class="filter-input" id="typeFilter">
-                    <option value="">All Types</option>
-                    <option value="client">My Documents</option>
-                    <option value="case">Case Documents</option>
-                </select>
-            </div>
-            <div class="filter-group">
                 <label class="filter-label">File Format</label>
                 <select class="filter-input" id="formatFilter">
                     <option value="">All Formats</option>
@@ -460,6 +470,15 @@
                     <option value="doc">Word Documents</option>
                     <option value="xlsx">Spreadsheets</option>
                     <option value="jpg">Images</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Date Range</label>
+                <select class="filter-input" id="dateFilter">
+                    <option value="">All Dates</option>
+                    <option value="today">Today</option>
+                    <option value="this-week">This Week</option>
+                    <option value="this-month">This Month</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -483,9 +502,9 @@
     <div class="documents-grid" id="documentsGrid">
         <?php if (isset($documents) && !empty($documents)): ?>
             <?php foreach ($documents as $doc): ?>
-                <div class="document-card <?php echo $doc['owner_type'] == 'client' ? 'client-owned' : 'case-owned'; ?>" 
-                     data-owner-type="<?php echo $doc['owner_type']; ?>"
+                <div class="document-card" 
                      data-file-type="<?php echo $doc['file_type']; ?>"
+                     data-date="<?php echo $doc['date_added']; ?>"
                      onclick="viewDocument(<?php echo $doc['id']; ?>)">
                     
                     <div class="document-header-row">
@@ -494,10 +513,10 @@
                                 <i class="fa fa-file-<?php echo $doc['file_type'] == 'pdf' ? 'pdf-o' : 'text-o'; ?>"></i>
                                 <?php echo htmlspecialchars($doc['name']); ?>
                             </h3>
-                            <p class="document-tag"><?php echo htmlspecialchars($doc['tag'] ?? 'Document'); ?></p>
+                            <p class="document-tag"><?php echo htmlspecialchars($doc['tag'] ?? 'Case Document'); ?></p>
                         </div>
-                        <div class="document-type type-<?php echo $doc['owner_type']; ?>">
-                            <?php echo $doc['owner_type'] == 'client' ? 'My Document' : 'Case Document'; ?>
+                        <div class="document-type">
+                            Case Document
                         </div>
                     </div>
 
@@ -510,10 +529,10 @@
                             <div class="meta-label">File Type</div>
                             <div class="meta-value"><?php echo strtoupper($doc['file_type']); ?></div>
                         </div>
-                        <?php if ($doc['owner_type'] == 'case' && !empty($doc['case_title'])): ?>
+                        <?php if (isset($doc['staffid']) && $doc['staffid']): ?>
                             <div class="meta-item">
-                                <div class="meta-label">Related Case</div>
-                                <div class="meta-value"><?php echo htmlspecialchars($doc['case_title']); ?></div>
+                                <div class="meta-label">Uploaded By</div>
+                                <div class="meta-value">Staff</div>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -532,7 +551,7 @@
             <div class="empty-state">
                 <i class="fa fa-files-o fa-4x"></i>
                 <h3>No Documents Found</h3>
-                <p>No documents match your current filters or you don't have any documents yet.</p>
+                <p>No documents have been uploaded for this case yet.</p>
             </div>
         <?php endif; ?>
     </div>
@@ -620,8 +639,8 @@ $(document).ready(function() {
 
 function filterDocuments() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const typeFilter = document.getElementById('typeFilter').value;
     const formatFilter = document.getElementById('formatFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
     
     const documentCards = document.querySelectorAll('.document-card');
     let visibleCount = 0;
@@ -629,14 +648,31 @@ function filterDocuments() {
     documentCards.forEach(card => {
         const title = card.querySelector('.document-title').textContent.toLowerCase();
         const tag = card.querySelector('.document-tag').textContent.toLowerCase();
-        const ownerType = card.dataset.ownerType;
         const fileType = card.dataset.fileType;
+        const docDate = new Date(card.dataset.date);
+        const today = new Date();
         
         const matchesSearch = !searchTerm || title.includes(searchTerm) || tag.includes(searchTerm);
-        const matchesType = !typeFilter || ownerType === typeFilter;
         const matchesFormat = !formatFilter || fileType === formatFilter;
         
-        if (matchesSearch && matchesType && matchesFormat) {
+        let matchesDate = true;
+        if (dateFilter) {
+            switch (dateFilter) {
+                case 'today':
+                    matchesDate = docDate.toDateString() === today.toDateString();
+                    break;
+                case 'this-week':
+                    const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
+                    const weekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+                    matchesDate = docDate >= weekStart && docDate <= weekEnd;
+                    break;
+                case 'this-month':
+                    matchesDate = docDate.getMonth() === today.getMonth() && docDate.getFullYear() === today.getFullYear();
+                    break;
+            }
+        }
+        
+        if (matchesSearch && matchesFormat && matchesDate) {
             card.style.display = 'block';
             visibleCount++;
         } else {
@@ -653,20 +689,15 @@ function filterDocuments() {
 
 function clearFilters() {
     document.getElementById('searchInput').value = '';
-    document.getElementById('typeFilter').value = '';
     document.getElementById('formatFilter').value = '';
+    document.getElementById('dateFilter').value = '';
     filterDocuments();
 }
 
 // Add event listeners
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchInput').addEventListener('input', filterDocuments);
-    document.getElementById('typeFilter').addEventListener('change', filterDocuments);
     document.getElementById('formatFilter').addEventListener('change', filterDocuments);
-    
-    // Apply initial filter if type is set from URL
-    if (document.getElementById('typeFilter').value) {
-        filterDocuments();
-    }
+    document.getElementById('dateFilter').addEventListener('change', filterDocuments);
 });
 </script>

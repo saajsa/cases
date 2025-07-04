@@ -112,10 +112,53 @@
 .activity-item {
     padding: 15px 0;
     border-bottom: 1px solid #ecf0f1;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
 }
 
 .activity-item:last-child {
     border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.activity-icon.success {
+    background: #d4edda;
+    color: #27ae60;
+}
+
+.activity-icon.info {
+    background: #d1ecf1;
+    color: #3498db;
+}
+
+.activity-icon.warning {
+    background: #fff3cd;
+    color: #f39c12;
+}
+
+.activity-icon.danger {
+    background: #f8d7da;
+    color: #e74c3c;
+}
+
+.activity-icon.primary {
+    background: #e8f4fd;
+    color: #3498db;
+}
+
+.activity-content {
+    flex: 1;
 }
 
 .activity-date {
@@ -128,12 +171,14 @@
     font-weight: 600;
     color: #2c3e50;
     margin-bottom: 5px;
+    font-size: 15px;
 }
 
 .activity-description {
     color: #7f8c8d;
     font-size: 14px;
     line-height: 1.4;
+    margin: 0;
 }
 
 .document-grid {
@@ -363,8 +408,8 @@
 <div class="dashboard-container">
     <!-- Header -->
     <div class="dashboard-header">
-        <h1><i class="fa fa-tachometer"></i> My Cases Dashboard</h1>
-        <p>Welcome back! Here's your case summary and recent activity.</p>
+        <h1><i class="fa fa-user"></i> Welcome, <?php echo isset($client_name) ? htmlspecialchars($client_name) : 'Client'; ?></h1>
+        <p>Your personalized legal dashboard - Stay updated on your cases and legal matters.</p>
     </div>
 
     <!-- Statistics -->
@@ -399,21 +444,37 @@
         </a>
     </div>
 
+
+
     <!-- Recent Activity -->
     <div class="content-section">
         <h2 class="section-title"><i class="fa fa-clock-o"></i> Recent Activity</h2>
         <?php if (isset($recent_activity) && !empty($recent_activity)): ?>
-            <?php foreach (array_slice($recent_activity, 0, 5) as $activity): ?>
+            <?php foreach (array_slice($recent_activity, 0, 8) as $activity): ?>
                 <div class="activity-item">
-                    <div class="activity-date"><?php echo date('M d, Y - H:i', strtotime($activity['date'])); ?></div>
-                    <div class="activity-title"><?php echo htmlspecialchars($activity['title']); ?></div>
-                    <div class="activity-description"><?php echo htmlspecialchars($activity['description']); ?></div>
+                    <div class="activity-icon <?php echo isset($activity['color']) ? $activity['color'] : 'primary'; ?>">
+                        <i class="fa <?php echo isset($activity['icon']) ? $activity['icon'] : 'fa-info'; ?>"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-date"><?php echo date('M d, Y - H:i', strtotime($activity['date'])); ?></div>
+                        <div class="activity-title"><?php echo htmlspecialchars($activity['title']); ?></div>
+                        <div class="activity-description"><?php echo htmlspecialchars($activity['description']); ?></div>
+                    </div>
                 </div>
             <?php endforeach; ?>
+            
+            <?php if (count($recent_activity) > 8): ?>
+                <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #ecf0f1;">
+                    <p style="color: #7f8c8d; margin: 0;">
+                        <strong><?php echo count($recent_activity) - 8; ?></strong> more activities available
+                    </p>
+                </div>
+            <?php endif; ?>
         <?php else: ?>
             <div class="empty-state">
                 <i class="fa fa-info-circle fa-3x"></i>
                 <p>No recent activity to display.</p>
+                <small style="color: #95a5a6;">Activity from the last 90 days will appear here</small>
             </div>
         <?php endif; ?>
     </div>

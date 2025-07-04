@@ -117,6 +117,18 @@
     background: #95a5a6;
 }
 
+.status-badge.general {
+    background: #95a5a6;
+}
+
+.status-badge.consultation {
+    background: #3498db;
+}
+
+.status-badge.litigation {
+    background: #e74c3c;
+}
+
 .consultation-notes {
     background: #fff;
     padding: 30px;
@@ -635,7 +647,11 @@
                     </div>
                     <div class="info-item">
                         <div class="info-label">Consultation Type</div>
-                        <div class="info-value"><?php echo isset($consultation['consultation_type']) ? htmlspecialchars($consultation['consultation_type']) : 'General'; ?></div>
+                        <div class="info-value">
+                            <span class="status-badge <?php echo strtolower($consultation['consultation_type'] ?? 'general'); ?>">
+                                <?php echo isset($consultation['consultation_type']) ? htmlspecialchars($consultation['consultation_type']) : 'General'; ?>
+                            </span>
+                        </div>
                     </div>
                     <?php if (isset($consultation['case_title'])): ?>
                         <div class="info-item">
@@ -658,7 +674,7 @@
                     <div class="note-section">
                         <h3 class="note-title">Summary</h3>
                         <div class="note-content">
-                            <?php echo nl2br(htmlspecialchars($consultation['summary'])); ?>
+                            <?php echo nl2br(htmlspecialchars(strip_tags($consultation['summary']))); ?>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -667,7 +683,7 @@
                     <div class="note-section">
                         <h3 class="note-title">Detailed Notes</h3>
                         <div class="note-content">
-                            <?php echo nl2br(htmlspecialchars($consultation['notes'])); ?>
+                            <?php echo nl2br(htmlspecialchars(strip_tags($consultation['notes']))); ?>
                         </div>
                     </div>
                 <?php endif; ?>
