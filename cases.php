@@ -37,6 +37,8 @@ function cases_module_init() {
 // SAFE MENU STRUCTURE - Basic but working
 hooks()->add_action('admin_init', 'cases_module_init_menu_items');
 
+// CLIENT AREA MENU INTEGRATION - REMOVED DUPLICATE HOOK
+
 function cases_module_init_menu_items() {
     $CI = &get_instance();
 
@@ -169,28 +171,12 @@ function cases_permissions() {
 
 function cases_client_area_init() {
     if (is_client_logged_in()) {
-        // Main dashboard menu item
-        add_theme_menu_item('my_legal_dashboard', [
-            'name'     => 'Legal Dashboard',
-            'href'     => site_url('cases/Client'),
-            'icon'     => 'fa fa-tachometer',
-            'position' => 50,
-        ]);
-        
-        // Sub-menu for Cases & Hearings  
-        add_theme_menu_item('my_cases_hearings', [
-            'name'     => 'Cases & Hearings',
-            'href'     => site_url('cases/Client'),
+        // Standard Perfex CRM module/controller pattern
+        add_theme_menu_item('my_cases', [
+            'name'     => 'My Cases',
+            'href'     => site_url('cases/Cl_cases'),
             'icon'     => 'fa fa-balance-scale',
             'position' => 51,
-        ]);
-        
-        // Sub-menu for Consultations
-        add_theme_menu_item('my_consultations', [
-            'name'     => 'Consultations',
-            'href'     => site_url('cases/Client/consultations'),
-            'icon'     => 'fa fa-comments',
-            'position' => 52,
         ]);
     }
 }

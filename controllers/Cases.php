@@ -76,7 +76,7 @@ class Cases extends AdminController
             $data['accessible_case_ids'] = [];
         }
 
-        $this->load->view('cases/manage', $data);
+        $this->load->view('admin/cases/manage', $data);
     }
 
     public function consultations_list()
@@ -933,7 +933,7 @@ public function get_menu_stats()
             $data['title'] = 'Case Details - ' . ($data['case']['case_title'] ?? 'Unknown Case');
 
             // Load view
-            $this->load->view('cases/cases/details', $data);
+            $this->load->view('admin/cases/details', $data);
 
             } catch (Exception $e) {
                 log_message('error', 'Error in cases/details: ' . $e->getMessage());
@@ -1020,7 +1020,7 @@ public function get_menu_stats()
         $data['consultations'] = $this->db->get()->result_array();
         
         $data['title'] = 'Caseboard';
-        $this->load->view('cases/caseboard', $data);
+        $this->load->view('admin/dashboard/caseboard', $data);
     }
 
     /**
@@ -1196,7 +1196,7 @@ public function get_menu_stats()
         $data['to_date'] = $to_date;
         $data['title'] = 'Cases Summary Report';
         
-        $this->load->view('cases/reports/summary', $data);
+        $this->load->view('admin/reports/reports_summary', $data);
     }
 
     private function generate_detailed_report($from_date, $to_date)
@@ -1221,7 +1221,7 @@ public function get_menu_stats()
         $data['to_date'] = $to_date;
         $data['title'] = 'Detailed Cases Report';
         
-        $this->load->view('cases/reports/detailed', $data);
+        $this->load->view('admin/reports/reports_detailed', $data);
     }
 
     private function generate_hearings_report($from_date, $to_date)
@@ -1242,7 +1242,7 @@ public function get_menu_stats()
         $data['to_date'] = $to_date;
         $data['title'] = 'Hearings Report';
         
-        $this->load->view('cases/reports/hearings', $data);
+        $this->load->view('admin/reports/reports_hearings', $data);
     }
 
     private function generate_consultations_report($from_date, $to_date)
@@ -1267,7 +1267,7 @@ public function get_menu_stats()
         $data['to_date'] = $to_date;
         $data['title'] = 'Consultations Report';
         
-        $this->load->view('cases/reports/consultations', $data);
+        $this->load->view('admin/reports/reports_consultations', $data);
     }
 
     /**
@@ -1692,367 +1692,5 @@ public function get_menu_stats()
             ]);
         }
     }
-
-    public function debug()
-{
-    if (!is_admin()) {
-        access_denied();
-    }
-    
-    $debug_info = [];
-    
-    // 1. Check if module is properly loaded
-    $debug_info['module_loaded'] = defined('CASES_MODULE_NAME');
-    
-    // 2. Check database tables
-    $tables_to_check = [
-        'case_consultations',
-        'cases',
-        'hearings',
-        'courts',
-        'court_rooms'
-    ];
-    
-    $debug_info['tables'] = [];
-    foreach ($tables_to_check as $table) {
-        $full_table_name = db_prefix() . $table;
-        $exists = $this->db->table_exists($table);
-        
-        $debug_info['tables'][$table] = [
-            'exists' => $exists,
-            'full_name' => $full_table_name
-        ];
-        
-        if ($exists) {
-            try {
-                $count = $this->db->count_all($full_table_name);
-                $debug_info['tables'][$table]['count'] = $count;
-                
-                // Get table structure
-                $fields = $this->db->field_data($full_table_name);
-                $debug_info['tables'][$table]['fields'] = array_map(function($field) {
-                    return $field->name . ' (' . $field->type . ')';
-                }, $fields);
-            } catch (Exception $e) {
-                $debug_info['tables'][$table]['error'] = $e->getMessage();
-            }
-        }
-    }
-    
-    // 3. Check permissions
-    $debug_info['permissions'] = [
-        'view' => has_permission('cases', '', 'view'),
-        'create' => has_permission('cases', '', 'create'),
-        'edit' => has_permission('cases', '', 'edit'),
-        'delete' => has_permission('cases', '', 'delete'),
-        'is_admin' => is_admin(),
-        'user_id' => get_staff_user_id()
-    ];
-    
-    // 4. Check models
-    $debug_info['models'] = [];
-    try {
-        $this->load->model('Cases_model');
-        $debug_info['models']['Cases_model'] = 'Loaded successfully';
-        
-        // Test a simple model method
-        $consultations = $this->Cases_model->get_consultations();
-        $debug_info['models']['Cases_model_test'] = 'Method works, returned ' . count($consultations) . ' consultations';
-    } catch (Exception $e) {
-        $debug_info['models']['Cases_model'] = 'Error: ' . $e->getMessage();
-    }
-    
-    // 5. Check routes
-    $debug_info['routes'] = [
-        'current_controller' => $this->router->class,
-        'current_method' => $this->router->method,
-        'base_url' => base_url(),
-        'admin_url' => admin_url(),
-        'site_url' => site_url()
-    ];
-    
-    // 6. Test database connection
-    try {
-        $this->db->query('SELECT 1');
-        $debug_info['database'] = 'Connection OK';
-        $debug_info['db_prefix'] = db_prefix();
-    } catch (Exception $e) {
-        $debug_info['database'] = 'Error: ' . $e->getMessage();
-    }
-    
-    // 7. Check environment
-    $debug_info['environment'] = [
-        'php_version' => PHP_VERSION,
-        'ci_version' => CI_VERSION,
-        'environment' => ENVIRONMENT,
-        'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown'
-    ];
-    
-    // 8. Test JSON endpoints
-    $debug_info['endpoints'] = [];
-    $endpoints_to_test = [
-        'consultations_list',
-        'cases_list',
-        'get_menu_stats'
-    ];
-    
-    foreach ($endpoints_to_test as $endpoint) {
-        try {
-            // Simulate the method call
-            ob_start();
-            $this->$endpoint();
-            $output = ob_get_clean();
-            
-            $json_data = json_decode($output, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $debug_info['endpoints'][$endpoint] = 'Valid JSON response';
-            } else {
-                $debug_info['endpoints'][$endpoint] = 'Invalid JSON: ' . substr($output, 0, 200);
-            }
-        } catch (Exception $e) {
-            $debug_info['endpoints'][$endpoint] = 'Error: ' . $e->getMessage();
-        }
-    }
-    
-    // Output as HTML for easy reading
-    ?>
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Cases Module Debug</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .debug-section { margin-bottom: 30px; }
-            .debug-title { font-size: 18px; font-weight: bold; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 5px; }
-            .debug-content { margin-top: 10px; }
-            .success { color: green; }
-            .error { color: red; }
-            .warning { color: orange; }
-            pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
-            table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-        </style>
-    </head>
-    <body>
-        <h1>Cases Module Debug Information</h1>
-        <p><strong>Generated:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
-        
-        <div class="debug-section">
-            <div class="debug-title">Module Status</div>
-            <div class="debug-content">
-                <p>Module Loaded: <span class="<?php echo $debug_info['module_loaded'] ? 'success' : 'error'; ?>">
-                    <?php echo $debug_info['module_loaded'] ? 'Yes' : 'No'; ?>
-                </span></p>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Database Tables</div>
-            <div class="debug-content">
-                <table>
-                    <tr>
-                        <th>Table</th>
-                        <th>Exists</th>
-                        <th>Count</th>
-                        <th>Status</th>
-                    </tr>
-                    <?php foreach ($debug_info['tables'] as $table => $info): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($table); ?></td>
-                        <td class="<?php echo $info['exists'] ? 'success' : 'error'; ?>">
-                            <?php echo $info['exists'] ? 'Yes' : 'No'; ?>
-                        </td>
-                        <td><?php echo isset($info['count']) ? $info['count'] : 'N/A'; ?></td>
-                        <td>
-                            <?php if (isset($info['error'])): ?>
-                                <span class="error"><?php echo htmlspecialchars($info['error']); ?></span>
-                            <?php else: ?>
-                                <span class="success">OK</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </table>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Permissions</div>
-            <div class="debug-content">
-                <table>
-                    <tr>
-                        <th>Permission</th>
-                        <th>Status</th>
-                    </tr>
-                    <?php foreach ($debug_info['permissions'] as $perm => $status): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($perm); ?></td>
-                        <td class="<?php echo $status ? 'success' : 'error'; ?>">
-                            <?php echo $status ? 'Granted' : 'Denied'; ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </table>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Models</div>
-            <div class="debug-content">
-                <?php foreach ($debug_info['models'] as $model => $status): ?>
-                    <p><strong><?php echo htmlspecialchars($model); ?>:</strong> 
-                    <span class="<?php echo strpos($status, 'Error') === false ? 'success' : 'error'; ?>">
-                        <?php echo htmlspecialchars($status); ?>
-                    </span></p>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">JSON Endpoints</div>
-            <div class="debug-content">
-                <table>
-                    <tr>
-                        <th>Endpoint</th>
-                        <th>Status</th>
-                    </tr>
-                    <?php foreach ($debug_info['endpoints'] as $endpoint => $status): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($endpoint); ?></td>
-                        <td class="<?php echo strpos($status, 'Valid JSON') === 0 ? 'success' : 'error'; ?>">
-                            <?php echo htmlspecialchars($status); ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </table>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Routes & URLs</div>
-            <div class="debug-content">
-                <?php foreach ($debug_info['routes'] as $key => $value): ?>
-                    <p><strong><?php echo htmlspecialchars($key); ?>:</strong> <?php echo htmlspecialchars($value); ?></p>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Environment</div>
-            <div class="debug-content">
-                <?php foreach ($debug_info['environment'] as $key => $value): ?>
-                    <p><strong><?php echo htmlspecialchars($key); ?>:</strong> <?php echo htmlspecialchars($value); ?></p>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Database Connection</div>
-            <div class="debug-content">
-                <p class="<?php echo strpos($debug_info['database'], 'Error') === false ? 'success' : 'error'; ?>">
-                    <?php echo htmlspecialchars($debug_info['database']); ?>
-                </p>
-                <p><strong>DB Prefix:</strong> <?php echo htmlspecialchars($debug_info['db_prefix']); ?></p>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Raw Debug Data</div>
-            <div class="debug-content">
-                <pre><?php echo htmlspecialchars(json_encode($debug_info, JSON_PRETTY_PRINT)); ?></pre>
-            </div>
-        </div>
-        
-        <div class="debug-section">
-            <div class="debug-title">Quick Tests</div>
-            <div class="debug-content">
-                <p><a href="<?php echo admin_url('cases/debug'); ?>?test=json">Test JSON Response</a></p>
-                <p><a href="<?php echo admin_url('cases/consultations_list'); ?>">Direct Consultations List</a></p>
-                <p><a href="<?php echo admin_url('cases/cases_list'); ?>">Direct Cases List</a></p>
-                <p><a href="<?php echo admin_url('cases/get_menu_stats'); ?>">Direct Menu Stats</a></p>
-            </div>
-        </div>
-    </body>
-    </html>
-    <?php
-    
-    // Handle test parameter
-    if ($this->input->get('test') === 'json') {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => true,
-            'message' => 'JSON response working',
-            'timestamp' => date('Y-m-d H:i:s'),
-            'debug_info' => $debug_info
-        ]);
-    }
-    
-    exit; // Important: prevent any additional output
-}
-
-public function debug_data()
-{
-    if (!is_admin()) {
-        access_denied();
-    }
-    
-    header('Content-Type: application/json');
-    
-    $debug_info = [];
-    
-    // Check database tables
-    $tables_to_check = [
-        db_prefix() . 'case_consultations',
-        db_prefix() . 'cases', 
-        db_prefix() . 'clients',
-        db_prefix() . 'contacts'
-    ];
-    
-    foreach ($tables_to_check as $table) {
-        $table_name = str_replace(db_prefix(), '', $table);
-        $exists = $this->db->table_exists($table_name);
-        $debug_info['tables'][$table] = [
-            'exists' => $exists,
-            'count' => $exists ? $this->db->count_all($table) : 0
-        ];
-        
-        if ($exists) {
-            // Get sample data
-            $this->db->limit(1);
-            $sample = $this->db->get($table)->row_array();
-            $debug_info['tables'][$table]['sample'] = $sample;
-        }
-    }
-    
-    // Test consultations query
-    try {
-        $consultations = $this->Cases_model->get_consultations_with_names();
-        $debug_info['consultations'] = [
-            'count' => count($consultations),
-            'data' => array_slice($consultations, 0, 2) // First 2 records
-        ];
-    } catch (Exception $e) {
-        $debug_info['consultations'] = [
-            'error' => $e->getMessage()
-        ];
-    }
-    
-    // Test cases query  
-    try {
-        $cases = $this->Cases_model->get_all_cases_with_details();
-        $debug_info['cases'] = [
-            'count' => count($cases),
-            'data' => array_slice($cases, 0, 2) // First 2 records
-        ];
-    } catch (Exception $e) {
-        $debug_info['cases'] = [
-            'error' => $e->getMessage()
-        ];
-    }
-    
-    echo json_encode($debug_info, JSON_PRETTY_PRINT);
-    exit;
-}
 
 }

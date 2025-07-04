@@ -4,11 +4,35 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Cases_model extends App_Model
 {
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Load essential helpers for client-area functions
+        $this->load_cases_helpers();
+    }
+    
+    /**
+     * Load Cases module helpers safely
+     */
+    private function load_cases_helpers()
+    {
+        $helper_files = [
+            'security_helper.php',
+            'validation_helper.php',
+            'access_control_helper.php'
+        ];
+        
+        foreach ($helper_files as $helper) {
+            $helper_path = FCPATH . 'modules/cases/helpers/' . $helper;
+            if (file_exists($helper_path)) {
+                require_once($helper_path);
+            }
+        }
+    }
+
     public function add_consultation($data)
     {
-        // Load security helper
-        $this->load->helper('modules/cases/helpers/security_helper');
-        
         // Validate required fields
         if (empty($data['client_id']) || empty($data['note'])) {
             log_message('error', 'Missing required fields for consultation');
@@ -407,6 +431,7 @@ public function get_all_cases_with_details()
     public function get_case_hearing_count($case_id)
     {
         try {
+            $this->db->reset_query();
             $this->db->where('case_id', $case_id);
             return $this->db->count_all_results(db_prefix() . 'hearings');
         } catch (Exception $e) {
@@ -724,15 +749,22 @@ public function get_all_cases_with_details()
      */
     public function get_case_documents_count($case_id)
     {
-        $this->db->where('rel_type', 'case');
-        $this->db->where('rel_id', $case_id);
-        $case_docs = $this->db->count_all_results(db_prefix() . 'files');
-        
-        // Also count hearing documents
-        $this->db->where("rel_type = 'hearing' AND rel_id IN (SELECT id FROM " . db_prefix() . "hearings WHERE case_id = ?)", $case_id);
-        $hearing_docs = $this->db->count_all_results(db_prefix() . 'files');
-        
-        return $case_docs + $hearing_docs;
+        try {
+            // Count case documents
+            $this->db->where('rel_type', 'case');
+            $this->db->where('rel_id', $case_id);
+            $case_docs = $this->db->count_all_results(db_prefix() . 'files');
+            
+            // Reset query builder and count hearing documents
+            $this->db->reset_query();
+            $this->db->where("rel_type = 'hearing' AND rel_id IN (SELECT id FROM " . db_prefix() . "hearings WHERE case_id = ?)", $case_id);
+            $hearing_docs = $this->db->count_all_results(db_prefix() . 'files');
+            
+            return $case_docs + $hearing_docs;
+        } catch (Exception $e) {
+            log_message('error', 'Error getting case documents count: ' . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -1274,5 +1306,59 @@ public function get_all_cases_with_details()
             return [];
         }
     }
+
+    // ✅ Log activity for file actions (upload, delete, etc.) - from Documents_model
+    public function log_activity(array $data)
+    {
+        $insert = [
+            'staff_id'    => $data['staff_id'] ?? null,
+            'document_id' => $data['document_id'] ?? null,
+            'rel_id'      => $data['rel_id'] ?? null,
+            'rel_type'    => $data['rel_type'] ?? null,
+            'message'     => $data['message'],
+            'created_at'  => date('Y-m-d H:i:s'),
+        ];
+
+        $this->db->insert('tblfile_activity_log', $insert);
+    }
+
+    // ✅ Fetch recent activity logs - from Documents_model
+    public function get_recent_activities($limit = 10)
+    {
+        $this->db->select('l.*, CONCAT(s.firstname, " ", s.lastname) AS staff_name');
+        $this->db->from('tblfile_activity_log l');
+        $this->db->join(db_prefix() . 'staff s', 's.staffid = l.staff_id', 'left');
+        $this->db->order_by('l.created_at', 'DESC');
+        $this->db->limit($limit);
+        return $this->db->get()->result_array();
+    }
+
+    // Search for client-based documents by looking up the client - from Documents_model
+    public function searchByClient($searchTerm) {
+        $this->db->like('company', $searchTerm);
+        $client = $this->db->get(db_prefix().'clients')->row();
+        if ($client) {
+            $clientId = $client->userid;
+            $this->db->where('rel_type', 'client');
+            $this->db->where('rel_id', $clientId);
+            return $this->db->get(db_prefix().'files')->result();
+        }
+        return array();
+    }
+
+    // Search for invoice-based documents by looking up the invoice - from Documents_model
+    public function searchByInvoice($searchTerm) {
+        $this->db->or_like('formatted_number', $searchTerm);
+        $invoice = $this->db->get(db_prefix().'invoices')->row();
+        if ($invoice) {
+            $invoiceId = $invoice->id;
+            $this->db->where('rel_type', 'invoice');
+            $this->db->where('rel_id', $invoiceId);
+            return $this->db->get(db_prefix().'files')->result();
+        }
+        return array();
+    }
+
+
 
 }

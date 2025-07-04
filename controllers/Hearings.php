@@ -33,7 +33,7 @@ class Hearings extends AdminController
         }
         
         $data['title'] = 'Hearings';
-        $this->load->view('cases/hearings/manage', $data);
+        $this->load->view('admin/hearings/manage', $data);
     }
 
  /**
@@ -144,7 +144,7 @@ public function add()
             ? 'Add First Hearing' 
             : 'Add Hearing';
             
-        $this->load->view('cases/hearings/manage', $data);
+        $this->load->view('admin/hearings/manage', $data);
     }
 }
 
@@ -269,7 +269,7 @@ public function edit($id)
         $data['upcoming_hearing'] = $this->db->get(db_prefix() . 'hearings')->row_array();
         
         $data['title'] = 'Edit Hearing';
-        $this->load->view('cases/hearings/manage', $data);
+        $this->load->view('admin/hearings/manage', $data);
     }
 }
 
@@ -390,7 +390,7 @@ public function causelist()
     }
     
     // Load the view
-    $this->load->view('cases/hearings/causelist', $data);
+    $this->load->view('admin/hearings/causelist', $data);
 }
 
 /**
@@ -514,7 +514,7 @@ public function get_causelist()
             }
         }
         
-        $this->load->view('cases/hearings/calendar', $data);
+        $this->load->view('admin/shared/calendar', $data);
     }
 
 /**
@@ -681,6 +681,6 @@ public function quick_update($hearing_id)
         'upcoming_hearing' => $data['upcoming_hearing'] ?? null
     ];
     
-    $this->load->view('cases/hearings/quick_update', $data);
+    $this->load->view('admin/hearings/quick_update', $data);
 }
 }

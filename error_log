@@ -1,0 +1,4 @@
+[02-Jul-2025 10:37:52 UTC] PHP Fatal error:  Cannot redeclare Cases_model::get_invoices_by_customer() in /home/pgoo0u1lojzd/legumlex/accs/modules/cases/models/Cases_model.php on line 1331
+[02-Jul-2025 10:38:31 UTC] PHP Fatal error:  Cannot redeclare Cases_model::get_contacts_by_customer() in /home/pgoo0u1lojzd/legumlex/accs/modules/cases/models/Cases_model.php on line 1332
+[02-Jul-2025 10:55:40 UTC] PHP Parse error:  syntax error, unexpected token "elseif" in /home/pgoo0u1lojzd/legumlex/accs/modules/cases/views/client/hearing_detail.php on line 304
+[02-Jul-2025 10:56:18 UTC] PHP Parse error:  syntax error, unexpected token "elseif" in /home/pgoo0u1lojzd/legumlex/accs/modules/cases/views/client/hearing_detail.php on line 304

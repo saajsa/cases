@@ -16,7 +16,7 @@ class Documents extends AdminController {
     public function index() {
         $data['title'] = _l('document_manager');
         $data['activities'] = $this->cases_model->get_recent_document_activities();
-        $this->load->view('documents/index', $data);
+        $this->load->view('admin/documents/documents_index', $data);
     }
 
     /**
@@ -44,7 +44,7 @@ public function upload()
         // ——— render empty upload form ———
         $data['customers'] = $this->db->get(db_prefix().'clients')->result();
         $data['title']     = _l('upload_document');
-        return $this->load->view('documents/upload_form', $data);
+        return $this->load->view('admin/documents/documents_upload_form', $data);
     }
 
     /* -------------------------------------------------------------
@@ -274,7 +274,7 @@ public function search()
     if (!$this->input->post()) {
         $data['customers'] = $this->db->get(db_prefix().'clients')->result();
         $data['title']     = _l('search_documents');
-        return $this->load->view('documents/search_form', $data);
+        return $this->load->view('admin/documents/documents_search_form', $data);
     }
 
     // ── Collect & sanitise incoming filters ───────────────
@@ -294,7 +294,7 @@ public function search()
 
     // ── Run search & render results ───────────────────────
     $data['results'] = $this->cases_model->search_documents($filters);
-    $this->load->view('documents/search_results', $data);
+    $this->load->view('admin/documents/documents_search_results', $data);
 }
 
     
@@ -381,7 +381,7 @@ public function search()
         $data['file']      = $file;
         $data['customers'] = $this->db->get(db_prefix().'clients')->result();
         $data['title']     = _l('edit_document');
-        $this->load->view('documents/edit_form', $data);
+        $this->load->view('admin/documents/documents_edit_form', $data);
     }
     
 
@@ -641,7 +641,7 @@ public function search()
             // Show advanced search form
             $data['clients'] = $this->db->get(db_prefix().'clients')->result();
             $data['title'] = _l('advanced_document_search');
-            return $this->load->view('documents/advanced_search_form', $data);
+            return $this->load->view('admin/documents/documents_advanced_search_form', $data);
         }
         
         // Process advanced search
@@ -663,7 +663,7 @@ public function search()
         $data['criteria'] = $criteria;
         $data['title'] = _l('advanced_search_results');
         
-        $this->load->view('documents/advanced_search_results', $data);
+        $this->load->view('admin/documents/documents_advanced_search_results', $data);
     }
 
     /**
@@ -719,7 +719,7 @@ public function search()
             // Show smart upload form
             $data['customers'] = $this->db->get(db_prefix().'clients')->result();
             $data['title'] = _l('smart_document_upload');
-            return $this->load->view('documents/smart_upload_form', $data);
+            return $this->load->view('admin/documents/documents_smart_upload_form', $data);
         }
 
         // Process smart upload with automatic categorization
@@ -924,7 +924,7 @@ public function search()
         $data['title'] = _l('document_analytics_report');
         $data['analytics'] = $this->get_document_analytics();
         
-        $this->load->view('documents/analytics_report', $data);
+        $this->load->view('admin/documents/documents_analytics_report', $data);
     }
 
     /**

@@ -12,7 +12,7 @@ class Courts extends AdminController
 
         $data['title'] = 'Manage Courts';
         $data['courts'] = $this->db->get('tblcourts')->result_array(); // previously tblcourt_establishments
-        $this->load->view('cases/courts/manage_courts', $data);
+        $this->load->view('admin/courts/manage_courts', $data);
     }
 
 
@@ -148,7 +148,7 @@ class Courts extends AdminController
         $data['title'] = 'Edit Court';
         $data['court'] = $court;
         
-        $this->load->view('cases/courts/edit_court', $data);
+        $this->load->view('admin/courts/edit_court', $data);
     }
 
     public function delete_court($id)
@@ -193,7 +193,7 @@ class Courts extends AdminController
         $data['rooms']  = $rooms;
         $data['courts'] = $courts;
 
-        $this->load->view('cases/courts/manage_courtrooms', $data);
+        $this->load->view('admin/courts/manage_courtrooms', $data);
     }
 
 
@@ -259,7 +259,7 @@ class Courts extends AdminController
         $data['room'] = $room;
         $data['courts'] = $courts;
         
-        $this->load->view('cases/courts/edit_room', $data);
+        $this->load->view('admin/courts/edit_room', $data);
     }
 
     public function delete_room($id)

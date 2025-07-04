@@ -243,10 +243,19 @@
     background: var(--cases-bg-secondary);
     padding: var(--cases-spacing-md);
     border: 1px solid var(--cases-border);
-    border-left: 3px solid var(--cases-text-light);
+    border-left: 3px solid var(--cases-info);
     line-height: 1.6;
     font-size: var(--cases-font-size-base);
     color: var(--cases-text);
+    border-radius: var(--cases-radius);
+}
+
+/* Document Section for timeline */
+.cases-document-section {
+    background: var(--cases-bg-secondary);
+    border: 1px solid var(--cases-border);
+    padding: var(--cases-spacing-md);
+    margin-top: var(--cases-spacing-md);
     border-radius: var(--cases-radius);
 }
 
