@@ -6,9 +6,47 @@ class Hearings extends AdminController
     public function __construct()
     {
         parent::__construct();
+        
         // Check if user is logged in
         if (!is_staff_logged_in()) {
             redirect(admin_url('authentication'));
+        }
+        
+        // Load essential helpers for security and validation
+        $this->load_essential_helpers();
+    }
+    
+    /**
+     * Load essential helpers for the Hearings controller
+     */
+    private function load_essential_helpers()
+    {
+        $helpers = [
+            'security_helper.php',
+            'validation_helper.php',
+            'rate_limiter_helper.php'
+        ];
+        
+        foreach ($helpers as $helper) {
+            // Use multiple fallback paths to ensure compatibility
+            $helper_paths = [
+                FCPATH . 'modules/cases/helpers/' . $helper,
+                __DIR__ . '/../helpers/' . $helper,
+                dirname(__FILE__) . '/../helpers/' . $helper
+            ];
+            
+            $loaded = false;
+            foreach ($helper_paths as $helper_path) {
+                if (file_exists($helper_path)) {
+                    require_once($helper_path);
+                    $loaded = true;
+                    break;
+                }
+            }
+            
+            if (!$loaded) {
+                log_message('error', 'Cannot load essential helper: ' . $helper);
+            }
         }
     }
     
@@ -540,10 +578,7 @@ public function quick_update($hearing_id)
     $case = $this->db->get(db_prefix() . 'cases')->row_array();
     
     if ($this->input->post()) {
-        // Load security helpers
-        $this->load->helper('modules/cases/helpers/security_helper');
-        $this->load->helper('modules/cases/helpers/validation_helper');
-        $this->load->helper('modules/cases/helpers/rate_limiter_helper');
+        // Helpers are loaded in constructor
         
         // Rate limiting for form submissions
         cases_enforce_rate_limit('hearing_update', 10, 300); // 10 updates per 5 minutes

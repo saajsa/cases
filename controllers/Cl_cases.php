@@ -41,6 +41,9 @@ class Cl_cases extends ClientsController
         $client_id = get_client_user_id();
         
         try {
+            // Get client name for personalized welcome
+            $data['client_name'] = $this->get_client_name($client_id);
+            
             // Get dashboard statistics
             $data['stats'] = $this->get_client_dashboard_stats($client_id);
             
@@ -55,6 +58,7 @@ class Cl_cases extends ClientsController
             log_message('error', 'Error loading dashboard for client ' . $client_id . ': ' . $e->getMessage());
             
             // Provide empty fallback data
+            $data['client_name'] = 'Client';
             $data['stats'] = [
                 'total_cases' => 0,
                 'active_consultations' => 0,
@@ -70,8 +74,41 @@ class Cl_cases extends ClientsController
         
         // Load dashboard view
         $this->data($data);
-        $this->view('cl_cases_list');
+        $this->view('client/cl_cases_list');
         $this->layout();
+    }
+
+    /**
+     * Get client name for personalized welcome message
+     */
+    private function get_client_name($client_id)
+    {
+        if (!$client_id) {
+            return 'Client';
+        }
+
+        // Get client company name
+        $this->db->select('company');
+        $this->db->from(db_prefix() . 'clients');
+        $this->db->where('userid', $client_id);
+        $client = $this->db->get()->row();
+
+        if ($client && !empty($client->company)) {
+            return $client->company;
+        }
+
+        // Fallback to primary contact name if company name is not available
+        $this->db->select('firstname, lastname');
+        $this->db->from(db_prefix() . 'contacts');
+        $this->db->where('userid', $client_id);
+        $this->db->where('is_primary', 1);
+        $contact = $this->db->get()->row();
+
+        if ($contact) {
+            return trim($contact->firstname . ' ' . $contact->lastname);
+        }
+
+        return 'Client';
     }
 
     /**
@@ -242,7 +279,7 @@ class Cl_cases extends ClientsController
         $data['title'] = 'My Cases';
         
         $this->data($data);
-        $this->view('cl_cases');
+        $this->view('client/cl_cases');
         $this->layout();
     }
 
@@ -336,7 +373,7 @@ class Cl_cases extends ClientsController
         $data['title'] = 'Case Details - ' . $case['case_title'];
         
         $this->data($data);
-        $this->view('cl_case_details');
+        $this->view('client/cl_case_details');
         $this->layout();
     }
 
@@ -382,7 +419,7 @@ class Cl_cases extends ClientsController
         $data['title'] = 'My Consultations';
         
         $this->data($data);
-        $this->view('cl_consultations');
+        $this->view('client/cl_consultations');
         $this->layout();
     }
 
@@ -463,7 +500,7 @@ class Cl_cases extends ClientsController
         $data['title'] = 'Consultation Details';
         
         $this->data($data);
-        $this->view('cl_consultation_details');
+        $this->view('client/cl_consultation_details');
         $this->layout();
     }
 
@@ -533,7 +570,7 @@ class Cl_cases extends ClientsController
         $data['title'] = 'My Documents';
         
         $this->data($data);
-        $this->view('cl_my_documents');
+        $this->view('client/cl_my_documents');
         $this->layout();
     }
 
@@ -580,7 +617,7 @@ class Cl_cases extends ClientsController
         $document['file_extension'] = strtolower(pathinfo($document['file_name'], PATHINFO_EXTENSION));
         
         $data['document'] = $document;
-        $this->load->view('cases/cl_document_preview', $data);
+        $this->load->view('cases/client/cl_document_preview', $data);
     }
 
     /**
@@ -881,7 +918,7 @@ class Cl_cases extends ClientsController
         $data['title'] = 'Case Documents - ' . $case['case_title'];
         
         $this->data($data);
-        $this->view('cl_case_documents');
+        $this->view('client/cl_case_documents');
         $this->layout();
     }
 
@@ -955,7 +992,7 @@ class Cl_cases extends ClientsController
         $data['title'] = 'Consultation Documents - ' . $consultation['subject'];
         
         $this->data($data);
-        $this->view('cl_consultation_documents');
+        $this->view('client/cl_consultation_documents');
         $this->layout();
     }
 }

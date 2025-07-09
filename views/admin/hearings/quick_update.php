@@ -138,8 +138,8 @@
                 <button type="submit" class="btn btn-primary">
                 <i class="fa fa-check"></i> Update and Schedule Next
                 </button>
-                <!-- Updated Cancel link to go to main cases page -->
-                <a href="<?php echo admin_url('cases/hearings/add?case_id=' . $case['id']); ?>" class="btn btn-default">
+                <!-- Cancel link to go back to cases page -->
+                <a href="<?php echo admin_url('cases'); ?>" class="btn btn-default">
                 Cancel </a>
             </div>
             </form>
