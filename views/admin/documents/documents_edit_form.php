@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
+<?php 
+init_head();
+echo load_cases_css(['forms', 'buttons', 'cards']);
+?>
 <div id="wrapper">
   <div class="content">
     <div class="panel_s">
@@ -24,7 +27,7 @@
           <!-- 🔁 Replace File -->
           <div class="form-group">
             <?php echo form_label(_l('replace_file'), 'document'); ?>
-            <input type="file" name="document" id="document" class="form-control">
+            <input type="file" name="document" id="document" class="cases-form-control">
             <small class="text-muted">
               <?php echo _l('leave_blank_to_keep_existing'); ?> |
               <?php echo _l('current_file'); ?>: <strong><?php echo htmlspecialchars($file->file_name); ?></strong>
@@ -34,7 +37,7 @@
           <!-- 👤 Customer -->
           <div class="form-group">
             <?php echo form_label(_l('select_customer'), 'customer_id'); ?>
-            <select name="customer_id" id="customer_id" class="form-control" required>
+            <select name="customer_id" id="customer_id" class="cases-form-select" required>
               <option value=""><?php echo _l('select_customer'); ?></option>
               <?php foreach ($customers as $customer) { ?>
                 <option value="<?php echo $customer->userid; ?>" <?php echo ($file->rel_id == $customer->userid) ? 'selected' : ''; ?>>
@@ -55,7 +58,7 @@
           <!-- Invoice -->
           <div class="form-group" id="invoice_div" style="display: none;">
             <?php echo form_label(_l('select_invoice'), 'invoice_id'); ?>
-            <select name="invoice_id" id="invoice_id" class="form-control">
+            <select name="invoice_id" id="invoice_id" class="cases-form-select">
               <option value=""><?php echo _l('select_invoice'); ?></option>
             </select>
           </div>
@@ -63,7 +66,7 @@
           <!-- Contact -->
           <div class="form-group" id="contact_div" style="display: none;">
             <?php echo form_label(_l('select_contact'), 'contact_id'); ?>
-            <select name="contact_id" id="contact_id" class="form-control">
+            <select name="contact_id" id="contact_id" class="cases-form-select">
               <option value=""><?php echo _l('select_contact'); ?></option>
             </select>
           </div>
@@ -71,7 +74,7 @@
           <!-- 🏷️ Tag -->
           <div class="form-group">
             <?php echo form_label(_l('document_tag'), 'document_tag'); ?>
-            <input type="text" name="document_tag" id="document_tag" class="form-control" value="<?php echo htmlspecialchars($file->tag); ?>" placeholder="<?php echo _l('enter_document_tag'); ?>">
+            <input type="text" name="document_tag" id="document_tag" class="cases-form-control" value="<?php echo htmlspecialchars($file->tag); ?>" placeholder="<?php echo _l('enter_document_tag'); ?>">
           </div>
 
           <button type="submit" id="saveBtn" class="btn btn-primary"><?php echo _l('save_changes'); ?></button>

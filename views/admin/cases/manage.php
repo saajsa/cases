@@ -1151,8 +1151,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Use Bootstrap modal directly if available, otherwise use fallback
         const modal = document.getElementById('viewNoteModal');
         if (typeof $ !== 'undefined' && $.fn.modal) {
+            // Clear any existing backdrops before showing
+            clearModalBackdrops();
             $('#viewNoteModal').modal('show');
         } else if (modal) {
+            // Clear any existing backdrops before showing
+            clearModalBackdrops();
             modal.style.display = 'block';
             modal.classList.add('show');
         }
@@ -1202,8 +1206,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show the modal
         const modal = document.getElementById('consultationModal');
         if (typeof $ !== 'undefined' && $.fn.modal) {
+            // Clear any existing backdrops before showing
+            clearModalBackdrops();
             $('#consultationModal').modal('show');
         } else if (modal) {
+            // Clear any existing backdrops before showing
+            clearModalBackdrops();
             modal.style.display = 'block';
             modal.classList.add('show');
         }
@@ -1249,8 +1257,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const modal = document.getElementById('upgradeModal');
         if (typeof $ !== 'undefined' && $.fn.modal) {
+            // Clear any existing backdrops before showing
+            clearModalBackdrops();
             $('#upgradeModal').modal('show');
         } else if (modal) {
+            // Clear any existing backdrops before showing
+            clearModalBackdrops();
             modal.style.display = 'block';
             modal.classList.add('show');
         }
@@ -1371,9 +1383,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const modal = document.getElementById('consultationModal');
                     if (typeof $ !== 'undefined' && $.fn.modal) {
                         $('#consultationModal').modal('hide');
+                        // Clear backdrop after hiding
+                        setTimeout(clearModalBackdrops, 300);
                     } else if (modal) {
                         modal.style.display = 'none';
                         modal.classList.remove('show');
+                        clearModalBackdrops();
                     }
                     
                     loadConsultations();
@@ -1430,9 +1445,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const modal = document.getElementById('upgradeModal');
                     if (typeof $ !== 'undefined' && $.fn.modal) {
                         $('#upgradeModal').modal('hide');
+                        // Clear backdrop after hiding
+                        setTimeout(clearModalBackdrops, 300);
                     } else if (modal) {
                         modal.style.display = 'none';
                         modal.classList.remove('show');
+                        clearModalBackdrops();
                     }
                     
                     loadConsultations();
@@ -1603,11 +1621,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 form.reset();
                 resetModalState();
             }
+            // Clear any remaining backdrops
+            clearModalBackdrops();
         });
         
         $('#upgradeModal').on('hidden.bs.modal', function () {
             const form = document.getElementById('upgradeForm');
             if (form) form.reset();
+            // Clear any remaining backdrops
+            clearModalBackdrops();
+        });
+        
+        $('#viewNoteModal').on('hidden.bs.modal', function () {
+            // Clear any remaining backdrops
+            clearModalBackdrops();
+        });
+        
+        // Handle any Bootstrap modal events that might leave backdrops
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            // Clear any remaining backdrops with a slight delay
+            setTimeout(clearModalBackdrops, 100);
         });
     }
     
@@ -1623,14 +1656,89 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Clear any leftover modal backdrops that might be blocking clicks
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-        backdrop.remove();
-    });
+    function clearModalBackdrops() {
+        // Remove all modal backdrops
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.remove();
+        });
+        
+        // Remove backdrops with 'in' class specifically
+        document.querySelectorAll('.modal-backdrop.in').forEach(backdrop => {
+            backdrop.remove();
+        });
+        
+        // Remove any backdrop divs that might have different classes
+        document.querySelectorAll('div[class*="modal-backdrop"]').forEach(backdrop => {
+            backdrop.remove();
+        });
+        
+        // Reset body classes and styles
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        // Force remove any remaining overlay elements
+        const overlays = document.querySelectorAll('div[style*="position: fixed"][style*="z-index"]');
+        overlays.forEach(overlay => {
+            if (overlay.classList.contains('modal-backdrop') || 
+                overlay.style.backgroundColor === 'rgba(0, 0, 0, 0.5)' ||
+                overlay.style.background === 'rgba(0, 0, 0, 0.5)') {
+                overlay.remove();
+            }
+        });
+    }
+    
+    // Clear backdrops on page load
+    clearModalBackdrops();
+    
+    // Clear backdrops periodically to prevent stuck backdrops
+    setInterval(clearModalBackdrops, 5000);
+    
+    // Add click handler to detect and remove backdrop clicks
+    document.addEventListener('click', function(e) {
+        // Check if clicked element is a modal backdrop
+        if (e.target.classList.contains('modal-backdrop') || 
+            e.target.className.includes('modal-backdrop')) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearModalBackdrops();
+            return false;
+        }
+        
+        // Check if clicked element is blocking the form
+        if (e.target.style.position === 'fixed' && 
+            e.target.style.zIndex && 
+            parseInt(e.target.style.zIndex) > 1000) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearModalBackdrops();
+            return false;
+        }
+    }, true);
     
     // Ensure modals are properly hidden
     document.querySelectorAll('.modal').forEach(modal => {
         modal.style.display = 'none';
-        modal.classList.remove('show');
+        modal.classList.remove('show', 'in');
+    });
+    
+    // Handle "Add Consultation" button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-target="#consultationModal"]')) {
+            e.preventDefault();
+            // Clear any existing backdrops before opening
+            clearModalBackdrops();
+            
+            // Reset modal state
+            resetModalState();
+            
+            // Open the modal
+            if (typeof $ !== 'undefined' && $.fn.modal) {
+                setTimeout(() => {
+                    $('#consultationModal').modal('show');
+                }, 100);
+            }
+        }
     });
     
     // Load initial data

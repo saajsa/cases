@@ -11,7 +11,7 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <label><?php echo _l('select_files'); ?></label>
-                    <input type="file" name="documents[]" multiple class="form-control" accept=".pdf,.doc,.docx,.jpg,.png,.txt">
+                    <input type="file" name="documents[]" multiple class="cases-form-control" accept=".pdf,.doc,.docx,.jpg,.png,.txt">
                     <small class="help-block"><?php echo _l('smart_upload_help'); ?></small>
                 </div>
             </div>

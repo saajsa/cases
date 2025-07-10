@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
+<?php 
+init_head();
+echo load_cases_css(['forms', 'buttons', 'cards']);
+?>
 <div id="wrapper">
     <div class="content">
         <div class="row">
@@ -13,19 +16,19 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="name" class="control-label">Court Name</label>
-                                    <input type="text" id="name" name="name" class="form-control" value="<?php echo htmlspecialchars($court['name'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                    <input type="text" id="name" name="name" class="cases-form-control" value="<?php echo htmlspecialchars($court['name'], ENT_QUOTES, 'UTF-8'); ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="hierarchy" class="control-label">Hierarchy</label>
-                                    <input type="text" id="hierarchy" name="hierarchy" class="form-control" value="<?php echo htmlspecialchars($court['hierarchy'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="text" id="hierarchy" name="hierarchy" class="cases-form-control" value="<?php echo htmlspecialchars($court['hierarchy'], ENT_QUOTES, 'UTF-8'); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="location" class="control-label">Location</label>
-                                    <input type="text" id="location" name="location" class="form-control" value="<?php echo htmlspecialchars($court['location'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="text" id="location" name="location" class="cases-form-control" value="<?php echo htmlspecialchars($court['location'], ENT_QUOTES, 'UTF-8'); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="status" class="control-label">Status</label>
-                                    <select name="status" id="status" class="form-control">
+                                    <select name="status" id="status" class="cases-form-select">
                                         <option value="Active" <?php if($court['status'] == 'Active'){echo 'selected';} ?>>Active</option>
                                         <option value="Inactive" <?php if($court['status'] == 'Inactive'){echo 'selected';} ?>>Inactive</option>
                                     </select>

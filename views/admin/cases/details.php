@@ -1,447 +1,8 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
-
-<style>
-/* Minimalist Black & White UI with Status Colors */
-* {
-    box-sizing: border-box;
-}
-
-body {
-    background: #fafafa;
-    color: #2c2c2c;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.case-header {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    padding: 40px;
-    margin-bottom: 30px;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-}
-
-.case-header h1 {
-    margin: 0 0 8px 0;
-    font-weight: 600;
-    font-size: 2.2rem;
-    color: #1a1a1a;
-    letter-spacing: -0.02em;
-}
-
-.case-header .case-number {
-    font-size: 1rem;
-    color: #666666;
-    font-weight: 400;
-    margin-bottom: 25px;
-}
-
-.case-actions .btn {
-    margin-right: 12px;
-    margin-bottom: 8px;
-    border-radius: 1px;
-    padding: 10px 20px;
-    font-weight: 500;
-    font-size: 0.875rem;
-    border: 1px solid #d1d1d1;
-    background: #ffffff;
-    color: #2c2c2c;
-    transition: all 0.15s ease;
-    text-decoration: none;
-}
-
-.case-actions .btn:hover {
-    background: #f8f8f8;
-    border-color: #999999;
-    color: #1a1a1a;
-}
-
-.case-actions .btn-primary {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
-    color: #ffffff;
-}
-
-.case-actions .btn-primary:hover {
-    background: #000000;
-    border-color: #000000;
-}
-
-.info-card {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    padding: 30px;
-    margin-bottom: 25px;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-}
-
-.info-card-header {
-    border-bottom: 1px solid #e1e1e1;
-    padding-bottom: 20px;
-    margin-bottom: 25px;
-}
-
-.info-card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
-    letter-spacing: -0.01em;
-}
-
-.info-table {
-    border: none;
-    margin: 0;
-}
-
-.info-table tr {
-    border: none;
-}
-
-.info-table th {
-    border: none;
-    padding: 14px 0;
-    font-weight: 500;
-    color: #666666;
-    font-size: 0.875rem;
-    width: 35%;
-    vertical-align: top;
-}
-
-.info-table td {
-    border: none;
-    padding: 14px 0;
-    color: #1a1a1a;
-    font-size: 0.875rem;
-    font-weight: 400;
-    vertical-align: top;
-}
-
-/* Status Colors */
-.status-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 1px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid;
-}
-
-/* Status Color Codes */
-.status-active { 
-    background: #f0f9f0; 
-    color: #2d7d2d; 
-    border-color: #2d7d2d; 
-}
-
-.status-scheduled { 
-    background: #eff8ff; 
-    color: #1a6bcc; 
-    border-color: #1a6bcc; 
-}
-
-.status-completed { 
-    background: #f0f9f0; 
-    color: #2d7d2d; 
-    border-color: #2d7d2d; 
-}
-
-.status-adjourned { 
-    background: #fff8e6; 
-    color: #cc8c1a; 
-    border-color: #cc8c1a; 
-}
-
-.status-cancelled { 
-    background: #fff0f0; 
-    color: #cc1a1a; 
-    border-color: #cc1a1a; 
-}
-
-.status-on-hold { 
-    background: #f5f5f5; 
-    color: #666666; 
-    border-color: #666666; 
-}
-
-.status-dismissed { 
-    background: #fff0f0; 
-    color: #cc1a1a; 
-    border-color: #cc1a1a; 
-}
-
-.section-header {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    padding: 25px 30px;
-    margin: 30px 0 20px 0;
-    border-radius: 2px;
-    border-left: 3px solid #1a1a1a;
-}
-
-.section-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
-    letter-spacing: -0.01em;
-}
-
-.modern-table {
-    background: #ffffff;
-    border: 1px solid #e1e1e1;
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-.modern-table thead th {
-    background: #f8f8f8;
-    color: #1a1a1a;
-    font-weight: 600;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e1e1e1;
-    border-right: 1px solid #f0f0f0;
-}
-
-.modern-table thead th:last-child {
-    border-right: none;
-}
-
-.modern-table tbody td {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f5f5f5;
-    border-right: 1px solid #f8f8f8;
-    vertical-align: middle;
-    color: #2c2c2c;
-    font-size: 0.875rem;
-}
-
-.modern-table tbody td:last-child {
-    border-right: none;
-}
-
-.modern-table tbody tr:hover {
-    background: #fafafa;
-}
-
-.modern-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.action-btn {
-    border-radius: 1px;
-    padding: 6px 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    margin-right: 6px;
-    margin-bottom: 4px;
-    transition: all 0.15s ease;
-    text-decoration: none;
-    border: 1px solid;
-}
-
-.action-btn.btn-primary {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
-    color: #ffffff;
-}
-
-.action-btn.btn-primary:hover {
-    background: #000000;
-    border-color: #000000;
-}
-
-.action-btn.btn-success {
-    background: #ffffff;
-    border-color: #2d7d2d;
-    color: #2d7d2d;
-}
-
-.action-btn.btn-success:hover {
-    background: #2d7d2d;
-    color: #ffffff;
-}
-
-.action-btn.btn-info {
-    background: #ffffff;
-    border-color: #1a6bcc;
-    color: #1a6bcc;
-}
-
-.action-btn.btn-info:hover {
-    background: #1a6bcc;
-    color: #ffffff;
-}
-
-.action-btn.btn-danger {
-    background: #ffffff;
-    border-color: #cc1a1a;
-    color: #cc1a1a;
-}
-
-.action-btn.btn-danger:hover {
-    background: #cc1a1a;
-    color: #ffffff;
-}
-
-.consultation-note {
-    background: #fafafa;
-    padding: 20px;
-    border: 1px solid #e1e1e1;
-    border-left: 3px solid #666666;
-    line-height: 1.6;
-    font-size: 0.875rem;
-    color: #2c2c2c;
-    border-radius: 2px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 40px;
-    color: #999999;
-    background: #fafafa;
-    border: 1px dashed #d1d1d1;
-    border-radius: 2px;
-}
-
-.empty-state i {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    opacity: 0.6;
-    color: #cccccc;
-}
-
-.empty-state h5 {
-    font-weight: 600;
-    color: #666666;
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    color: #999999;
-    margin-bottom: 20px;
-}
-
-.file-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    opacity: 0.7;
-}
-
-.date-time-cell strong {
-    color: #1a1a1a;
-    font-weight: 600;
-}
-
-.date-time-cell small {
-    color: #666666;
-    font-weight: normal;
-}
-
-.text-muted {
-    color: #999999 !important;
-}
-
-.text-primary {
-    color: #1a1a1a !important;
-}
-
-.text-success {
-    color: #2d7d2d !important;
-}
-
-.text-warning {
-    color: #cc8c1a !important;
-}
-
-.text-danger {
-    color: #cc1a1a !important;
-}
-
-.text-info {
-    color: #1a6bcc !important;
-}
-
-/* Remarks and Important Text Colors */
-.remark-critical {
-    color: #cc1a1a;
-    font-weight: 600;
-}
-
-.remark-warning {
-    color: #cc8c1a;
-    font-weight: 500;
-}
-
-.remark-info {
-    color: #1a6bcc;
-    font-weight: 500;
-}
-
-.remark-success {
-    color: #2d7d2d;
-    font-weight: 500;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .case-header {
-        padding: 25px 20px;
-        text-align: left;
-    }
-    
-    .case-header h1 {
-        font-size: 1.8rem;
-    }
-    
-    .case-actions .btn {
-        width: 100%;
-        margin-bottom: 8px;
-        margin-right: 0;
-    }
-    
-    .info-card {
-        padding: 20px;
-    }
-    
-    .section-header {
-        padding: 20px;
-    }
-    
-    .modern-table thead th,
-    .modern-table tbody td {
-        padding: 12px 15px;
-        font-size: 0.8rem;
-    }
-}
-
-/* Print Styles */
-@media print {
-    .case-actions {
-        display: none;
-    }
-    
-    .info-card,
-    .modern-table,
-    .section-header {
-        border: 1px solid #000000;
-        box-shadow: none;
-    }
-    
-    .status-badge {
-        border: 1px solid #000000;
-    }
-}
-</style>
+<?php 
+init_head();
+echo load_cases_css(['cards', 'buttons', 'forms', 'status', 'modals', 'tables'], 'case-details');
+?>
 
 <div id="wrapper">
     <div class="content">
@@ -460,7 +21,7 @@ body {
                         <a href="<?php echo admin_url('cases/hearings/add?case_id=' . $case['id']); ?>" class="btn btn-primary">
                             Add Hearing
                         </a>
-                        <a href="<?php echo admin_url('documents/upload'); ?>" class="btn"
+                        <a href="<?php echo admin_url('cases/documents/upload'); ?>" class="btn"
                            onclick="localStorage.setItem('document_upload_data', JSON.stringify({
                              case_id: <?php echo $case['id']; ?>,
                              customer_id: <?php echo $case['client_id']; ?>,
@@ -505,7 +66,12 @@ body {
                             <tr>
                                 <th>Status</th>
                                 <td>
-                                    <span class="status-badge status-active">Active</span>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span class="status-badge status-active" id="case-status-badge">Active</span>
+                                        <button class="action-btn btn-primary" onclick="showStatusUpdateModal()" title="Update Case Status">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             <?php if (!empty($case['consultation_tag'])): ?>
@@ -602,7 +168,7 @@ body {
                     
                     <div class="form-group">
                         <label>Document Tag (Optional)</label>
-                        <input type="text" name="document_tag" class="form-control" placeholder="e.g., Contract, Evidence, Notice">
+                        <input type="text" name="document_tag" class="cases-form-control" placeholder="e.g., Contract, Evidence, Notice">
                     </div>
                     
                     <div class="modal-footer">
@@ -676,7 +242,7 @@ body {
                     <i class="fas fa-folder-open"></i>
                     <h5>No Case Documents Found</h5>
                     <p>Upload your first case document to get started.</p>
-                    <a href="<?php echo admin_url('documents/upload'); ?>" 
+                    <a href="<?php echo admin_url('cases/documents/upload'); ?>" 
                        class="action-btn btn-primary"
                        onclick="localStorage.setItem('document_upload_data', JSON.stringify({
                          case_id: <?php echo $case['id']; ?>,
@@ -800,13 +366,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // build actions
             let actions  = 
-              '<a href="<?php echo admin_url('documents/download/'); ?>'+doc.id+'" '+
+              '<a href="<?php echo admin_url('cases/documents/download/'); ?>'+doc.id+'" '+
               'class="action-btn btn-success">Download</a>'+
-              '<a href="<?php echo admin_url('documents/view/'); ?>'+doc.id+'" '+
+              '<a href="<?php echo admin_url('cases/documents/view/'); ?>'+doc.id+'" '+
               'class="action-btn btn-info" target="_blank">View</a>';
             if (canDelete) {
                 actions += 
-                  '<a href="<?php echo admin_url('documents/delete/'); ?>'+doc.id+'" '+
+                  '<a href="<?php echo admin_url('cases/documents/delete/'); ?>'+doc.id+'" '+
                   'class="action-btn btn-danger _delete">Delete</a>';
             }
 
@@ -950,6 +516,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             <?php endif; ?>
         </div>
+    </div>
+</div>
+
+<!-- Status Update Modal -->
+<div id="statusUpdateModal" class="modal" style="display: none;">
+    <div class="modal-content" style="width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 5px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+            <h4>Update Case Status</h4>
+            <button onclick="closeStatusUpdateModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <form id="statusUpdateForm">
+            <input type="hidden" name="case_id" value="<?php echo $case['id']; ?>">
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Case Status</label>
+                <select name="status" id="case_status_select" class="cases-form-select" style="width: 100%;">
+                    <option value="Active">Active</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Dismissed">Dismissed</option>
+                    <option value="Settled">Settled</option>
+                    <option value="Withdrawn">Withdrawn</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Status Notes (Optional)</label>
+                <textarea name="status_notes" id="status_notes" class="form-control" rows="3" 
+                         style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 3px; resize: vertical;"
+                         placeholder="Add any notes about this status change..."></textarea>
+            </div>
+            
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeStatusUpdateModal()" class="action-btn">Cancel</button>
+                <button type="submit" class="action-btn btn-primary">Update Status</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -1133,7 +736,113 @@ window.addEventListener('click', function(e) {
     if (e.target === modal) {
         closeQuickUpload();
     }
+    
+    const statusModal = document.getElementById('statusUpdateModal');
+    if (e.target === statusModal) {
+        closeStatusUpdateModal();
+    }
 });
+
+// Case Status Update Functions
+function showStatusUpdateModal() {
+    const modal = document.getElementById('statusUpdateModal');
+    const currentStatus = document.getElementById('case-status-badge').textContent.trim();
+    const statusSelect = document.getElementById('case_status_select');
+    
+    // Set current status as selected
+    if (statusSelect) {
+        statusSelect.value = currentStatus;
+    }
+    
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeStatusUpdateModal() {
+    const modal = document.getElementById('statusUpdateModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    const form = document.getElementById('statusUpdateForm');
+    if (form) {
+        form.reset();
+    }
+}
+
+// Status Update Form Submission
+document.getElementById('statusUpdateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Updating...';
+    submitBtn.disabled = true;
+    
+    fetch('<?php echo admin_url('cases/update_case_status'); ?>', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the status badge
+            const statusBadge = document.getElementById('case-status-badge');
+            const newStatus = formData.get('status');
+            
+            if (statusBadge) {
+                statusBadge.textContent = newStatus;
+                
+                // Update status badge class
+                statusBadge.className = 'status-badge';
+                switch(newStatus.toLowerCase()) {
+                    case 'active':
+                        statusBadge.classList.add('status-active');
+                        break;
+                    case 'on hold':
+                        statusBadge.classList.add('status-on-hold');
+                        break;
+                    case 'completed':
+                        statusBadge.classList.add('status-completed');
+                        break;
+                    case 'dismissed':
+                        statusBadge.classList.add('status-dismissed');
+                        break;
+                    case 'settled':
+                        statusBadge.classList.add('status-completed');
+                        break;
+                    case 'withdrawn':
+                        statusBadge.classList.add('status-cancelled');
+                        break;
+                    default:
+                        statusBadge.classList.add('status-active');
+                }
+            }
+            
+            alert('Case status updated successfully!');
+            closeStatusUpdateModal();
+        } else {
+            alert('Error updating case status: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Status update error:', error);
+        alert('Error updating case status. Please try again.');
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// Global function for onclick handler
+window.showStatusUpdateModal = showStatusUpdateModal;
+window.closeStatusUpdateModal = closeStatusUpdateModal;
 </script>
 
 <?php init_tail(); ?>

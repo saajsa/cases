@@ -63,13 +63,13 @@ echo cases_page_wrapper_start(
 <div class="tab-content" id="add-hearing-tab">
     <h3 class="cases-section-title" style="margin-bottom: var(--cases-spacing-lg);">Schedule New Hearing</h3>
     
-    <form id="hearingForm" method="POST" action="<?php echo admin_url('cases/hearings/add'); ?>">
+    <form id="hearingForm" method="POST" action="<?php echo isset($hearing) ? admin_url('cases/hearings/edit/' . $hearing['id']) : admin_url('cases/hearings/add'); ?>">
         <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
         
         <!-- Case Selection with Search -->
         <div class="cases-form-group">
             <label class="cases-form-label cases-label-required">Select Case</label>
-            <select name="case_id" id="case_id" class="cases-form-control" required>
+            <select name="case_id" id="case_id" class="cases-form-select" required>
                 <option value="">Choose a case...</option>
             </select>
             <div class="cases-form-help">Search and select the case for which you want to schedule a hearing</div>
@@ -85,20 +85,20 @@ echo cases_page_wrapper_start(
             <div class="cases-form-group">
                 <label class="cases-form-label cases-label-required">Hearing Date</label>
                 <input type="date" name="date" id="date" class="cases-form-control" 
-                    value="<?php echo date('Y-m-d', strtotime('+7 days')); ?>" required>
+                    value="<?php echo isset($hearing['date']) ? $hearing['date'] : date('Y-m-d', strtotime('+7 days')); ?>" required>
                 <div class="cases-form-help">Select the date for this hearing</div>
             </div>
             <div class="cases-form-group">
                 <label class="cases-form-label cases-label-required">Hearing Time</label>
                 <input type="time" name="time" id="time" class="cases-form-control" 
-                    value="10:00" required>
+                    value="<?php echo isset($hearing['time']) ? $hearing['time'] : '10:00'; ?>" required>
                 <div class="cases-form-help">Set the scheduled time</div>
             </div>
         </div>
         
         <div class="cases-form-group">
             <label class="cases-form-label">Purpose of Hearing</label>
-            <select name="hearing_purpose" id="hearing_purpose" class="cases-form-control">
+            <select name="hearing_purpose" id="hearing_purpose" class="cases-form-select">
                 <option value="">Select purpose or enter custom</option>
                 <option value="Arguments">Arguments</option>
                 <option value="Evidence">Evidence Presentation</option>
@@ -116,12 +116,12 @@ echo cases_page_wrapper_start(
         <div class="cases-form-group">
             <label class="cases-form-label">Additional Notes</label>
             <textarea name="description" id="description" class="cases-form-control cases-textarea" rows="3" 
-                placeholder="Any additional details or preparation notes for this hearing"></textarea>
+                placeholder="Any additional details or preparation notes for this hearing"><?php echo isset($hearing['description']) ? htmlspecialchars($hearing['description']) : ''; ?></textarea>
         </div>
         
         <div class="cases-form-actions">
             <button type="submit" class="cases-btn cases-btn-primary" id="submit-hearing-btn">
-                <i class="fas fa-calendar-plus"></i> Schedule Hearing
+                <i class="fas fa-calendar-plus"></i> <?php echo isset($hearing) ? 'Update Hearing' : 'Schedule Hearing'; ?>
             </button>
             <button type="reset" class="cases-btn cases-btn-default">
                 <i class="fas fa-undo"></i> Reset Form
@@ -154,7 +154,7 @@ echo cases_page_wrapper_start(
         <div class="cases-flex" style="gap: 10px;">
             <input type="text" id="past-search" class="cases-form-control" 
                 placeholder="Search hearings..." style="width: 250px;">
-            <select id="past-status-filter" class="cases-form-control" style="width: 150px;">
+            <select id="past-status-filter" class="cases-form-select" style="width: 150px;">
                 <option value="">All Status</option>
                 <option value="Completed">Completed</option>
                 <option value="Adjourned">Adjourned</option>
@@ -174,7 +174,7 @@ echo cases_page_wrapper_start(
         <div class="cases-flex" style="gap: 10px;">
             <input type="text" id="all-search" class="cases-form-control" 
                 placeholder="Search all hearings..." style="width: 250px;">
-            <select id="all-status-filter" class="cases-form-control" style="width: 150px;">
+            <select id="all-status-filter" class="cases-form-select" style="width: 150px;">
                 <option value="">All Status</option>
                 <option value="Scheduled">Scheduled</option>
                 <option value="Completed">Completed</option>
@@ -229,6 +229,37 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadCases();
     loadHearings();
+    
+    // If editing existing hearing, populate the form
+    <?php if (isset($hearing)): ?>
+    window.addEventListener('load', function() {
+        const caseId = '<?php echo $hearing['case_id']; ?>';
+        const hearingPurpose = '<?php echo addslashes($hearing['hearing_purpose']); ?>';
+        
+        // Set case selection after cases are loaded
+        setTimeout(function() {
+            const caseSelect = document.getElementById('case_id');
+            if (caseSelect) {
+                caseSelect.value = caseId;
+                caseSelect.dispatchEvent(new Event('change'));
+            }
+        }, 1000);
+        
+        // Set custom purpose if not in predefined options
+        const purposeSelect = document.getElementById('hearing_purpose');
+        const customPurpose = document.getElementById('custom_purpose');
+        const predefinedOptions = ['Arguments', 'Evidence', 'Witness Examination', 'Motion Hearing', 'Case Management', 'Judgment', 'Final Arguments', 'Interim Orders'];
+        
+        if (purposeSelect && customPurpose) {
+            if (hearingPurpose && !predefinedOptions.includes(hearingPurpose)) {
+                purposeSelect.value = '';
+                customPurpose.style.display = 'block';
+                customPurpose.required = true;
+                customPurpose.value = hearingPurpose;
+            }
+        }
+    });
+    <?php endif; ?>
     
     // Load cases for dropdown
     function loadCases() {
@@ -510,210 +541,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Global function for refresh button
     window.loadHearings = loadHearings;
-});
-</script>
-
-<?php init_tail(); ?>-control" 
-                value="<?php echo isset($hearing) ? htmlspecialchars($hearing['time'], ENT_QUOTES, 'UTF-8') : '10:00'; ?>" required>
-        </div>
-    </div>
-    
-    <div class="cases-form-group">
-        <label class="cases-form-label">Purpose of Hearing</label>
-        <input type="text" name="hearing_purpose" id="hearing_purpose" class="cases-form-control" 
-            value="<?php echo isset($hearing['hearing_purpose']) ? htmlspecialchars($hearing['hearing_purpose']) : ''; ?>" 
-            placeholder="e.g., Arguments, Evidence, Motion Hearing">
-    </div>
-    
-    <div class="cases-form-grid cases-form-grid-2">
-        <div class="cases-form-group">
-            <label class="cases-form-label">Status</label>
-            <select name="status" class="cases-form-control">
-                <option value="Scheduled" <?php echo (!isset($hearing) || (isset($hearing) && $hearing['status'] == 'Scheduled')) ? 'selected' : ''; ?>>Scheduled</option>
-                <option value="Adjourned" <?php echo (isset($hearing) && $hearing['status'] == 'Adjourned') ? 'selected' : ''; ?>>Adjourned</option>
-                <option value="Completed" <?php echo (isset($hearing) && $hearing['status'] == 'Completed') ? 'selected' : ''; ?>>Completed</option>
-                <option value="Cancelled" <?php echo (isset($hearing) && $hearing['status'] == 'Cancelled') ? 'selected' : ''; ?>>Cancelled</option>
-            </select>
-        </div>
-        <div class="cases-form-group">
-            <label class="cases-form-label">Next Hearing Date</label>
-            <input type="date" name="next_date" id="next_date" class="cases-form-control" 
-                value="<?php echo isset($hearing) && !empty($hearing['next_date']) ? htmlspecialchars($hearing['next_date'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-        </div>
-    </div>
-    
-    <div class="cases-form-group">
-        <label class="cases-form-label">Notes/Outcome</label>
-        <textarea name="description" id="description" class="cases-form-control cases-textarea" rows="4" 
-            placeholder="Enter the outcome, proceedings or notes about this hearing"><?php echo isset($hearing) ? htmlspecialchars($hearing['description']) : ''; ?></textarea>
-    </div>
-    
-    <div class="cases-form-actions">
-        <?php echo cases_button(isset($hearing) ? 'Update Hearing' : 'Save Hearing', [
-            'type' => 'primary',
-            'button_type' => 'submit'
-        ]); ?>
-        <?php if (!isset($hearing)): ?>
-            <?php echo cases_button('Reset Form', [
-                'type' => 'default',
-                'button_type' => 'reset'
-            ]); ?>
-        <?php endif; ?>
-    </div>
-</form>
-
-<?php echo cases_section_end(); ?>
-
-<?php if (!isset($hearing)): ?>
-<!-- All Hearings Section -->
-<?php echo cases_section_start('All Hearings'); ?>
-
-<?php if (!empty($hearings)): ?>
-    <div class="cases-table-wrapper">
-        <table class="cases-table">
-            <thead>
-                <tr>
-                    <th>Case</th>
-                    <th>Date & Time</th>
-                    <th>Status</th>
-                    <th>Next Date</th>
-                    <th>Description</th>
-                    <th class="cases-table-actions-col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($hearings as $h): ?>
-                    <tr>
-                        <td>
-                            <a href="<?php echo admin_url('cases/view_case/' . $h['case_id']); ?>" style="color: var(--cases-primary); text-decoration: none; font-weight: 500;">
-                                <?php echo htmlspecialchars($h['case_title']); ?>
-                            </a>
-                        </td>
-                        <td>
-                            <div style="font-weight: 600; color: var(--cases-primary);"><?php echo date('d M Y', strtotime($h['date'])); ?></div>
-                            <div style="font-size: var(--cases-font-size-sm); color: var(--cases-text-light);"><?php echo date('h:i A', strtotime($h['time'])); ?></div>
-                        </td>
-                        <td>
-                            <?php 
-                            $statusClass = 'status-scheduled';
-                            switch(strtolower($h['status'])) {
-                                case 'completed': $statusClass = 'status-completed'; break;
-                                case 'adjourned': $statusClass = 'status-adjourned'; break;
-                                case 'cancelled': $statusClass = 'status-cancelled'; break;
-                                default: $statusClass = 'status-scheduled';
-                            }
-                            echo cases_status_badge($h['status'], $statusClass);
-                            ?>
-                        </td>
-                        <td>
-                            <?php echo !empty($h['next_date']) ? date('d M Y', strtotime($h['next_date'])) : '<span style="color: var(--cases-text-muted);">No next date</span>'; ?>
-                        </td>
-                        <td>
-                            <?php 
-                            if (!empty($h['description'])) {
-                                $truncatedDescription = strlen($h['description']) > 50 
-                                    ? substr($h['description'], 0, 50) . '...' 
-                                    : $h['description'];
-                                echo '<span title="' . htmlspecialchars($h['description']) . '">' . htmlspecialchars($truncatedDescription) . '</span>';
-                            } else {
-                                echo '<span style="color: var(--cases-text-muted);">No description</span>';
-                            }
-                            ?>
-                        </td>
-                        <td>
-                            <div class="cases-table-actions">
-                                <?php echo cases_action_button('Update', [
-                                    'type' => 'success',
-                                    'href' => admin_url('cases/hearings/quick_update/' . $h['id']),
-                                    'title' => 'Quick Update'
-                                ]); ?>
-                                <?php echo cases_action_button('Edit', [
-                                    'type' => 'primary',
-                                    'href' => admin_url('cases/hearings/edit/' . $h['id'])
-                                ]); ?>
-                                <?php echo cases_action_button('Delete', [
-                                    'type' => 'danger',
-                                    'href' => admin_url('cases/hearings/delete/' . $h['id']),
-                                    'onclick' => 'return confirm(\'Are you sure you want to delete this hearing?\');'
-                                ]); ?>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-<?php else: ?>
-    <?php echo cases_empty_state(
-        'No Hearings Found',
-        'Start by scheduling your first hearing',
-        ['icon' => 'fas fa-calendar-times']
-    ); ?>
-<?php endif; ?>
-
-<?php echo cases_section_end(); ?>
-<?php endif; ?>
-
-<?php echo cases_page_wrapper_end(); ?>
-
-<script>
-// Clean JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    // Next hearing date validation
-    const dateField = document.getElementById('date');
-    const nextDateField = document.getElementById('next_date');
-    
-    if (nextDateField && dateField) {
-        nextDateField.addEventListener('change', function() {
-            const currentDate = new Date(dateField.value);
-            const nextDate = new Date(this.value);
-            
-            if (nextDate <= currentDate) {
-                alert('Next hearing date must be after the current hearing date');
-                this.value = '';
-            }
-        });
-    }
-    
-    // Form reset confirmation
-    const resetBtn = document.querySelector('button[type="reset"]');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to reset the form? All unsaved changes will be lost.')) {
-                e.preventDefault();
-            }
-        });
-    }
-    
-    // Table row hover effects
-    const tableRows = document.querySelectorAll('.cases-table tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = 'var(--cases-bg-hover)';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
-    });
-    
-    // Status change handling
-    const statusSelect = document.querySelector('select[name="status"]');
-    if (statusSelect) {
-        statusSelect.addEventListener('change', function() {
-            const isCompleted = this.value === 'Completed';
-            const nextDateField = document.getElementById('next_date');
-            
-            if (isCompleted && nextDateField) {
-                nextDateField.value = '';
-                nextDateField.style.backgroundColor = 'var(--cases-bg-tertiary)';
-                nextDateField.disabled = true;
-            } else if (nextDateField) {
-                nextDateField.style.backgroundColor = '';
-                nextDateField.disabled = false;
-            }
-        });
-    }
 });
 </script>
 

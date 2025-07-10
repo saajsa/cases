@@ -1628,6 +1628,75 @@ public function get_menu_stats()
     }
 
     /**
+     * Update case status
+     */
+    public function update_case_status()
+    {
+        if (!has_permission('cases', '', 'edit')) {
+            access_denied('cases');
+        }
+
+        if (!$this->input->post()) {
+            echo json_encode(['success' => false, 'message' => 'No data provided']);
+            return;
+        }
+
+        $case_id = $this->input->post('case_id', true);
+        $new_status = $this->input->post('status', true);
+        $status_notes = $this->input->post('status_notes', true);
+
+        if (!$case_id || !$new_status) {
+            echo json_encode(['success' => false, 'message' => 'Case ID and status are required']);
+            return;
+        }
+
+        try {
+            // Start transaction
+            $this->db->trans_begin();
+
+            // Update case status
+            $update_data = [
+                'status' => $new_status,
+                'status_updated' => date('Y-m-d H:i:s'),
+                'status_updated_by' => get_staff_user_id()
+            ];
+
+            $this->db->where('id', $case_id);
+            $this->db->update(db_prefix() . 'cases', $update_data);
+
+            // Log the status change
+            $log_data = [
+                'case_id' => $case_id,
+                'action' => 'status_update',
+                'old_status' => '', // Could be enhanced to track old status
+                'new_status' => $new_status,
+                'notes' => $status_notes,
+                'staff_id' => get_staff_user_id(),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            // Insert log entry (if table exists)
+            if ($this->db->table_exists('case_logs')) {
+                $this->db->insert(db_prefix() . 'case_logs', $log_data);
+            }
+
+            // Commit transaction
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                echo json_encode(['success' => false, 'message' => 'Failed to update case status']);
+            } else {
+                $this->db->trans_commit();
+                echo json_encode(['success' => true, 'message' => 'Case status updated successfully']);
+            }
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Error updating case status: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error updating case status']);
+        }
+    }
+
+    /**
      * Integration with Perfex CRM projects (if needed)
      */
     public function sync_with_projects()

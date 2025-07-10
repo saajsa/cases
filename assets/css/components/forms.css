@@ -133,6 +133,123 @@
     border-bottom-right-radius: var(--cases-radius);
 }
 
+/* Enhanced Select Components */
+.cases-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.cases-select-display {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--cases-border-dark);
+    border-radius: var(--cases-radius);
+    background: var(--cases-bg-primary);
+    color: var(--cases-text);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--cases-transition);
+}
+
+.cases-select-display:hover {
+    border-color: var(--cases-primary);
+}
+
+.cases-select-display.cases-select-open {
+    border-color: var(--cases-primary);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.cases-select-value {
+    flex: 1;
+}
+
+.cases-select-arrow {
+    color: var(--cases-text-light);
+    transition: var(--cases-transition);
+}
+
+.cases-select-open .cases-select-arrow {
+    transform: rotate(180deg);
+}
+
+.cases-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-primary);
+    border-top: none;
+    border-bottom-left-radius: var(--cases-radius);
+    border-bottom-right-radius: var(--cases-radius);
+    z-index: 1000;
+    max-height: 300px;
+    overflow: hidden;
+    box-shadow: var(--cases-shadow-md);
+}
+
+.cases-select-search {
+    padding: 10px;
+    border-bottom: 1px solid var(--cases-border);
+}
+
+.cases-select-search .cases-form-control {
+    margin: 0;
+}
+
+.cases-select-options {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.cases-select-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: var(--cases-transition);
+    border-bottom: 1px solid var(--cases-border-light);
+}
+
+.cases-select-option:hover {
+    background: var(--cases-bg-hover);
+}
+
+.cases-select-option.cases-option-selected {
+    background: var(--cases-primary-bg);
+    color: var(--cases-primary);
+    font-weight: 500;
+}
+
+.cases-select-option:last-child {
+    border-bottom: none;
+}
+
+/* Status-specific select styling */
+.cases-status-select option[value="active"] { color: var(--cases-success); }
+.cases-status-select option[value="on_hold"] { color: var(--cases-warning); }
+.cases-status-select option[value="completed"] { color: var(--cases-info); }
+.cases-status-select option[value="dismissed"] { color: var(--cases-danger); }
+.cases-status-select option[value="settled"] { color: var(--cases-success); }
+.cases-status-select option[value="transferred"] { color: var(--cases-secondary); }
+
+/* Hearing status specific styling */
+.cases-hearing-status-select option[value="Scheduled"] { color: var(--cases-primary); }
+.cases-hearing-status-select option[value="In Progress"] { color: var(--cases-warning); }
+.cases-hearing-status-select option[value="Completed"] { color: var(--cases-success); }
+.cases-hearing-status-select option[value="Adjourned"] { color: var(--cases-info); }
+.cases-hearing-status-select option[value="Postponed"] { color: var(--cases-warning); }
+.cases-hearing-status-select option[value="Cancelled"] { color: var(--cases-danger); }
+.cases-hearing-status-select option[value="No Appearance"] { color: var(--cases-secondary); }
+
+/* Priority select styling */
+.cases-priority-select option[value="low"] { color: var(--cases-info); }
+.cases-priority-select option[value="medium"] { color: var(--cases-warning); }
+.cases-priority-select option[value="high"] { color: var(--cases-danger); }
+.cases-priority-select option[value="urgent"] { color: var(--cases-danger); font-weight: bold; }
+
 .cases-input-group-addon {
     display: flex;
     align-items: center;

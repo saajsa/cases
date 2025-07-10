@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
+<?php 
+init_head();
+echo load_cases_css(['forms', 'buttons', 'cards']);
+?>
 <div id="wrapper">
     <div class="content">
         <div class="row">

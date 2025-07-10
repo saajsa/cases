@@ -1,0 +1,595 @@
+/**
+ * Causelist CSS
+ * Extracted from views/admin/hearings/causelist.php
+ * Modular CSS for the court causelist view
+ */
+
+/* Minimalist Black & White UI with Status Colors */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #fafafa;
+    color: #2c2c2c;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-header {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    padding: 40px;
+    margin-bottom: 30px;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.page-header h1 {
+    margin: 0 0 8px 0;
+    font-weight: 600;
+    font-size: 2.2rem;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+}
+
+.page-header .subtitle {
+    font-size: 1rem;
+    color: #666666;
+    font-weight: 400;
+    margin-bottom: 25px;
+}
+
+.page-actions .btn {
+    margin-right: 12px;
+    margin-bottom: 8px;
+    border-radius: 1px;
+    padding: 10px 20px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid #d1d1d1;
+    background: #ffffff;
+    color: #2c2c2c;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.page-actions .btn:hover {
+    background: #f8f8f8;
+    border-color: #999999;
+    color: #1a1a1a;
+}
+
+.page-actions .btn-primary {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.page-actions .btn-primary:hover {
+    background: #000000;
+    border-color: #000000;
+}
+
+.page-actions .btn-success {
+    background: #ffffff;
+    border-color: #2d7d2d;
+    color: #2d7d2d;
+}
+
+.page-actions .btn-success:hover {
+    background: #2d7d2d;
+    color: #ffffff;
+}
+
+.page-actions .btn-info {
+    background: #ffffff;
+    border-color: #1a6bcc;
+    color: #1a6bcc;
+}
+
+.page-actions .btn-info:hover {
+    background: #1a6bcc;
+    color: #ffffff;
+}
+
+.date-navigation {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.date-navigation-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 20px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.date-controls {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: end;
+}
+
+.date-input-group {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+}
+
+.date-input {
+    padding: 12px 16px;
+    border: 1px solid #d1d1d1;
+    border-radius: 1px;
+    font-size: 0.875rem;
+    background: #ffffff;
+    color: #2c2c2c;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #1a1a1a;
+}
+
+.date-nav-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.date-nav-btn {
+    padding: 12px 16px;
+    border: 1px solid #d1d1d1;
+    border-radius: 1px;
+    background: #ffffff;
+    color: #2c2c2c;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.date-nav-btn:hover {
+    background: #f8f8f8;
+    border-color: #999999;
+}
+
+.date-nav-btn.active {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.date-shortcuts {
+    margin-top: 20px;
+}
+
+.date-shortcuts label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+}
+
+.date-shortcuts select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d1d1;
+    border-radius: 1px;
+    font-size: 0.875rem;
+    background: #ffffff;
+    color: #2c2c2c;
+}
+
+.date-shortcuts select:focus {
+    outline: none;
+    border-color: #1a1a1a;
+}
+
+.court-section {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    margin-bottom: 30px;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    overflow: hidden;
+}
+
+.court-header {
+    background: #1a1a1a;
+    color: #ffffff;
+    padding: 25px 30px;
+    text-align: center;
+}
+
+.court-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.judge-section {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.judge-section:last-child {
+    border-bottom: none;
+}
+
+.judge-header {
+    background: #f8f8f8;
+    padding: 20px 30px;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.judge-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 5px 0;
+}
+
+.court-info {
+    font-size: 0.875rem;
+    color: #666666;
+    margin: 0;
+}
+
+.causelist-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.causelist-table thead th {
+    background: #f8f8f8;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e1e1e1;
+    border-right: 1px solid #f0f0f0;
+    text-align: center;
+}
+
+.causelist-table thead th:first-child {
+    text-align: center;
+    width: 60px;
+}
+
+.causelist-table thead th:last-child {
+    border-right: none;
+}
+
+.causelist-table tbody td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    border-right: 1px solid #f8f8f8;
+    vertical-align: top;
+    color: #2c2c2c;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.causelist-table tbody td:first-child {
+    text-align: center;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.causelist-table tbody td:last-child {
+    border-right: none;
+}
+
+.causelist-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.causelist-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.case-number {
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 2px;
+}
+
+.case-name {
+    color: #2c2c2c;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.3px;
+    line-height: 1.3;
+}
+
+.hearing-time {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 0.9rem;
+}
+
+.hearing-purpose {
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+}
+
+.hearing-description {
+    font-size: 0.8rem;
+    color: #666666;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.follow-up-indicator {
+    font-size: 0.75rem;
+    color: #1a6bcc;
+    font-style: italic;
+}
+
+/* Status Colors */
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 1px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    float: right;
+    margin-top: 5px;
+}
+
+.status-scheduled { 
+    background: #eff8ff; 
+    color: #1a6bcc; 
+    border-color: #1a6bcc; 
+}
+
+.status-completed { 
+    background: #f0f9f0; 
+    color: #2d7d2d; 
+    border-color: #2d7d2d; 
+}
+
+.status-adjourned { 
+    background: #fff8e6; 
+    color: #cc8c1a; 
+    border-color: #cc8c1a; 
+}
+
+.status-cancelled { 
+    background: #fff0f0; 
+    color: #cc1a1a; 
+    border-color: #cc1a1a; 
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 40px;
+    color: #999999;
+    background: #fafafa;
+    margin: 30px;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    color: #cccccc;
+}
+
+.empty-state h5 {
+    font-weight: 600;
+    color: #666666;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #999999;
+    margin-bottom: 20px;
+}
+
+/* Print Styles */
+.print-header {
+    display: none;
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #1a1a1a;
+}
+
+.print-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 5px;
+}
+
+.print-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 5px;
+}
+
+.print-header h4 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666666;
+    margin: 0;
+}
+
+/* Debug Panel */
+.debug-panel {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    padding: 20px;
+    margin-top: 30px;
+    border-radius: 2px;
+    border-left: 3px solid #cc8c1a;
+}
+
+.debug-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #cc8c1a;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.debug-content {
+    font-size: 0.8rem;
+    color: #666666;
+    font-family: 'Courier New', monospace;
+}
+
+.debug-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.75rem;
+}
+
+.debug-table th,
+.debug-table td {
+    padding: 8px 12px;
+    border: 1px solid #e1e1e1;
+    text-align: left;
+}
+
+.debug-table th {
+    background: #f8f8f8;
+    font-weight: 600;
+}
+
+.debug-table .highlight {
+    background: #f0f9f0;
+    font-weight: 600;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 25px 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .page-actions .btn {
+        width: 100%;
+        margin-bottom: 8px;
+        margin-right: 0;
+    }
+    
+    .date-navigation {
+        padding: 20px;
+    }
+    
+    .date-controls {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .date-input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .date-nav-buttons {
+        justify-content: center;
+    }
+    
+    .court-header {
+        padding: 20px;
+    }
+    
+    .court-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .judge-header {
+        padding: 15px 20px;
+    }
+    
+    .causelist-table {
+        font-size: 0.8rem;
+    }
+    
+    .causelist-table thead th,
+    .causelist-table tbody td {
+        padding: 12px 8px;
+    }
+    
+    .status-badge {
+        float: none;
+        display: block;
+        margin-top: 8px;
+        text-align: center;
+    }
+}
+
+@media print {
+    body {
+        background: #ffffff;
+    }
+    
+    .page-actions,
+    .date-navigation,
+    .debug-panel {
+        display: none !important;
+    }
+    
+    .print-header {
+        display: block !important;
+    }
+    
+    .court-section {
+        page-break-inside: avoid;
+        border: 2px solid #000000;
+        margin-bottom: 20px;
+    }
+    
+    .court-header {
+        background: #f0f0f0 !important;
+        color: #000000 !important;
+        border-bottom: 2px solid #000000;
+    }
+    
+    .judge-header {
+        background: #f8f8f8 !important;
+        border-bottom: 1px solid #000000;
+    }
+    
+    .causelist-table thead th {
+        background: #f0f0f0 !important;
+        border: 1px solid #000000;
+    }
+    
+    .causelist-table tbody td {
+        border: 1px solid #000000;
+    }
+    
+    .status-badge {
+        border: 1px solid #000000 !important;
+        background: none !important;
+        color: #000000 !important;
+    }
+}

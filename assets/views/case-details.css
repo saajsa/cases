@@ -1,0 +1,481 @@
+/* ========================================
+   CASE DETAILS VIEW STYLES
+   Extracted from inline CSS in views/admin/cases/details.php
+   Minimalist Black & White UI with Status Colors
+======================================== */
+
+/* Base Styling */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #fafafa;
+    color: #2c2c2c;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Case Header */
+.case-header {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    padding: 40px;
+    margin-bottom: 30px;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.case-header h1 {
+    margin: 0 0 8px 0;
+    font-weight: 600;
+    font-size: 2.2rem;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+}
+
+.case-header .case-number {
+    font-size: 1rem;
+    color: #666666;
+    font-weight: 400;
+    margin-bottom: 25px;
+}
+
+/* Case Actions */
+.case-actions .btn {
+    margin-right: 12px;
+    margin-bottom: 8px;
+    border-radius: 1px;
+    padding: 10px 20px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid #d1d1d1;
+    background: #ffffff;
+    color: #2c2c2c;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.case-actions .btn:hover {
+    background: #f8f8f8;
+    border-color: #999999;
+    color: #1a1a1a;
+}
+
+.case-actions .btn-primary {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.case-actions .btn-primary:hover {
+    background: #000000;
+    border-color: #000000;
+}
+
+/* Info Cards */
+.info-card {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    padding: 30px;
+    margin-bottom: 25px;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.info-card-header {
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.info-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+/* Info Tables */
+.info-table {
+    border: none;
+    margin: 0;
+}
+
+.info-table tr {
+    border: none;
+}
+
+.info-table th {
+    border: none;
+    padding: 14px 0;
+    font-weight: 500;
+    color: #666666;
+    font-size: 0.875rem;
+    width: 35%;
+    vertical-align: top;
+}
+
+.info-table td {
+    border: none;
+    padding: 14px 0;
+    color: #1a1a1a;
+    font-size: 0.875rem;
+    font-weight: 400;
+    vertical-align: top;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 1px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+}
+
+/* Status Color Codes */
+.status-active { 
+    background: #f0f9f0; 
+    color: #2d7d2d; 
+    border-color: #2d7d2d; 
+}
+
+.status-scheduled { 
+    background: #eff8ff; 
+    color: #1a6bcc; 
+    border-color: #1a6bcc; 
+}
+
+.status-completed { 
+    background: #f0f9f0; 
+    color: #2d7d2d; 
+    border-color: #2d7d2d; 
+}
+
+.status-adjourned { 
+    background: #fff8e6; 
+    color: #cc8c1a; 
+    border-color: #cc8c1a; 
+}
+
+.status-cancelled { 
+    background: #fff0f0; 
+    color: #cc1a1a; 
+    border-color: #cc1a1a; 
+}
+
+.status-on-hold { 
+    background: #f5f5f5; 
+    color: #666666; 
+    border-color: #666666; 
+}
+
+.status-dismissed { 
+    background: #fff0f0; 
+    color: #cc1a1a; 
+    border-color: #cc1a1a; 
+}
+
+/* Section Headers */
+.section-header {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    padding: 25px 30px;
+    margin: 30px 0 20px 0;
+    border-radius: 2px;
+    border-left: 3px solid #1a1a1a;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+/* Modern Tables */
+.modern-table {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.modern-table thead th {
+    background: #f8f8f8;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e1e1e1;
+    border-right: 1px solid #f0f0f0;
+}
+
+.modern-table thead th:last-child {
+    border-right: none;
+}
+
+.modern-table tbody td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    border-right: 1px solid #f8f8f8;
+    vertical-align: middle;
+    color: #2c2c2c;
+    font-size: 0.875rem;
+}
+
+.modern-table tbody td:last-child {
+    border-right: none;
+}
+
+.modern-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.modern-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Action Buttons */
+.action-btn {
+    border-radius: 1px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: 1px solid;
+}
+
+.action-btn.btn-primary {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.action-btn.btn-primary:hover {
+    background: #000000;
+    border-color: #000000;
+}
+
+.action-btn.btn-success {
+    background: #ffffff;
+    border-color: #2d7d2d;
+    color: #2d7d2d;
+}
+
+.action-btn.btn-success:hover {
+    background: #2d7d2d;
+    color: #ffffff;
+}
+
+.action-btn.btn-info {
+    background: #ffffff;
+    border-color: #1a6bcc;
+    color: #1a6bcc;
+}
+
+.action-btn.btn-info:hover {
+    background: #1a6bcc;
+    color: #ffffff;
+}
+
+.action-btn.btn-danger {
+    background: #ffffff;
+    border-color: #cc1a1a;
+    color: #cc1a1a;
+}
+
+.action-btn.btn-danger:hover {
+    background: #cc1a1a;
+    color: #ffffff;
+}
+
+/* Consultation Notes */
+.consultation-note {
+    background: #fafafa;
+    padding: 20px;
+    border: 1px solid #e1e1e1;
+    border-left: 3px solid #666666;
+    line-height: 1.6;
+    font-size: 0.875rem;
+    color: #2c2c2c;
+    border-radius: 2px;
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 60px 40px;
+    color: #999999;
+    background: #fafafa;
+    border: 1px dashed #d1d1d1;
+    border-radius: 2px;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    color: #cccccc;
+}
+
+.empty-state h5 {
+    font-weight: 600;
+    color: #666666;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #999999;
+    margin-bottom: 20px;
+}
+
+/* File Icons */
+.file-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+/* Date Time Cells */
+.date-time-cell strong {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.date-time-cell small {
+    color: #666666;
+    font-weight: normal;
+}
+
+/* Text Utilities */
+.text-muted {
+    color: #999999 !important;
+}
+
+.text-primary {
+    color: #1a1a1a !important;
+}
+
+.text-success {
+    color: #2d7d2d !important;
+}
+
+.text-warning {
+    color: #cc8c1a !important;
+}
+
+.text-danger {
+    color: #cc1a1a !important;
+}
+
+.text-info {
+    color: #1a6bcc !important;
+}
+
+/* Remarks and Important Text Colors */
+.remark-critical {
+    color: #cc1a1a;
+    font-weight: 600;
+}
+
+.remark-warning {
+    color: #cc8c1a;
+    font-weight: 500;
+}
+
+.remark-info {
+    color: #1a6bcc;
+    font-weight: 500;
+}
+
+.remark-success {
+    color: #2d7d2d;
+    font-weight: 500;
+}
+
+/* Hearing Selector Styling */
+#hearingSelector {
+    padding: 10px 20px;
+    border: 1px solid #d1d1d1;
+    border-radius: 1px;
+    font-size: 0.875rem;
+    color: #2c2c2c;
+    background: #ffffff;
+    transition: all 0.15s ease;
+    appearance: none;
+    margin-bottom: 20px;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'10'%20height%3D'6'%20viewBox%3D'0%200%2010%206'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M0%200l5%206%205-6z'%20fill%3D'%23666666'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+#hearingSelector:hover,
+#hearingSelector:focus {
+    background: #f8f8f8;
+    border-color: #999999;
+    color: #1a1a1a;
+    outline: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .case-header {
+        padding: 25px 20px;
+        text-align: left;
+    }
+    
+    .case-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .case-actions .btn {
+        width: 100%;
+        margin-bottom: 8px;
+        margin-right: 0;
+    }
+    
+    .info-card {
+        padding: 20px;
+    }
+    
+    .section-header {
+        padding: 20px;
+    }
+    
+    .modern-table thead th,
+    .modern-table tbody td {
+        padding: 12px 15px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .case-actions {
+        display: none;
+    }
+    
+    .info-card,
+    .modern-table,
+    .section-header {
+        border: 1px solid #000000;
+        box-shadow: none;
+    }
+    
+    .status-badge {
+        border: 1px solid #000000;
+    }
+}
