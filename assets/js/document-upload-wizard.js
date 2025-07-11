@@ -26,11 +26,31 @@ class DocumentUploadWizard {
     }
     
     init() {
+        console.log('DocumentUploadWizard initializing...');
+        
+        // Make wizard globally accessible
+        window.wizard = this;
+        
         this.initializeElements();
         this.bindEvents();
         this.initializeSelectPickers();
         this.handlePrePopulation();
         this.showStep(1);
+        
+        // Add a global fallback for testing
+        window.testCardClick = () => {
+            console.log('Testing card click functionality...');
+            const firstCard = document.querySelector('.cases-connection-card');
+            if (firstCard) {
+                console.log('Found first card, simulating click');
+                this.handleConnectionSelection({ currentTarget: firstCard });
+            } else {
+                console.log('No cards found');
+            }
+        };
+        
+        console.log('DocumentUploadWizard initialized. Cards should now be clickable!');
+        console.log('Wizard instance available at: window.wizard');
     }
     
     initializeElements() {
@@ -79,17 +99,58 @@ class DocumentUploadWizard {
             });
         }
         
-        // Quick actions
-        this.quickActions.forEach(action => {
-            action.addEventListener('click', (e) => this.handleQuickAction(e));
+        // Connection card selection using event delegation
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('.cases-connection-card');
+            if (card) {
+                console.log('Connection card clicked:', card.dataset.type);
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleConnectionSelection(e, card);
+            }
         });
         
-        // Document type selection
-        document.querySelectorAll('.cases-doc-type-option').forEach(option => {
-            option.addEventListener('click', (e) => this.handleDocTypeSelection(e));
+        // Keyboard support for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const card = e.target.closest('.cases-connection-card');
+                if (card) {
+                    e.preventDefault();
+                    this.handleConnectionSelection(e, card);
+                }
+            }
         });
         
-        // Entity selection
+        // Legal matter sub-type selection
+        document.querySelectorAll('.cases-legal-option').forEach(option => {
+            option.addEventListener('click', (e) => this.handleLegalSubtypeSelection(e));
+        });
+        
+        // Entity item selection
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.cases-entity-item')) {
+                this.handleEntityItemSelection(e);
+            }
+        });
+        
+        // Search and filter functionality
+        const entitySearch = document.getElementById('entity-search');
+        if (entitySearch) {
+            entitySearch.addEventListener('input', (e) => this.handleEntitySearch(e));
+        }
+        
+        // Filter buttons
+        document.querySelectorAll('.cases-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleFilterToggle(e));
+        });
+        
+        // Change selection button
+        const changeSelectionBtn = document.getElementById('change-selection');
+        if (changeSelectionBtn) {
+            changeSelectionBtn.addEventListener('click', () => this.resetSelection());
+        }
+        
+        // Legacy entity selection (for compatibility)
         ['invoice_id', 'consultation_id', 'case_id', 'hearing_id'].forEach(selectId => {
             const select = document.getElementById(selectId);
             if (select) {
@@ -120,7 +181,31 @@ class DocumentUploadWizard {
     initializeSelectPickers() {
         if (window.$ && $.fn.selectpicker) {
             $('.selectpicker').selectpicker();
+            
+            // Fix dropdown overflow issues
+            this.fixSelectPickerOverflow();
         }
+    }
+    
+    fixSelectPickerOverflow() {
+        if (!window.$) return;
+        
+        // Override SelectPicker's dropdown positioning
+        $('.cases-related-entities .selectpicker').on('shown.bs.select', function() {
+            const $dropdown = $(this).siblings('.dropdown-menu');
+            
+            // Remove problematic inline styles
+            $dropdown.css({
+                'overflow': 'visible',
+                'max-height': '300px'
+            });
+            
+            // Fix inner content
+            $dropdown.find('.inner').css({
+                'max-height': '250px',
+                'overflow-y': 'auto'
+            });
+        });
     }
     
     // ==========================================
@@ -138,6 +223,16 @@ class DocumentUploadWizard {
                 step.classList.remove('active');
             }
         });
+        
+        // Handle dropdown overflow for step 3 (entity selection)
+        const wizardContainer = document.querySelector('.cases-upload-wizard');
+        if (wizardContainer) {
+            if (stepNumber === 3) {
+                wizardContainer.classList.add('has-dropdowns');
+            } else {
+                wizardContainer.classList.remove('has-dropdowns');
+            }
+        }
         
         // Animate content sections
         document.querySelectorAll('.cases-upload-content').forEach((content, index) => {
@@ -562,6 +657,8 @@ class DocumentUploadWizard {
                 select.innerHTML = data;
                 if (window.$ && $.fn.selectpicker) {
                     $(select).selectpicker('refresh');
+                    // Apply overflow fix to newly refreshed SelectPicker
+                    this.fixSelectPickerOverflow();
                 }
             }
         })
@@ -571,9 +668,587 @@ class DocumentUploadWizard {
                 select.innerHTML = `<option value="">${defaultOptionText}</option>`;
                 if (window.$ && $.fn.selectpicker) {
                     $(select).selectpicker('refresh');
+                    // Apply overflow fix to newly refreshed SelectPicker
+                    this.fixSelectPickerOverflow();
                 }
             }
         });
+    }
+    
+    // ==========================================
+    // UTILITY METHODS FOR CONNECTION HANDLING
+    // ==========================================
+    
+    // ==========================================
+    // NEW REDESIGNED INTERFACE HANDLERS
+    // ==========================================
+    
+    handleConnectionSelection(e, card = null) {
+        console.log('handleConnectionSelection called');
+        
+        // Get the card element - either passed or from event
+        const cardElement = card || e.currentTarget;
+        if (!cardElement) {
+            console.error('No card element found');
+            return;
+        }
+        
+        const type = cardElement.dataset.type;
+        const radio = cardElement.querySelector('.cases-connection-radio');
+        
+        console.log('Card data:', { cardElement, type, radio });
+        
+        // Update UI - remove active state from all cards
+        document.querySelectorAll('.cases-connection-card').forEach(c => c.classList.remove('active'));
+        cardElement.classList.add('active');
+        
+        // Select radio button
+        if (radio) {
+            radio.checked = true;
+            this.selectedDocType = radio.value;
+        }
+        
+        // Handle progressive disclosure based on card type
+        if (type === 'case') {
+            this.showLegalMatterOptions();
+        } else {
+            this.hideLegalMatterOptions();
+            this.showEntitySelection(type);
+        }
+        
+        console.log('Connection selection completed for type:', type);
+    }
+    
+    handleLegalSubtypeSelection(e) {
+        const option = e.currentTarget;
+        const subtype = option.dataset.subtype;
+        
+        // Update UI
+        document.querySelectorAll('.cases-legal-option').forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        // Update the radio button value
+        const radio = document.querySelector('input[name="doc_owner_type"][value="case"]');
+        if (radio && subtype === 'hearing') {
+            radio.value = 'hearing';
+            this.selectedDocType = 'hearing';
+        } else if (radio) {
+            radio.value = 'case';
+            this.selectedDocType = 'case';
+        }
+        
+        // Show entity selection
+        this.showEntitySelection(subtype);
+    }
+    
+    showLegalMatterOptions() {
+        const legalOptions = document.getElementById('legal-matter-options');
+        const entitySelection = document.getElementById('entity-selection');
+        const selectionSummary = document.getElementById('selection-summary');
+        
+        if (legalOptions) {
+            legalOptions.style.display = 'block';
+            legalOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (entitySelection) entitySelection.style.display = 'none';
+        if (selectionSummary) selectionSummary.style.display = 'none';
+        
+        this.disableNextButton(3);
+    }
+    
+    hideLegalMatterOptions() {
+        const legalOptions = document.getElementById('legal-matter-options');
+        if (legalOptions) legalOptions.style.display = 'none';
+        
+        // Reset legal options
+        document.querySelectorAll('.cases-legal-option').forEach(opt => opt.classList.remove('active'));
+    }
+    
+    showEntitySelection(type) {
+        const entitySelection = document.getElementById('entity-selection');
+        const entityList = document.getElementById('entity-list');
+        const entityLoading = document.getElementById('entity-loading');
+        const entityEmpty = document.getElementById('entity-empty');
+        
+        if (!entitySelection) return;
+        
+        entitySelection.style.display = 'block';
+        entitySelection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Show loading state
+        if (entityLoading) entityLoading.style.display = 'block';
+        if (entityList) entityList.innerHTML = '';
+        if (entityEmpty) entityEmpty.style.display = 'none';
+        
+        // Update search placeholder
+        const searchInput = document.getElementById('entity-search');
+        if (searchInput) {
+            const placeholders = {
+                'invoice': 'Search invoices...',
+                'consultation': 'Search consultations...',
+                'case': 'Search cases...',
+                'hearing': 'Search hearings...',
+                'customer': 'Search general documents...'
+            };
+            searchInput.placeholder = placeholders[type] || 'Search...';
+            searchInput.value = '';
+        }
+        
+        // Load entities
+        this.loadEntities(type);
+    }
+    
+    loadEntities(type) {
+        const customerId = this.selectedClient ? this.selectedClient.id : null;
+        
+        if (!customerId && type !== 'customer') {
+            this.showEntityEmpty('Please select a client first');
+            return;
+        }
+        
+        let endpoint = '';
+        let params = {};
+        
+        switch (type) {
+            case 'invoice':
+                endpoint = 'get_invoices_by_customer';
+                params = { customer_id: customerId };
+                break;
+            case 'consultation':
+                endpoint = 'get_consultations_by_client';
+                params = { customer_id: customerId };
+                break;
+            case 'case':
+                endpoint = 'get_cases_by_client';
+                params = { customer_id: customerId };
+                break;
+            case 'hearing':
+                // For hearings, we need to first show cases, then hearings
+                // Show a message to first select a case
+                this.showHearingCaseSelection();
+                return;
+            case 'customer':
+                this.hideEntityLoading();
+                this.enableNextButton(3);
+                this.showSelectionSummary('General client document');
+                return;
+            default:
+                this.showEntityEmpty('Unknown document type');
+                return;
+        }
+        
+        const url = this.config.adminUrl + 'cases/documents/' + endpoint;
+        this.fetchEntityData(url, params, type);
+    }
+    
+    fetchEntityData(url, params, type) {
+        params[this.config.csrfName] = this.config.csrfHash;
+        
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(params)
+        })
+        .then(response => response.text())
+        .then(html => {
+            this.parseAndDisplayEntities(html, type);
+        })
+        .catch(error => {
+            console.error('Error loading entities:', error);
+            this.showEntityEmpty('Failed to load items');
+        });
+    }
+    
+    parseAndDisplayEntities(html, type) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const options = tempDiv.querySelectorAll('option[value]:not([value=""])');
+        
+        this.hideEntityLoading();
+        
+        if (options.length === 0) {
+            this.showEntityEmpty(`No ${type}s found`);
+            return;
+        }
+        
+        const entityList = document.getElementById('entity-list');
+        if (!entityList) return;
+        
+        entityList.innerHTML = '';
+        
+        options.forEach(option => {
+            const item = this.createEntityItem(option, type);
+            entityList.appendChild(item);
+        });
+    }
+    
+    createEntityItem(option, type) {
+        const item = document.createElement('div');
+        item.className = 'cases-entity-item';
+        item.dataset.value = option.value;
+        item.dataset.type = type;
+        
+        const icons = {
+            'invoice': 'fas fa-file-invoice',
+            'consultation': 'fas fa-user-tie',
+            'case': 'fas fa-briefcase',
+            'hearing': 'fas fa-gavel'
+        };
+        
+        const icon = icons[type] || 'fas fa-file';
+        
+        item.innerHTML = `
+            <div class="cases-entity-icon">
+                <i class="${icon}"></i>
+            </div>
+            <div class="cases-entity-details">
+                <div class="cases-entity-title">${this.escapeHtml(option.textContent)}</div>
+                <div class="cases-entity-meta">ID: ${option.value}</div>
+            </div>
+        `;
+        
+        return item;
+    }
+    
+    handleEntityItemSelection(e) {
+        const item = e.target.closest('.cases-entity-item');
+        if (!item) return;
+        
+        // Special handling for hearing case selection
+        if (item.dataset.type === 'hearing-case') {
+            this.handleHearingCaseSelection(item);
+            return;
+        }
+        
+        // Update UI
+        document.querySelectorAll('.cases-entity-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        
+        // Store selection
+        this.selectedEntity = {
+            type: item.dataset.type,
+            id: item.dataset.value,
+            name: item.querySelector('.cases-entity-title').textContent
+        };
+        
+        // Update hidden select for form submission
+        this.updateHiddenSelect(item.dataset.type, item.dataset.value);
+        
+        // Show summary and enable next button
+        this.showSelectionSummary(`${this.selectedEntity.name} (${this.selectedEntity.type})`);
+        this.enableNextButton(3);
+    }
+    
+    handleHearingCaseSelection(caseItem) {
+        const caseId = caseItem.dataset.value;
+        const caseName = caseItem.querySelector('.cases-entity-title').textContent;
+        
+        // Store the selected case for reference
+        this.selectedCase = {
+            id: caseId,
+            name: caseName
+        };
+        
+        // Show loading state
+        const entityLoading = document.getElementById('entity-loading');
+        const entityList = document.getElementById('entity-list');
+        
+        if (entityLoading) entityLoading.style.display = 'block';
+        if (entityList) entityList.innerHTML = '';
+        
+        // Load hearings for this case
+        const url = this.config.adminUrl + 'cases/documents/get_hearings_by_case';
+        const params = { 
+            case_id: caseId,
+            [this.config.csrfName]: this.config.csrfHash
+        };
+        
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(params)
+        })
+        .then(response => response.text())
+        .then(html => {
+            this.parseAndDisplayHearings(html, caseName);
+        })
+        .catch(error => {
+            console.error('Error loading hearings:', error);
+            this.showEntityEmpty('Failed to load hearings for this case');
+        });
+    }
+    
+    parseAndDisplayHearings(html, caseName) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const options = tempDiv.querySelectorAll('option[value]:not([value=""])');
+        
+        this.hideEntityLoading();
+        
+        if (options.length === 0) {
+            this.showEntityEmpty(`No hearings found for this case. You can still link the document to the case itself.`);
+            
+            // Offer option to link to case instead
+            const entityList = document.getElementById('entity-list');
+            if (entityList) {
+                const caseOption = document.createElement('div');
+                caseOption.className = 'cases-entity-item cases-fallback-option';
+                caseOption.dataset.value = this.selectedCase.id;
+                caseOption.dataset.type = 'case';
+                caseOption.innerHTML = `
+                    <div class="cases-entity-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="cases-entity-details">
+                        <div class="cases-entity-title">Link to Case: ${this.escapeHtml(caseName)}</div>
+                        <div class="cases-entity-meta">No hearings available - link to case instead</div>
+                    </div>
+                `;
+                entityList.appendChild(caseOption);
+            }
+            return;
+        }
+        
+        const entityList = document.getElementById('entity-list');
+        if (!entityList) return;
+        
+        entityList.innerHTML = '';
+        
+        // Add back button and header
+        const header = document.createElement('div');
+        header.className = 'cases-hearing-selection-header';
+        header.innerHTML = `
+            <div style="background: #e8f5e8; padding: 12px; border-radius: 4px; margin-bottom: 16px; border-left: 4px solid #4caf50;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h6 style="margin: 0 0 4px 0; color: #2e7d32;">
+                            <i class="fas fa-gavel"></i> Select Hearing
+                        </h6>
+                        <p style="margin: 0; font-size: 13px; color: #555;">
+                            Case: ${this.escapeHtml(caseName)}
+                        </p>
+                    </div>
+                    <button type="button" class="cases-btn-sm cases-btn-secondary" onclick="window.wizard.showHearingCaseSelection()">
+                        <i class="fas fa-arrow-left"></i> Back to Cases
+                    </button>
+                </div>
+            </div>
+        `;
+        entityList.appendChild(header);
+        
+        // Add hearings as selectable items
+        options.forEach(option => {
+            const item = this.createEntityItem(option, 'hearing');
+            entityList.appendChild(item);
+        });
+    }
+    
+    updateHiddenSelect(type, value) {
+        if (type === 'hearing') {
+            // For hearings, we need to set both case_id and hearing_id
+            this.updateHiddenSelectField('case_id', this.selectedCase.id);
+            this.updateHiddenSelectField('hearing_id', value);
+        } else {
+            this.updateHiddenSelectField(type + '_id', value);
+        }
+    }
+    
+    updateHiddenSelectField(selectId, value) {
+        const select = document.getElementById(selectId);
+        if (select) {
+            // Add option if it doesn't exist
+            let option = select.querySelector(`option[value="${value}"]`);
+            if (!option) {
+                option = document.createElement('option');
+                option.value = value;
+                option.textContent = this.selectedEntity ? this.selectedEntity.name : `ID: ${value}`;
+                select.appendChild(option);
+            }
+            select.value = value;
+            
+            // Update SelectPicker if present
+            if (window.$ && $.fn.selectpicker) {
+                $(select).selectpicker('refresh');
+            }
+        }
+    }
+    
+    handleEntitySearch(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('.cases-entity-item');
+        
+        items.forEach(item => {
+            const title = item.querySelector('.cases-entity-title').textContent.toLowerCase();
+            if (title.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    handleFilterToggle(e) {
+        const button = e.currentTarget;
+        
+        // Toggle active state
+        document.querySelectorAll('.cases-filter-btn').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Apply filter logic here if needed
+        // For now, just visual feedback
+    }
+    
+    showEntityEmpty(message) {
+        const entityLoading = document.getElementById('entity-loading');
+        const entityEmpty = document.getElementById('entity-empty');
+        
+        if (entityLoading) entityLoading.style.display = 'none';
+        if (entityEmpty) {
+            entityEmpty.style.display = 'flex';
+            const p = entityEmpty.querySelector('p');
+            if (p) p.textContent = message;
+        }
+    }
+    
+    showHearingCaseSelection() {
+        const customerId = this.selectedClient ? this.selectedClient.id : null;
+        const entityList = document.getElementById('entity-list');
+        const entityLoading = document.getElementById('entity-loading');
+        const entityEmpty = document.getElementById('entity-empty');
+        
+        if (entityLoading) entityLoading.style.display = 'block';
+        if (entityList) entityList.innerHTML = '';
+        if (entityEmpty) entityEmpty.style.display = 'none';
+        
+        // Load cases first for hearing selection
+        const url = this.config.adminUrl + 'cases/documents/get_cases_by_client';
+        const params = { 
+            customer_id: customerId,
+            [this.config.csrfName]: this.config.csrfHash
+        };
+        
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(params)
+        })
+        .then(response => response.text())
+        .then(html => {
+            this.parseAndDisplayCasesForHearing(html);
+        })
+        .catch(error => {
+            console.error('Error loading cases for hearing:', error);
+            this.showEntityEmpty('Failed to load cases');
+        });
+    }
+    
+    parseAndDisplayCasesForHearing(html) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const options = tempDiv.querySelectorAll('option[value]:not([value=""])');
+        
+        this.hideEntityLoading();
+        
+        if (options.length === 0) {
+            this.showEntityEmpty('No cases found. Please create a case first.');
+            return;
+        }
+        
+        const entityList = document.getElementById('entity-list');
+        if (!entityList) return;
+        
+        entityList.innerHTML = '';
+        
+        // Add header to explain the two-step process
+        const header = document.createElement('div');
+        header.className = 'cases-hearing-selection-header';
+        header.innerHTML = `
+            <div style="background: #e3f2fd; padding: 12px; border-radius: 4px; margin-bottom: 16px; border-left: 4px solid #2196f3;">
+                <h6 style="margin: 0 0 4px 0; color: #1976d2;">
+                    <i class="fas fa-info-circle"></i> Hearing Document Selection
+                </h6>
+                <p style="margin: 0; font-size: 13px; color: #555;">
+                    First select a case, then choose the specific hearing for this document.
+                </p>
+            </div>
+        `;
+        entityList.appendChild(header);
+        
+        // Add cases as selectable items
+        options.forEach(option => {
+            const item = this.createCaseItemForHearing(option);
+            entityList.appendChild(item);
+        });
+    }
+    
+    createCaseItemForHearing(option) {
+        const item = document.createElement('div');
+        item.className = 'cases-entity-item cases-hearing-case-item';
+        item.dataset.value = option.value;
+        item.dataset.type = 'hearing-case';
+        
+        item.innerHTML = `
+            <div class="cases-entity-icon">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="cases-entity-details">
+                <div class="cases-entity-title">${this.escapeHtml(option.textContent)}</div>
+                <div class="cases-entity-meta">Case ID: ${option.value} → Click to view hearings</div>
+            </div>
+            <div class="cases-entity-arrow">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        `;
+        
+        return item;
+    }
+    
+    hideEntityLoading() {
+        const entityLoading = document.getElementById('entity-loading');
+        if (entityLoading) entityLoading.style.display = 'none';
+    }
+    
+    showSelectionSummary(text) {
+        const selectionSummary = document.getElementById('selection-summary');
+        const summaryText = document.getElementById('summary-text');
+        
+        if (selectionSummary) selectionSummary.style.display = 'block';
+        if (summaryText) summaryText.textContent = text;
+    }
+    
+    resetSelection() {
+        // Reset all UI states
+        document.querySelectorAll('.cases-connection-card').forEach(card => card.classList.remove('active'));
+        document.querySelectorAll('.cases-legal-option').forEach(opt => opt.classList.remove('active'));
+        document.querySelectorAll('.cases-entity-item').forEach(item => item.classList.remove('selected'));
+        
+        // Hide sections
+        const legalOptions = document.getElementById('legal-matter-options');
+        const entitySelection = document.getElementById('entity-selection');
+        const selectionSummary = document.getElementById('selection-summary');
+        
+        if (legalOptions) legalOptions.style.display = 'none';
+        if (entitySelection) entitySelection.style.display = 'none';
+        if (selectionSummary) selectionSummary.style.display = 'none';
+        
+        // Reset form data
+        this.selectedDocType = null;
+        this.selectedEntity = null;
+        
+        // Clear form fields
+        document.querySelectorAll('input[name="doc_owner_type"]').forEach(radio => radio.checked = false);
+        ['invoice_id', 'consultation_id', 'case_id', 'hearing_id'].forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if (select) select.value = '';
+        });
+        
+        this.disableNextButton(3);
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
     
     // ==========================================

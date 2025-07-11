@@ -891,4 +891,24 @@ public function quick_update($hearing_id)
     
     $this->load->view('admin/hearings/quick_update', $data);
 }
+
+/**
+ * Get hearings data for AJAX requests
+ */
+public function get_hearings_data()
+{
+    if (!has_permission('cases', '', 'view')) {
+        access_denied('cases');
+    }
+    
+    $this->db->select('h.*, c.case_title, c.case_number, cl.company as client_name');
+    $this->db->from(db_prefix() . 'hearings h');
+    $this->db->join(db_prefix() . 'cases c', 'c.id = h.case_id', 'left');
+    $this->db->join(db_prefix() . 'clients cl', 'cl.userid = c.client_id', 'left');
+    $this->db->order_by('h.date', 'DESC');
+    $hearings = $this->db->get()->result_array();
+    
+    header('Content-Type: application/json');
+    echo json_encode(['hearings' => $hearings]);
+}
 }

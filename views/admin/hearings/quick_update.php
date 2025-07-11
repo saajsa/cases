@@ -1,254 +1,226 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php 
 init_head();
-echo load_cases_css(['forms', 'buttons', 'cards']);
+echo load_cases_css(['forms', 'buttons', 'cards', 'status']);
+echo cases_page_wrapper_start(
+    'Quick Update Hearing',
+    'Update hearing status and schedule next hearing',
+    [
+        [
+            'text' => '← Back to Cases',
+            'href' => admin_url('cases'),
+            'class' => 'cases-btn'
+        ],
+        [
+            'text' => 'Back to Hearings',
+            'href' => admin_url('cases/hearings'),
+            'class' => 'cases-btn cases-btn-default'
+        ]
+    ]
+);
 ?>
-
-<div id="wrapper">
-  <div class="content">
-    <div class="row">
-      <div class="col-md-8 col-md-offset-2">
-        <div class="panel_s">
-          <div class="panel-body">
-          <div class="row">
-                <div class="col-md-7">
-                    <h4>
-                    <i class="fa fa-gavel"></i> Quick Update Hearing
-                    </h4>
-                </div>
-                <div class="col-md-5 text-right">
-                    <!-- Updated back button to go to main cases page -->
-                    <a href="<?php echo admin_url('cases'); ?>" class="btn btn-default">
-                    <i class="fa fa-arrow-left"></i> Back to Cases
-                    </a>
-                </div>
-            </div>
-            <hr>
             
-            <!-- Case Information (Read-only) -->
-            <div class="alert alert-info">
-              <div class="row">
-                <div class="col-md-6">
-                  <p class="bold">Case Information</p>
-                  <p><strong>Case Title:</strong> <?php echo $case['case_title']; ?></p>
-                  <p><strong>Case Number:</strong> <?php echo $case['case_number']; ?></p>
-                </div>
-                <div class="col-md-6">
-                  <p class="bold">Current Hearing</p>
-                  <p><strong>Hearing Date:</strong> <?php echo date('d M Y', strtotime($hearing['date'])); ?></p>
-                  <p><strong>Current Status:</strong> 
-                    <span class="label <?php echo $hearing['status'] == 'Completed' ? 'label-success' : 'label-primary'; ?>">
-                      <?php echo $hearing['status']; ?>
-                    </span>
-                  </p>
-                </div>
-              </div>
+<!-- Case Information -->
+<div class="cases-card cases-info-card cases-mb-lg">
+    <div class="cases-grid cases-grid-2">
+        <div class="cases-card-section">
+            <div class="cases-card-title cases-text-primary">
+                <i class="fas fa-briefcase"></i> Case Information
             </div>
-            
-            <!-- Quick Update Form -->
-            <form method="POST" action="<?php echo admin_url('cases/hearings/quick_update/' . $hearing['id']); ?>">
-              <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
-              
-              <!-- Form Sections -->
-              <div class="panel-group" id="quick-update-accordion">
-                <!-- Current Hearing Updates -->
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h4 class="panel-title">
-                      <a data-toggle="collapse" data-parent="#quick-update-accordion" href="#current-status-panel">
-                        <i class="fa fa-refresh"></i> Update Current Hearing Status
-                      </a>
-                    </h4>
-                  </div>
-                  <div id="current-status-panel" class="panel-collapse collapse in">
-                    <div class="panel-body">
-                      <div class="form-group">
-                        <label for="status" class="control-label">Status</label>
-                        <select name="status" id="status" class="form-control">
-                          <?php 
-                          $statuses = ['Scheduled', 'Adjourned', 'Completed', 'Cancelled'];
-                          foreach ($statuses as $status) {
-                            $selected = ($hearing['status'] == $status) ? 'selected' : '';
-                            echo '<option value="' . $status . '" ' . $selected . '>' . $status . '</option>';
-                          }
-                          ?>
-                        </select>
-                      </div>
-                      
-                      <div class="form-group">
-                        <label for="description" class="control-label">Outcome/Notes</label>
-                        <textarea name="description" id="description" class="form-control" rows="3" 
-                          placeholder="Enter the outcome or notes about this hearing"><?php echo $hearing['description']; ?></textarea>
-                      </div>
-                    </div>
-                  </div>
+            <div class="cases-card-meta-grid">
+                <div class="cases-card-meta-item">
+                    <span class="cases-card-meta-label">Case Title:</span>
+                    <span class="cases-card-meta-value"><?php echo htmlspecialchars($case['case_title']); ?></span>
                 </div>
-                
-                <!-- Next Hearing Details -->
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h4 class="panel-title">
-                      <a data-toggle="collapse" data-parent="#quick-update-accordion" href="#next-hearing-panel">
-                        <i class="fa fa-calendar-plus-o"></i> Schedule Next Hearing
-                      </a>
-                    </h4>
-                  </div>
-                  <div id="next-hearing-panel" class="panel-collapse collapse in">
-                    <div class="panel-body">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="next_date" class="control-label">Next Date</label>
-                            <div class="input-group">
-                              <input type="date" name="next_date" id="next_date" class="form-control" 
-                                value="<?php echo !empty($hearing['next_date']) ? $hearing['next_date'] : 
-                                        (!empty($upcoming_hearing['date']) ? $upcoming_hearing['date'] : ''); ?>">
-                              <div class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="next_time" class="control-label">Next Time</label>
-                            <div class="input-group">
-                              <input type="time" name="next_time" id="next_time" class="form-control" 
-                                value="<?php echo !empty($upcoming_hearing['time']) ? $upcoming_hearing['time'] : '10:00'; ?>">
-                              <div class="input-group-addon">
-                                <i class="fa fa-clock-o"></i>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div class="form-group">
-                        <label for="upcoming_purpose" class="control-label">
-                          <i class="fa fa-gavel"></i> Purpose of Next Hearing
-                        </label>
-                        <div class="input-group">
-                          <input type="text" name="upcoming_purpose" id="upcoming_purpose" class="form-control" 
-                            value="<?php echo isset($upcoming_hearing['hearing_purpose']) ? $upcoming_hearing['hearing_purpose'] : ''; ?>" 
-                            placeholder="e.g., Arguments, Evidence, Witness Examination"
-                            list="hearing-purposes">
-                          <div class="input-group-addon">
-                            <i class="fa fa-list"></i>
-                          </div>
-                        </div>
-                        <datalist id="hearing-purposes">
-                          <option value="Arguments">
-                          <option value="Evidence Submission">
-                          <option value="Witness Examination">
-                          <option value="Cross Examination">
-                          <option value="Final Arguments">
-                          <option value="Judgment">
-                          <option value="Interim Application">
-                          <option value="Status Report">
-                          <option value="Settlement Discussion">
-                          <option value="Compliance Review">
-                        </datalist>
-                        <small class="text-muted">
-                          <i class="fa fa-info-circle"></i> This will be shown on the cause list for the next date
-                        </small>
-                      </div>
-                      
-                      <!-- Additional Options -->
-                      <div class="row">
-                        <div class="col-md-12">
-                          <div class="checkbox">
-                            <label>
-                              <input type="checkbox" id="send_notification" name="send_notification" value="1">
-                              <i class="fa fa-bell-o"></i> Send notification reminder 24 hours before the hearing
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Replace the form actions buttons section in the quick_update.php view -->
-
-            <div class="form-group" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                <button type="submit" class="btn btn-primary btn-lg" style="padding: 12px 30px; font-weight: 600;">
-                <i class="fa fa-check"></i> Update and Schedule Next
-                </button>
-                <!-- Cancel link to go back to cases page -->
-                <a href="<?php echo admin_url('cases'); ?>" class="btn btn-default btn-lg" style="margin-left: 10px; padding: 12px 30px;">
-                <i class="fa fa-times"></i> Cancel
-                </a>
-                
-                <!-- Additional help text -->
-                <div style="margin-top: 15px; color: #777; font-size: 13px;">
-                    <i class="fa fa-info-circle"></i> 
-                    <strong>Note:</strong> This will update the current hearing status and create a new hearing entry if you specify a next date.
+                <div class="cases-card-meta-item">
+                    <span class="cases-card-meta-label">Case Number:</span>
+                    <span class="cases-card-meta-value"><?php echo htmlspecialchars($case['case_number']); ?></span>
                 </div>
             </div>
-            </form>
-          </div>
         </div>
-      </div>
+        <div class="cases-card-section">
+            <div class="cases-card-title cases-text-info">
+                <i class="fas fa-calendar-alt"></i> Current Hearing
+            </div>
+            <div class="cases-card-meta-grid">
+                <div class="cases-card-meta-item">
+                    <span class="cases-card-meta-label">Hearing Date:</span>
+                    <span class="cases-card-meta-value"><?php echo date('d M Y', strtotime($hearing['date'])); ?></span>
+                </div>
+                <div class="cases-card-meta-item">
+                    <span class="cases-card-meta-label">Current Status:</span>
+                    <span class="cases-status-badge cases-status-<?php echo strtolower($hearing['status']); ?>">
+                        <?php echo $hearing['status']; ?>
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
-<?php init_tail(); ?>
+            
+<!-- Quick Update Form -->
+<?php echo cases_section_start('Quick Update Form'); ?>
+<form method="POST" action="<?php echo admin_url('cases/hearings/quick_update/' . $hearing['id']); ?>" id="quick-update-form">
+    <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
+    
+    <!-- Current Hearing Status -->
+    <div class="cases-card cases-mb-lg">
+        <div class="cases-card-header">
+            <h3 class="cases-card-title">
+                <i class="fas fa-sync-alt"></i> Update Current Hearing Status
+            </h3>
+        </div>
+        <div class="cases-card-body">
+            <div class="cases-form-group">
+                <label class="cases-form-label cases-label-required">Status</label>
+                <select name="status" id="status" class="cases-form-select" required>
+                    <?php 
+                    $statuses = ['Scheduled', 'Adjourned', 'Completed', 'Cancelled'];
+                    foreach ($statuses as $status) {
+                        $selected = ($hearing['status'] == $status) ? 'selected' : '';
+                        echo '<option value="' . $status . '" ' . $selected . '>' . $status . '</option>';
+                    }
+                    ?>
+                </select>
+                <div class="cases-form-help">Update the current status of this hearing</div>
+            </div>
+            
+            <div class="cases-form-group">
+                <label class="cases-form-label">Outcome/Notes</label>
+                <textarea name="description" id="description" class="cases-form-control cases-textarea" rows="3" 
+                    placeholder="Enter the outcome or notes about this hearing"><?php echo htmlspecialchars($hearing['description']); ?></textarea>
+                <div class="cases-form-help">Document what happened during this hearing</div>
+            </div>
+        </div>
+    </div>
+                
+    <!-- Next Hearing Details -->
+    <div class="cases-card cases-mb-lg">
+        <div class="cases-card-header">
+            <h3 class="cases-card-title">
+                <i class="fas fa-calendar-plus"></i> Schedule Next Hearing
+            </h3>
+        </div>
+        <div class="cases-card-body">
+            <div class="cases-form-grid cases-form-grid-2">
+                <div class="cases-form-group">
+                    <label class="cases-form-label">Next Date</label>
+                    <input type="date" name="next_date" id="next_date" class="cases-form-control" 
+                        value="<?php echo !empty($hearing['next_date']) ? $hearing['next_date'] : 
+                                (!empty($upcoming_hearing['date']) ? $upcoming_hearing['date'] : ''); ?>">
+                    <div class="cases-form-help">Select the date for the next hearing</div>
+                </div>
+                <div class="cases-form-group">
+                    <label class="cases-form-label">Next Time</label>
+                    <input type="time" name="next_time" id="next_time" class="cases-form-control" 
+                        value="<?php echo !empty($upcoming_hearing['time']) ? $upcoming_hearing['time'] : '10:00'; ?>">
+                    <div class="cases-form-help">Set the scheduled time</div>
+                </div>
+            </div>
+            
+            <div class="cases-form-group">
+                <label class="cases-form-label">Purpose of Next Hearing</label>
+                <select name="upcoming_purpose" id="upcoming_purpose" class="cases-form-select">
+                    <option value="">Select purpose or enter custom</option>
+                    <option value="Arguments" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Arguments') ? 'selected' : ''; ?>>Arguments</option>
+                    <option value="Evidence Submission" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Evidence Submission') ? 'selected' : ''; ?>>Evidence Submission</option>
+                    <option value="Witness Examination" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Witness Examination') ? 'selected' : ''; ?>>Witness Examination</option>
+                    <option value="Cross Examination" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Cross Examination') ? 'selected' : ''; ?>>Cross Examination</option>
+                    <option value="Final Arguments" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Final Arguments') ? 'selected' : ''; ?>>Final Arguments</option>
+                    <option value="Judgment" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Judgment') ? 'selected' : ''; ?>>Judgment</option>
+                    <option value="Interim Application" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Interim Application') ? 'selected' : ''; ?>>Interim Application</option>
+                    <option value="Status Report" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Status Report') ? 'selected' : ''; ?>>Status Report</option>
+                    <option value="Settlement Discussion" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Settlement Discussion') ? 'selected' : ''; ?>>Settlement Discussion</option>
+                    <option value="Compliance Review" <?php echo (isset($upcoming_hearing['hearing_purpose']) && $upcoming_hearing['hearing_purpose'] == 'Compliance Review') ? 'selected' : ''; ?>>Compliance Review</option>
+                </select>
+                <input type="text" name="custom_purpose" id="custom_purpose" class="cases-form-control" 
+                    style="margin-top: 10px; display: none;" placeholder="Enter custom purpose">
+                <div class="cases-form-help">This will be shown on the cause list for the next date</div>
+            </div>
+            
+            <div class="cases-form-group">
+                <label class="cases-form-checkbox">
+                    <input type="checkbox" id="send_notification" name="send_notification" value="1">
+                    <span class="cases-form-checkbox-label">
+                        <i class="fas fa-bell"></i> Send notification reminder 24 hours before the hearing
+                    </span>
+                </label>
+            </div>
+        </div>
+    </div>
+              
+    <!-- Form Actions -->
+    <div class="cases-form-actions">
+        <button type="submit" class="cases-btn cases-btn-primary cases-btn-lg" id="submit-btn">
+            <i class="fas fa-check"></i> Update and Schedule Next
+        </button>
+        <a href="<?php echo admin_url('cases'); ?>" class="cases-btn cases-btn-default cases-btn-lg">
+            <i class="fas fa-times"></i> Cancel
+        </a>
+    </div>
+    
+    <!-- Help Text -->
+    <div class="cases-info-box cases-mt-md">
+        <div class="cases-info-box-content">
+            <i class="fas fa-info-circle cases-text-info"></i>
+            <strong>Note:</strong> This will update the current hearing status and create a new hearing entry if you specify a next date.
+        </div>
+    </div>
+</form>
+<?php echo cases_section_end(); ?>
+<?php echo cases_page_wrapper_end(); ?>
 
 <script>
-$(document).ready(function() {
-  // Simple date validation
-  $('#next_date').on('change', function() {
-    var currentDate = new Date('<?php echo $hearing['date']; ?>');
-    var nextDate = new Date($(this).val());
+document.addEventListener('DOMContentLoaded', function() {
+    // Purpose dropdown handler
+    document.getElementById('upcoming_purpose').addEventListener('change', function() {
+        const customInput = document.getElementById('custom_purpose');
+        if (this.value === '') {
+            customInput.style.display = 'block';
+            customInput.required = true;
+        } else {
+            customInput.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+        }
+    });
     
-    if (nextDate <= currentDate) {
-      alert('Next hearing date must be after the current hearing date');
-      $(this).val('');
+    // Date validation
+    document.getElementById('next_date').addEventListener('change', function() {
+        const currentDate = new Date('<?php echo $hearing['date']; ?>');
+        const nextDate = new Date(this.value);
+        
+        if (nextDate <= currentDate) {
+            alert('Next hearing date must be after the current hearing date');
+            this.value = '';
+        }
+    });
+    
+    // Form validation
+    document.getElementById('quick-update-form').addEventListener('submit', function(e) {
+        const nextDate = document.getElementById('next_date').value;
+        const nextTime = document.getElementById('next_time').value;
+        
+        // Basic validation
+        if (nextDate && !nextTime) {
+            e.preventDefault();
+            alert('Please select a time for the next hearing');
+            document.getElementById('next_time').focus();
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        submitBtn.disabled = true;
+    });
+    
+    // Set default time if empty
+    const timeInput = document.getElementById('next_time');
+    if (!timeInput.value) {
+        timeInput.value = '10:00';
     }
-  });
-  
-  // Simple form validation
-  $('form').on('submit', function(e) {
-    var nextDate = $('#next_date').val();
-    var nextTime = $('#next_time').val();
-    
-    // Basic validation
-    if (nextDate && !nextTime) {
-      e.preventDefault();
-      alert('Please select a time for the next hearing');
-      $('#next_time').focus();
-      return false;
-    }
-    
-    // Show loading state
-    $(this).find('button[type="submit"]').html('<i class="fa fa-spinner fa-spin"></i> Updating...').prop('disabled', true);
-  });
-  
-  // Set default time if empty
-  if (!$('#next_time').val()) {
-    $('#next_time').val('10:00');
-  }
 });
 </script>
 
-<style>
-.form-group {
-  margin-bottom: 20px;
-}
-
-.control-label {
-  font-weight: 600;
-  color: #333;
-}
-
-.text-muted {
-  color: #777;
-  font-size: 12px;
-}
-
-.panel-body {
-  padding: 20px;
-}
-</style>
+<?php init_tail(); ?>

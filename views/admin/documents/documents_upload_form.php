@@ -138,98 +138,183 @@ echo cases_page_wrapper_start(
     <div class="cases-upload-content" data-step="3">
         <div class="cases-upload-step-header">
             <h3><i class="fas fa-link"></i> Link Document</h3>
-            <p>Choose what this document relates to</p>
+            <p>Connect this document to the relevant case, consultation, or invoice</p>
         </div>
 
-        <!-- Quick Actions for Common Scenarios -->
-        <div class="cases-quick-actions">
-            <button type="button" class="cases-quick-action" data-type="general">
-                <i class="fas fa-folder"></i>
-                <span>General Client Document</span>
-                <small>Not related to any specific case or invoice</small>
-            </button>
-            <button type="button" class="cases-quick-action" data-type="case">
-                <i class="fas fa-gavel"></i>
-                <span>Litigation</span>
-                <small>Associate with legal case or hearing</small>
-            </button>
-            <button type="button" class="cases-quick-action" data-type="invoice">
-                <i class="fas fa-file-invoice"></i>
-                <span>Link to Invoice</span>
-                <small>Billing or payment related document</small>
-            </button>
-            <button type="button" class="cases-quick-action" data-type="consultation">
-                <i class="fas fa-comments"></i>
-                <span>Consultation</span>
-                <small>Client consultation document</small>
-            </button>
-        </div>
+        <!-- Document Linking Interface -->
+        <div class="cases-document-linking">
+            
+            <!-- Connection Type Selection -->
+            <div class="cases-connection-types" id="connection-types">
+                <div class="cases-connection-grid">
+                    
+                    <!-- General Document Option -->
+                    <div class="cases-connection-card" data-type="customer" data-category="general" role="button" tabindex="0">
+                        <div class="cases-connection-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="cases-connection-content">
+                            <h4 class="cases-connection-title">General Document</h4>
+                            <p class="cases-connection-description">Client document not linked to specific matter</p>
+                            <div class="cases-connection-badge">
+                                <i class="fas fa-check"></i> Quick Save
+                            </div>
+                        </div>
+                        <input type="radio" name="doc_owner_type" value="customer" class="cases-connection-radio">
+                    </div>
 
-        <!-- Document Type Selection (Hidden initially) -->
-        <div class="cases-document-types" id="document-types" style="display:none;">
-            <label class="cases-form-label">What type of document is this?</label>
-            <div class="cases-doc-type-grid">
-                <div class="cases-doc-type-option" data-type="invoice">
-                    <div class="cases-doc-type-icon"><i class="fas fa-file-invoice"></i></div>
-                    <label class="cases-doc-type-label"><?php echo _l('invoice'); ?></label>
-                    <input type="radio" name="doc_owner_type" value="invoice">
-                </div>
-                <div class="cases-doc-type-option" data-type="customer">
-                    <div class="cases-doc-type-icon"><i class="fas fa-building"></i></div>
-                    <label class="cases-doc-type-label"><?php echo _l('customer'); ?></label>
-                    <input type="radio" name="doc_owner_type" value="customer">
-                </div>
-                <div class="cases-doc-type-option" data-type="consultation">
-                    <div class="cases-doc-type-icon"><i class="fas fa-comments"></i></div>
-                    <label class="cases-doc-type-label"><?php echo _l('consultation'); ?></label>
-                    <input type="radio" name="doc_owner_type" value="consultation">
-                </div>
-                <div class="cases-doc-type-option" data-type="case">
-                    <div class="cases-doc-type-icon"><i class="fas fa-briefcase"></i></div>
-                    <label class="cases-doc-type-label"><?php echo _l('case'); ?></label>
-                    <input type="radio" name="doc_owner_type" value="case">
-                </div>
-                <div class="cases-doc-type-option" data-type="hearing">
-                    <div class="cases-doc-type-icon"><i class="fas fa-gavel"></i></div>
-                    <label class="cases-doc-type-label"><?php echo _l('hearing'); ?></label>
-                    <input type="radio" name="doc_owner_type" value="hearing">
+                    <!-- Legal Matter Option -->
+                    <div class="cases-connection-card" data-type="case" data-category="legal" role="button" tabindex="0">
+                        <div class="cases-connection-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="cases-connection-content">
+                            <h4 class="cases-connection-title">Legal Matter</h4>
+                            <p class="cases-connection-description">Associate with case, hearing, or legal proceeding</p>
+                            <div class="cases-connection-badge">
+                                <i class="fas fa-layer-group"></i> Multi-level
+                            </div>
+                        </div>
+                        <input type="radio" name="doc_owner_type" value="case" class="cases-connection-radio">
+                    </div>
+
+                    <!-- Business Document Option -->
+                    <div class="cases-connection-card" data-type="invoice" data-category="business" role="button" tabindex="0">
+                        <div class="cases-connection-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <div class="cases-connection-content">
+                            <h4 class="cases-connection-title">Business Document</h4>
+                            <p class="cases-connection-description">Invoice, contract, or business correspondence</p>
+                            <div class="cases-connection-badge">
+                                <i class="fas fa-dollar-sign"></i> Financial
+                            </div>
+                        </div>
+                        <input type="radio" name="doc_owner_type" value="invoice" class="cases-connection-radio">
+                    </div>
+
+                    <!-- Consultation Option -->
+                    <div class="cases-connection-card" data-type="consultation" data-category="consultation" role="button" tabindex="0">
+                        <div class="cases-connection-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="cases-connection-content">
+                            <h4 class="cases-connection-title">Consultation</h4>
+                            <p class="cases-connection-description">Initial meeting or consultation notes</p>
+                            <div class="cases-connection-badge">
+                                <i class="fas fa-comments"></i> Advisory
+                            </div>
+                        </div>
+                        <input type="radio" name="doc_owner_type" value="consultation" class="cases-connection-radio">
+                    </div>
+                    
                 </div>
             </div>
-        </div>
 
-        <!-- Related Entity Selection -->
-        <div class="cases-related-entities" id="related-entities" style="display:none;">
-            <!-- Invoice -->
-            <div class="cases-form-group entity-select" id="invoice_div" style="display:none;">
-                <label class="cases-form-label"><?php echo _l('select_invoice'); ?></label>
-                <select name="invoice_id" id="invoice_id" class="cases-form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_invoice'); ?></option>
-                </select>
+            <!-- Progressive Disclosure for Legal Matter -->
+            <div class="cases-legal-matter-options" id="legal-matter-options" style="display: none;">
+                <div class="cases-section-divider">
+                    <span class="cases-divider-text">Select Legal Matter Type</span>
+                </div>
+                
+                <div class="cases-legal-grid">
+                    <div class="cases-legal-option" data-subtype="case">
+                        <div class="cases-legal-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="cases-legal-content">
+                            <h5>Case Document</h5>
+                            <p>General case file or evidence</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cases-legal-option" data-subtype="hearing">
+                        <div class="cases-legal-icon">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <div class="cases-legal-content">
+                            <h5>Hearing Document</h5>
+                            <p>Specific to court hearing</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Consultation -->
-            <div class="cases-form-group entity-select" id="consultation_div" style="display:none;">
-                <label class="cases-form-label"><?php echo _l('select_consultation'); ?></label>
-                <select name="consultation_id" id="consultation_id" class="cases-form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_consultation'); ?></option>
-                </select>
+            <!-- Entity Selection Interface -->
+            <div class="cases-entity-selection" id="entity-selection" style="display: none;">
+                <div class="cases-section-divider">
+                    <span class="cases-divider-text">Choose Specific Item</span>
+                </div>
+
+                <!-- Search and Filter Controls -->
+                <div class="cases-search-controls">
+                    <div class="cases-search-input-wrapper">
+                        <i class="fas fa-search cases-search-icon"></i>
+                        <input type="text" id="entity-search" class="cases-search-input" placeholder="Search...">
+                    </div>
+                    <div class="cases-filter-controls">
+                        <button type="button" class="cases-filter-btn" id="recent-filter">
+                            <i class="fas fa-clock"></i> Recent
+                        </button>
+                        <button type="button" class="cases-filter-btn" id="active-filter">
+                            <i class="fas fa-bolt"></i> Active
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Entity List Container -->
+                <div class="cases-entity-list-container">
+                    <div class="cases-entity-list" id="entity-list">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div class="cases-loading-state" id="entity-loading" style="display: none;">
+                        <div class="cases-loading-spinner"></div>
+                        <p>Loading items...</p>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div class="cases-empty-state" id="entity-empty" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <h5>No items found</h5>
+                        <p>Try adjusting your search or create a new item</p>
+                    </div>
+                </div>
+
+                <!-- Hidden form inputs for SelectPicker compatibility -->
+                <div style="display: none;">
+                    <select name="invoice_id" id="invoice_id" class="cases-form-control selectpicker" data-live-search="true">
+                        <option value="">Select Invoice</option>
+                    </select>
+                    <select name="consultation_id" id="consultation_id" class="cases-form-control selectpicker" data-live-search="true">
+                        <option value="">Select Consultation</option>
+                    </select>
+                    <select name="case_id" id="case_id" class="cases-form-control selectpicker" data-live-search="true">
+                        <option value="">Select Case</option>
+                    </select>
+                    <select name="hearing_id" id="hearing_id" class="cases-form-control selectpicker" data-live-search="true">
+                        <option value="">Select Hearing</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Case -->
-            <div class="cases-form-group entity-select" id="case_div" style="display:none;">
-                <label class="cases-form-label"><?php echo _l('select_case'); ?></label>
-                <select name="case_id" id="case_id" class="cases-form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_case'); ?></option>
-                </select>
+            <!-- Selection Summary -->
+            <div class="cases-selection-summary" id="selection-summary" style="display: none;">
+                <div class="cases-summary-card">
+                    <div class="cases-summary-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div class="cases-summary-content">
+                        <h5>Document will be linked to:</h5>
+                        <p id="summary-text">No selection made</p>
+                    </div>
+                    <button type="button" class="cases-summary-change" id="change-selection">
+                        <i class="fas fa-edit"></i> Change
+                    </button>
+                </div>
             </div>
 
-            <!-- Hearing -->
-            <div class="cases-form-group entity-select" id="hearing_div" style="display:none;">
-                <label class="cases-form-label"><?php echo _l('select_hearing'); ?></label>
-                <select name="hearing_id" id="hearing_id" class="cases-form-control selectpicker" data-live-search="true">
-                    <option value=""><?php echo _l('select_hearing'); ?></option>
-                </select>
-            </div>
         </div>
 
         <div class="cases-upload-actions">
@@ -308,10 +393,79 @@ echo cases_page_wrapper_start(
 <?php echo cases_section_end(); ?>
 <?php echo cases_page_wrapper_end(); ?>
 
+<!-- Additional CSS for connection cards -->
+<style>
+.cases-connection-card {
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.cases-connection-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-color: #007bff;
+}
+
+.cases-connection-card.active {
+    border-color: #28a745;
+    background-color: #f8f9fa;
+}
+
+.cases-connection-card:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.cases-connection-radio {
+    pointer-events: none;
+}
+
+/* Hearing selection styles */
+.cases-hearing-case-item {
+    border-left: 3px solid #2196f3;
+}
+
+.cases-hearing-case-item:hover {
+    background-color: #f3f9ff;
+}
+
+.cases-entity-arrow {
+    color: #666;
+    margin-left: auto;
+}
+
+.cases-fallback-option {
+    border-left: 3px solid #ff9800;
+    background-color: #fff8e1;
+}
+
+.cases-btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cases-btn-sm:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+}
+</style>
+
 <!-- Load the modular document upload wizard -->
 <script src="<?php echo base_url('modules/cases/assets/js/document-upload-wizard.js'); ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing wizard...');
+    
     // Initialize the document upload wizard
     const wizard = new DocumentUploadWizard({
         csrfName: '<?php echo $this->security->get_csrf_token_name(); ?>',
@@ -319,6 +473,8 @@ document.addEventListener('DOMContentLoaded', function() {
         adminUrl: '<?php echo admin_url(); ?>',
         clients: <?php echo json_encode($customers); ?>
     });
+    
+    console.log('Wizard initialized:', wizard);
 });
 </script>
 

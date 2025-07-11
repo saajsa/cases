@@ -338,11 +338,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load hearings
     function loadHearings() {
-        // Get hearings data from PHP - we'll use the existing data
-        const hearingsFromPHP = <?php echo json_encode(isset($hearings) ? $hearings : []); ?>;
-        hearingsData = hearingsFromPHP;
-        renderHearings();
-        updateStats();
+        // Show loading states
+        document.getElementById('upcoming-container').innerHTML = '<?php echo cases_loading_state("Loading upcoming hearings..."); ?>';
+        document.getElementById('past-container').innerHTML = '<?php echo cases_loading_state("Loading past hearings..."); ?>';
+        document.getElementById('all-container').innerHTML = '<?php echo cases_loading_state("Loading all hearings..."); ?>';
+        
+        // Fetch fresh hearings data
+        fetch(admin_url + 'cases/hearings/get_hearings_data')
+            .then(response => response.json())
+            .then(data => {
+                hearingsData = data.hearings || [];
+                renderHearings();
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Error loading hearings:', error);
+                // Fallback to static data if AJAX fails
+                const hearingsFromPHP = <?php echo json_encode(isset($hearings) ? $hearings : []); ?>;
+                hearingsData = hearingsFromPHP;
+                renderHearings();
+                updateStats();
+            });
     }
     
     function renderHearings() {
@@ -406,6 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ` : ''}
                             <a href="${admin_url}cases/hearings/edit/${hearing.id}" class="cases-action-btn cases-btn-primary">Edit</a>
                             <a href="${admin_url}cases/details?id=${hearing.case_id}" class="cases-action-btn cases-btn-default">View Case</a>
+                            <a href="javascript:void(0)" class="cases-action-btn cases-btn-danger" onclick="confirmHearingDelete(${hearing.id}, '${htmlEscape(hearing.case_title || 'Case #' + hearing.case_id)}')">Delete</a>
                         </div>
                     </td>
                 </tr>
@@ -479,6 +496,43 @@ document.addEventListener('DOMContentLoaded', function() {
     function showError(message) {
         console.error(message);
     }
+    
+    // Delete confirmation function
+    function confirmHearingDelete(hearingId, caseTitle) {
+        if (confirm(`Are you sure you want to delete this hearing for "${caseTitle}"?\n\nThis action cannot be undone and will remove all associated data.`)) {
+            // Show loading state
+            const deleteBtn = event.target;
+            const originalText = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            deleteBtn.classList.add('disabled');
+            
+            // Make delete request
+            fetch(`${admin_url}cases/hearings/delete/${hearingId}`, {
+                method: 'GET',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Refresh the hearings data
+                    loadHearings();
+                    alert('Hearing deleted successfully!');
+                } else {
+                    throw new Error('Failed to delete hearing');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete hearing. Please try again.');
+                
+                // Restore button state
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.classList.remove('disabled');
+            });
+        }
+    }
+    
+    // Make function globally accessible
+    window.confirmHearingDelete = confirmHearingDelete;
     
     // Form submission
     document.getElementById('hearingForm').addEventListener('submit', function(e) {

@@ -9,6 +9,12 @@
     border-radius: var(--cases-radius);
     box-shadow: var(--cases-shadow-sm);
     overflow: hidden;
+    position: relative;
+}
+
+/* Allow overflow for dropdown content step */
+.cases-upload-wizard.has-dropdowns {
+    overflow: visible;
 }
 
 /* Wizard Steps Navigation */
@@ -95,6 +101,8 @@
     opacity: 0;
     transform: translateX(30px);
     transition: opacity 0.3s ease, transform 0.3s ease;
+    position: relative;
+    overflow: visible;
 }
 
 .cases-upload-content.active {
@@ -1127,5 +1135,638 @@
     .cases-loading-spinner {
         animation: none;
         border-top-color: var(--cases-primary);
+    }
+}
+
+/* ========================================
+   SELECTPICKER DROPDOWN SUPPORT
+======================================== */
+
+/* Ensure SelectPicker containers have proper positioning */
+.cases-related-entities .cases-form-group {
+    position: relative;
+    z-index: 1;
+}
+
+/* SelectPicker dropdown menu positioning */
+.cases-related-entities .bootstrap-select .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    border-top: none;
+    border-bottom-left-radius: var(--cases-radius);
+    border-bottom-right-radius: var(--cases-radius);
+    z-index: 1000 !important;
+    max-height: 300px !important;
+    overflow: visible !important;
+    box-shadow: var(--cases-shadow-md);
+}
+
+/* Override SelectPicker's inline overflow styles */
+.cases-related-entities .bootstrap-select .dropdown-menu.open {
+    overflow: visible !important;
+    max-height: 300px !important;
+}
+
+/* Inner dropdown content */
+.cases-related-entities .bootstrap-select .dropdown-menu .inner {
+    max-height: 250px !important;
+    overflow-y: auto !important;
+}
+
+/* Ensure dropdown appears above wizard content */
+.cases-related-entities .bootstrap-select.open {
+    z-index: 1001 !important;
+}
+
+/* Force dropdown visibility and positioning */
+.cases-related-entities .bootstrap-select .dropdown-menu {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* Hide dropdown when not open */
+.cases-related-entities .bootstrap-select:not(.open) .dropdown-menu {
+    display: none !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .cases-related-entities .bootstrap-select .dropdown-menu {
+        max-height: 200px !important;
+    }
+    
+    .cases-related-entities .bootstrap-select .dropdown-menu .inner {
+        max-height: 150px !important;
+    }
+}
+
+/* ========================================
+   REDESIGNED DOCUMENT LINKING INTERFACE
+======================================== */
+
+/* Main document linking container */
+.cases-document-linking {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Connection Type Cards Grid */
+.cases-connection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--cases-spacing-lg);
+    margin-bottom: var(--cases-spacing-xl);
+}
+
+/* Individual Connection Cards */
+.cases-connection-card {
+    position: relative;
+    background: var(--cases-bg-primary);
+    border: 2px solid var(--cases-border);
+    border-radius: var(--cases-radius);
+    padding: var(--cases-spacing-lg);
+    cursor: pointer;
+    transition: var(--cases-transition);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.cases-connection-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: transparent;
+    transition: var(--cases-transition);
+}
+
+.cases-connection-card[data-category="general"]::before { background: var(--cases-info); }
+.cases-connection-card[data-category="legal"]::before { background: var(--cases-primary); }
+.cases-connection-card[data-category="business"]::before { background: var(--cases-success); }
+.cases-connection-card[data-category="consultation"]::before { background: var(--cases-warning); }
+
+.cases-connection-card:hover {
+    border-color: var(--cases-primary);
+    background: var(--cases-bg-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--cases-shadow-lg);
+}
+
+.cases-connection-card.active {
+    border-color: var(--cases-primary);
+    background: var(--cases-primary-bg);
+    box-shadow: var(--cases-shadow-md);
+}
+
+.cases-connection-card.active::before {
+    background: var(--cases-primary) !important;
+    height: 6px;
+}
+
+/* Connection Card Icon */
+.cases-connection-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--cases-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--cases-spacing-md);
+    transition: var(--cases-transition);
+}
+
+.cases-connection-icon i {
+    font-size: 1.5rem;
+    color: var(--cases-text-light);
+    transition: var(--cases-transition);
+}
+
+.cases-connection-card:hover .cases-connection-icon {
+    background: var(--cases-primary-bg);
+}
+
+.cases-connection-card:hover .cases-connection-icon i {
+    color: var(--cases-primary);
+}
+
+.cases-connection-card.active .cases-connection-icon {
+    background: var(--cases-primary);
+}
+
+.cases-connection-card.active .cases-connection-icon i {
+    color: white;
+}
+
+/* Connection Card Content */
+.cases-connection-content {
+    flex: 1;
+}
+
+.cases-connection-title {
+    font-size: var(--cases-font-size-lg);
+    font-weight: 600;
+    color: var(--cases-text);
+    margin: 0 0 var(--cases-spacing-xs) 0;
+    transition: var(--cases-transition);
+}
+
+.cases-connection-description {
+    color: var(--cases-text-light);
+    margin: 0 0 var(--cases-spacing-md) 0;
+    line-height: 1.4;
+}
+
+.cases-connection-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cases-spacing-xs);
+    padding: 4px 8px;
+    background: var(--cases-bg-secondary);
+    border: 1px solid var(--cases-border);
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-xs);
+    font-weight: 500;
+    color: var(--cases-text-light);
+    transition: var(--cases-transition);
+}
+
+.cases-connection-card:hover .cases-connection-badge {
+    background: var(--cases-primary-bg);
+    border-color: var(--cases-primary);
+    color: var(--cases-primary);
+}
+
+.cases-connection-card.active .cases-connection-badge {
+    background: var(--cases-primary);
+    border-color: var(--cases-primary);
+    color: white;
+}
+
+/* Hidden radio inputs */
+.cases-connection-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Section Divider */
+.cases-section-divider {
+    position: relative;
+    text-align: center;
+    margin: var(--cases-spacing-xl) 0 var(--cases-spacing-lg) 0;
+}
+
+.cases-section-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--cases-border);
+    z-index: 1;
+}
+
+.cases-divider-text {
+    display: inline-block;
+    padding: 0 var(--cases-spacing-lg);
+    background: var(--cases-bg-primary);
+    color: var(--cases-text-light);
+    font-weight: 500;
+    font-size: var(--cases-font-size-sm);
+    position: relative;
+    z-index: 2;
+}
+
+/* Legal Matter Options */
+.cases-legal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--cases-spacing-md);
+    margin-bottom: var(--cases-spacing-lg);
+}
+
+.cases-legal-option {
+    background: var(--cases-bg-primary);
+    border: 2px solid var(--cases-border);
+    border-radius: var(--cases-radius);
+    padding: var(--cases-spacing-lg);
+    cursor: pointer;
+    transition: var(--cases-transition);
+    text-align: center;
+}
+
+.cases-legal-option:hover {
+    border-color: var(--cases-primary);
+    background: var(--cases-bg-hover);
+    transform: translateY(-1px);
+}
+
+.cases-legal-option.active {
+    border-color: var(--cases-primary);
+    background: var(--cases-primary-bg);
+}
+
+.cases-legal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--cases-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--cases-spacing-sm) auto;
+    transition: var(--cases-transition);
+}
+
+.cases-legal-icon i {
+    font-size: 1.25rem;
+    color: var(--cases-text-light);
+    transition: var(--cases-transition);
+}
+
+.cases-legal-option:hover .cases-legal-icon {
+    background: var(--cases-primary-bg);
+}
+
+.cases-legal-option:hover .cases-legal-icon i {
+    color: var(--cases-primary);
+}
+
+.cases-legal-option.active .cases-legal-icon {
+    background: var(--cases-primary);
+}
+
+.cases-legal-option.active .cases-legal-icon i {
+    color: white;
+}
+
+.cases-legal-content h5 {
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    color: var(--cases-text);
+}
+
+.cases-legal-content p {
+    margin: 0;
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-light);
+}
+
+/* Search Controls */
+.cases-search-controls {
+    display: flex;
+    gap: var(--cases-spacing-md);
+    margin-bottom: var(--cases-spacing-lg);
+    align-items: center;
+}
+
+.cases-search-input-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.cases-search-icon {
+    position: absolute;
+    left: var(--cases-spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--cases-text-light);
+    z-index: 2;
+}
+
+.cases-search-input {
+    width: 100%;
+    padding: var(--cases-spacing-sm) var(--cases-spacing-md) var(--cases-spacing-sm) 40px;
+    border: 1px solid var(--cases-border);
+    border-radius: var(--cases-radius);
+    font-size: var(--cases-font-size-base);
+    background: var(--cases-bg-primary);
+    color: var(--cases-text);
+    transition: var(--cases-transition);
+}
+
+.cases-search-input:focus {
+    outline: none;
+    border-color: var(--cases-primary);
+    box-shadow: 0 0 0 2px var(--cases-primary-bg);
+}
+
+.cases-filter-controls {
+    display: flex;
+    gap: var(--cases-spacing-xs);
+}
+
+.cases-filter-btn {
+    padding: var(--cases-spacing-sm) var(--cases-spacing-md);
+    border: 1px solid var(--cases-border);
+    border-radius: var(--cases-radius);
+    background: var(--cases-bg-primary);
+    color: var(--cases-text-light);
+    font-size: var(--cases-font-size-sm);
+    cursor: pointer;
+    transition: var(--cases-transition);
+    display: flex;
+    align-items: center;
+    gap: var(--cases-spacing-xs);
+}
+
+.cases-filter-btn:hover {
+    border-color: var(--cases-primary);
+    color: var(--cases-primary);
+}
+
+.cases-filter-btn.active {
+    background: var(--cases-primary);
+    border-color: var(--cases-primary);
+    color: white;
+}
+
+/* Entity List Container */
+.cases-entity-list-container {
+    background: var(--cases-bg-primary);
+    border: 1px solid var(--cases-border);
+    border-radius: var(--cases-radius);
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.cases-entity-list {
+    padding: var(--cases-spacing-sm);
+}
+
+.cases-entity-item {
+    display: flex;
+    align-items: center;
+    padding: var(--cases-spacing-md);
+    border: 1px solid transparent;
+    border-radius: var(--cases-radius);
+    cursor: pointer;
+    transition: var(--cases-transition);
+    margin-bottom: var(--cases-spacing-xs);
+}
+
+.cases-entity-item:hover {
+    background: var(--cases-bg-hover);
+    border-color: var(--cases-border);
+}
+
+.cases-entity-item.selected {
+    background: var(--cases-primary-bg);
+    border-color: var(--cases-primary);
+    color: var(--cases-primary);
+}
+
+.cases-entity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--cases-radius);
+    background: var(--cases-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--cases-spacing-md);
+    flex-shrink: 0;
+}
+
+.cases-entity-icon i {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-light);
+}
+
+.cases-entity-item.selected .cases-entity-icon {
+    background: var(--cases-primary);
+}
+
+.cases-entity-item.selected .cases-entity-icon i {
+    color: white;
+}
+
+.cases-entity-details {
+    flex: 1;
+}
+
+.cases-entity-title {
+    font-weight: 600;
+    color: var(--cases-text);
+    margin: 0 0 2px 0;
+    font-size: var(--cases-font-size-base);
+}
+
+.cases-entity-meta {
+    font-size: var(--cases-font-size-sm);
+    color: var(--cases-text-light);
+    margin: 0;
+}
+
+/* Loading and Empty States */
+.cases-loading-state,
+.cases-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--cases-spacing-xl);
+    text-align: center;
+    color: var(--cases-text-light);
+}
+
+.cases-loading-state .cases-loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--cases-border);
+    border-top: 3px solid var(--cases-primary);
+    border-radius: 50%;
+    animation: cases-spin 1s linear infinite;
+    margin-bottom: var(--cases-spacing-md);
+}
+
+.cases-empty-state i {
+    font-size: 3rem;
+    color: var(--cases-text-muted);
+    margin-bottom: var(--cases-spacing-md);
+}
+
+.cases-empty-state h5 {
+    color: var(--cases-text);
+    margin: 0 0 var(--cases-spacing-xs) 0;
+}
+
+/* Selection Summary */
+.cases-selection-summary {
+    margin-top: var(--cases-spacing-lg);
+    animation: slideInUp 0.3s ease;
+}
+
+.cases-summary-card {
+    background: var(--cases-success-bg);
+    border: 1px solid var(--cases-success);
+    border-radius: var(--cases-radius);
+    padding: var(--cases-spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--cases-spacing-md);
+}
+
+.cases-summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--cases-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cases-summary-icon i {
+    color: white;
+    font-size: 1.125rem;
+}
+
+.cases-summary-content {
+    flex: 1;
+}
+
+.cases-summary-content h5 {
+    margin: 0 0 2px 0;
+    color: var(--cases-success);
+    font-weight: 600;
+}
+
+.cases-summary-content p {
+    margin: 0;
+    color: var(--cases-text);
+    font-weight: 500;
+}
+
+.cases-summary-change {
+    padding: var(--cases-spacing-xs) var(--cases-spacing-sm);
+    border: 1px solid var(--cases-success);
+    border-radius: var(--cases-radius);
+    background: transparent;
+    color: var(--cases-success);
+    font-size: var(--cases-font-size-sm);
+    cursor: pointer;
+    transition: var(--cases-transition);
+    display: flex;
+    align-items: center;
+    gap: var(--cases-spacing-xs);
+}
+
+.cases-summary-change:hover {
+    background: var(--cases-success);
+    color: white;
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cases-connection-grid {
+        grid-template-columns: 1fr;
+        gap: var(--cases-spacing-md);
+    }
+    
+    .cases-legal-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cases-search-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .cases-search-input-wrapper {
+        max-width: none;
+    }
+    
+    .cases-filter-controls {
+        justify-content: center;
+    }
+    
+    .cases-summary-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .cases-connection-card {
+        padding: var(--cases-spacing-md);
+    }
+    
+    .cases-connection-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .cases-connection-icon i {
+        font-size: 1.25rem;
     }
 }
